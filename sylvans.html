@@ -292,12 +292,7 @@
     /* Recent matches (all from Sylvans' POV) */
     document.getElementById("matches-wrap").innerHTML = buildHistoryRows(data.history.slice(0, 5));
 
-    /* MOTM */
-    const sylvansMatches = data.history.filter(m =>
-      m.motm && (data.sylvansWins > 0 || true) // show all MOTM awards
-    );
-    document.getElementById("motm-wrap").innerHTML = buildMOTMLeaderboard(data.history);
-
+  
     /* Re-init */
     document.querySelectorAll(".reveal").forEach(el => {
       if (!el.classList.contains("visible")) Reveal.observe(el);
