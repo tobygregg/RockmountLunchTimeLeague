@@ -1,84 +1,100 @@
 <!DOCTYPE html>
-            <li><a href="cpfc.html">CP FC</a></li>
-            <li><a href="about.html">About</a></li>
-        </ul>
-    </nav>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rockmount Lunchtime League</title>
 
-    <section class="hero fade-in">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-        <div class="floating-logo red-glow">
-            <img src="assets/sylvans-logo.png" alt="Sylvans FC">
-        </div>
+<nav>
+  <div class="logo">ROCKMOUNT LEAGUE</div>
 
-        <div class="hero-center">
-            <h1>Rockmount Lunchtime League</h1>
-            <p>The ultimate battle between Sylvans FC and Charlie Prevost FC</p>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="sylvans.html">Sylvans FC</a></li>
+    <li><a href="cpfc.html">CP FC</a></li>
+    <li><a href="history.html">History</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+</nav>
 
-            <div class="scoreboard">
+<section class="hero">
 
-                <div class="team-card red-border">
-                    <h2>Sylvans FC</h2>
-                    <div class="points" id="sylvansPoints">0</div>
-                    <p>League Points</p>
-                </div>
+  <div class="team-logos fade-in">
+    <img src="assets/sylvans-logo.png" class="team-logo sylvans-glow">
 
-                <div class="team-card blue-border">
-                    <h2>CP FC</h2>
-                    <div class="points" id="cpfcPoints">0</div>
-                    <p>League Points</p>
-                </div>
+    <div class="vs">VS</div>
 
-            </div>
+    <img src="assets/cpfc-logo.png" class="team-logo cpfc-glow">
+  </div>
 
-            <div class="latest-match glass-card">
-                <h3>Latest Match</h3>
-                <p id="latestScore">Loading...</p>
-                <p id="motm">Loading...</p>
-            </div>
+  <h1 class="fade-in">ROCKMOUNT LUNCHTIME LEAGUE</h1>
 
-        </div>
+  <p class="fade-in">The greatest lunchtime football rivalry.</p>
 
-        <div class="floating-logo blue-glow">
-            <img src="assets/cpfc-logo.png" alt="CP FC">
-        </div>
+  <div class="scoreboard fade-in">
 
-    </section>
+    <div class="card">
+      <h2>Sylvans League Points</h2>
+      <div class="big-stat" id="sylvansPoints">0</div>
+    </div>
 
-    <section class="stats-section fade-in-up">
+    <div class="card">
+      <h2>CP FC League Points</h2>
+      <div class="big-stat" id="cpfcPoints">0</div>
+    </div>
 
-        <div class="stat-box red-border">
-            <h2>Total Wins</h2>
-            <div id="sylvansWins">0</div>
-            <p>Sylvans FC</p>
-        </div>
+    <div class="card">
+      <h2>Latest Match</h2>
+      <div class="big-stat" id="latestScore">0 - 0</div>
+      <p>Man of the Match: <span id="motm">---</span></p>
+    </div>
 
-        <div class="stat-box blue-border">
-            <h2>Total Wins</h2>
-            <div id="cpfcWins">0</div>
-            <p>CP FC</p>
-        </div>
+    <div class="card">
+      <h2>Sylvans Total Wins</h2>
+      <div class="big-stat" id="sylvansWins">0</div>
+    </div>
 
-    </section>
+    <div class="card">
+      <h2>CP FC Total Wins</h2>
+      <div class="big-stat" id="cpfcWins">0</div>
+    </div>
 
-    <section class="stats-section fade-in-up">
+    <div class="card">
+      <h2>Total Draws</h2>
+      <div class="big-stat" id="draws">0</div>
+    </div>
 
-        <div class="stat-box red-border">
-            <h2>Total Goals</h2>
-            <div id="sylvansGoals">0</div>
-            <p>Sylvans FC</p>
-        </div>
+    <div class="card">
+      <h2>Sylvans Goals</h2>
+      <div class="big-stat" id="sylvansGoals">0</div>
+    </div>
 
-        <div class="stat-box blue-border">
-            <h2>Total Goals</h2>
-            <div id="cpfcGoals">0</div>
-            <p>CP FC</p>
-        </div>
+    <div class="card">
+      <h2>CP FC Goals</h2>
+      <div class="big-stat" id="cpfcGoals">0</div>
+    </div>
 
-    </section>
+    <div class="card">
+      <h2>Win Rates</h2>
+      <p>Sylvans: <span id="sylvansRate">0%</span></p>
+      <p>CP FC: <span id="cpfcRate">0%</span></p>
+    </div>
 
-    <footer>
-        <p>Rockmount Lunchtime League © 2026</p>
-    </footer>
+  </div>
+
+</section>
+
+<footer>
+  Rockmount Lunchtime League © 2026
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/animations.js"></script>
 
 </body>
 </html>
