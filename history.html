@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match History — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .history-hero {
+      padding: calc(var(--nav-h) + 72px) var(--pad-x) 64px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .history-hero::before {
+      content:''; position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+      background-size: 72px 72px;
+    }
+    .history-hero::after {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 55% at 50% 110%, rgba(0,0,0,0.85) 0%, transparent 65%);
+    }
+    .history-hero__inner { position: relative; z-index: 1; }
+    .history-hero__title {
+      font-family: var(--font-d);
+      font-size: clamp(2.8rem, 8vw, 7rem);
+      letter-spacing: 0.04em; line-height: 0.9;
+      margin-bottom: 16px;
+    }
+    .history-hero__sub {
+      color: var(--text-muted); font-size: 1rem; max-width: 480px; margin: 0 auto;
+    }
+
+    /* Summary strip */
+    .summary-strip {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      justify-content: center; margin-top: 36px;
+    }
+    .summary-chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 22px;
+      text-align: center; min-width: 110px;
+    }
+    .summary-chip__val {
+      font-family: var(--font-d);
+      font-size: 2rem; letter-spacing: 0.05em; line-height: 1;
+    }
+    .summary-chip__lbl {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .filter-btn {
+      padding: 8px 18px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 100px; color: var(--text-muted);
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: all var(--t) var(--ease); cursor: pointer;
+    }
+    .filter-btn:hover { border-color: var(--border-md); color: var(--text); }
+    .filter-btn.active {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.25);
+      color: var(--text);
+    }
+    .filter-btn--syl.active  { background: rgba(230,48,48,0.12); border-color: var(--sylvans); color: var(--sylvans); }
+    .filter-btn--cpfc.active { background: rgba(26,109,212,0.12); border-color: var(--cpfc);   color: var(--cpfc);   }
+    .filter-btn--draw.active { background: rgba(255,255,255,0.07); }
+
+    /* Stats grid below history */
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin-top: 40px;
+    }
+    .history-stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px;
+    }
+    .history-stat-card__title {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 14px;
+    }
+
+    /* Biggest win card */
+    .bw-score {
+      font-family: var(--font-d); font-size: 2.2rem;
+      letter-spacing: 0.05em; line-height: 1;
+    }
+    .bw-teams { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .bw-date  { font-size: 0.72rem; color: var(--text-dim);   margin-top: 2px; }
+
+    @media(max-width:580px) {
+      .summary-chip { min-width: 90px; padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-transition"></div>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links">
+    <li><a class="nav__link" href="index.html"   data-transition>Home</a></li>
+    <li><a class="nav__link" href="sylvans.html"  data-transition>Sylvans FC</a></li>
+    <li><a class="nav__link" href="cpfc.html"     data-transition>CP FC</a></li>
+    <li><a class="nav__link" href="history.html"  data-transition>History</a></li>
+    <li><a class="nav__link" href="about.html"    data-transition>About</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── HISTORY HERO ── -->
+<section class="history-hero">
+  <div class="history-hero__inner">
+    <h1 class="history-hero__title">Match<br>History</h1>
+    <p class="history-hero__sub">Every game, every goal, every moment from the Rockmount Lunchtime League.</p>
+
+    <div class="summary-strip" id="summary-strip">
+      <div class="summary-chip">
+        <div class="summary-chip__val" id="total-games">—</div>
+        <div class="summary-chip__lbl">Games Played</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip__val text-sylvans" id="syl-wins-chip">—</div>
+        <div class="summary-chip__lbl">Sylvans Wins</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip__val" id="draws-chip">—</div>
+        <div class="summary-chip__lbl">Draws</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip__val text-cpfc" id="cpfc-wins-chip">—</div>
+        <div class="summary-chip__lbl">CP FC Wins</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip__val text-gold" id="total-goals-chip">—</div>
+        <div class="summary-chip__lbl">Total Goals</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FULL HISTORY ── -->
+<section class="section">
+  <div class="container">
+
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-btn active"     data-filter="all">All Games</button>
+      <button class="filter-btn filter-btn--syl"  data-filter="sylvans">Sylvans Wins</button>
+      <button class="filter-btn filter-btn--cpfc" data-filter="cpfc">CP FC Wins</button>
+      <button class="filter-btn filter-btn--draw" data-filter="draw">Draws</button>
+    </div>
+
+    <!-- Count label -->
+    <p id="filter-label" style="font-size:0.8rem;color:var(--text-muted);margin-bottom:18px;font-weight:600;letter-spacing:0.07em"></p>
+
+    <!-- History list -->
+    <div id="history-list-wrap">
+      <div class="loading">Loading match history</div>
+    </div>
+
+    <!-- Extra stats -->
+    <div class="history-stats" id="history-stats"></div>
+
+  </div>
+</section>
+
+<!-- ── MOTM LEADERBOARD ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>Man of</span> the Match</h2>
+    <p class="text-muted reveal" style="margin-bottom:24px;font-size:0.9rem">All-time award leaderboard</p>
+    <div id="motm-wrap"><div class="loading">Loading</div></div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League</p>
+  <nav class="footer__links">
+    <a href="index.html"   data-transition>Home</a>
+    <a href="sylvans.html" data-transition>Sylvans FC</a>
+    <a href="cpfc.html"    data-transition>CP FC</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  let allHistory = [];
+
+  function renderList(filter) {
+    const filtered = allHistory.filter(m => {
+      if (filter === "all")    return true;
+      if (filter === "sylvans") return m.sylvans > m.cpfc;
+      if (filter === "cpfc")   return m.cpfc > m.sylvans;
+      if (filter === "draw")   return m.sylvans === m.cpfc;
+    });
+
+    const label = document.getElementById("filter-label");
+    label.textContent = `${filtered.length} match${filtered.length !== 1 ? "es" : ""} found`;
+
+    const wrap = document.getElementById("history-list-wrap");
+    wrap.innerHTML = buildHistoryRows(filtered);
+
+    // Re-observe new reveals
+    wrap.querySelectorAll(".reveal").forEach(el => Reveal.observe(el));
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const data = await RLLData.load();
+    allHistory = data.history;
+
+    /* Summary chips */
+    const totalGoals = data.history.reduce((a, m) => a + m.sylvans + m.cpfc, 0);
+    document.getElementById("total-games").textContent    = data.history.length;
+    document.getElementById("syl-wins-chip").textContent  = data.sylvansWins;
+    document.getElementById("draws-chip").textContent     = data.sylvansDraws;
+    document.getElementById("cpfc-wins-chip").textContent = data.cpfcWins;
+    document.getElementById("total-goals-chip").textContent = totalGoals;
+
+    /* Render all games */
+    renderList("all");
+
+    /* Filter buttons */
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderList(btn.dataset.filter);
+      });
+    });
+
+    /* Extra stats section */
+    const avgGoals = data.history.length
+      ? (data.history.reduce((a, m) => a + m.sylvans + m.cpfc, 0) / data.history.length).toFixed(1)
+      : 0;
+
+    const biggestWin = [...data.history].sort((a, b) => {
+      return Math.abs(b.sylvans - b.cpfc) - Math.abs(a.sylvans - a.cpfc);
+    })[0];
+
+    const highScoring = [...data.history].sort((a, b) => {
+      return (b.sylvans + b.cpfc) - (a.sylvans + a.cpfc);
+    })[0];
+
+    document.getElementById("history-stats").innerHTML = `
+      <div class="history-stat-card reveal">
+        <div class="history-stat-card__title">Avg Goals Per Game</div>
+        <div style="font-family:var(--font-d);font-size:3rem;letter-spacing:0.04em;color:var(--gold)">${avgGoals}</div>
+      </div>
+      ${biggestWin ? `
+      <div class="history-stat-card reveal">
+        <div class="history-stat-card__title">Biggest Win</div>
+        <div class="bw-score">
+          <span class="${biggestWin.sylvans > biggestWin.cpfc ? 'text-sylvans' : 'text-cpfc'}">${biggestWin.sylvans}</span>
+          <span style="color:var(--text-dim)"> — </span>
+          <span class="${biggestWin.cpfc > biggestWin.sylvans ? 'text-cpfc' : 'text-sylvans'}">${biggestWin.cpfc}</span>
+        </div>
+        <div class="bw-teams">Sylvans FC vs CP FC</div>
+        <div class="bw-date">${biggestWin.date}</div>
+      </div>` : ""}
+      ${highScoring ? `
+      <div class="history-stat-card reveal">
+        <div class="history-stat-card__title">Most Goals in a Game</div>
+        <div class="bw-score text-gold">${highScoring.sylvans + highScoring.cpfc} goals</div>
+        <div class="bw-teams">${highScoring.sylvans} — ${highScoring.cpfc}</div>
+        <div class="bw-date">${highScoring.date}</div>
+      </div>` : ""}
+      <div class="history-stat-card reveal">
+        <div class="history-stat-card__title">Goals Breakdown</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.82rem;color:var(--text-muted)">Sylvans FC</span>
+            <span style="font-family:var(--font-d);font-size:1.5rem;color:var(--sylvans)">${data.sylvansGoalsFor}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.82rem;color:var(--text-muted)">CP FC</span>
+            <span style="font-family:var(--font-d);font-size:1.5rem;color:var(--cpfc)">${data.cpfcGoalsFor}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    /* MOTM */
+    document.getElementById("motm-wrap").innerHTML = buildMOTMLeaderboard(data.history);
+
+    document.querySelectorAll(".reveal").forEach(el => {
+      if (!el.classList.contains("visible")) Reveal.observe(el);
+    });
+  });
+</script>
+</body>
+</html>

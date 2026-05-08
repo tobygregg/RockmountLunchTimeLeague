@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rockmount Lunchtime League</title>
+  <meta name="description" content="The official home of the Rockmount Lunchtime League — Sylvans FC vs Charlie Prevost FC." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ---- Hero Points section ---- */
+    .hero__points-area {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(14px, 2.5vw, 22px);
+    }
+
+    /* ---- Glassmorphism stats row ---- */
+    .stats-strip {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+    .stats-strip__item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      backdrop-filter: blur(12px);
+      border-radius: 10px;
+      padding: 18px 28px;
+      text-align: center;
+      flex: 1; min-width: 150px; max-width: 200px;
+    }
+    .stats-strip__val {
+      font-family: var(--font-d);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      letter-spacing: 0.05em; line-height: 1;
+    }
+    .stats-strip__lbl {
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-muted); margin-top: 5px;
+    }
+
+    /* ---- Section layouts ---- */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media(max-width:680px) {
+      .two-col { grid-template-columns: 1fr; }
+      .stats-strip__item { min-width: 130px; }
+    }
+
+    /* ---- League badge ---- */
+    .league-table-wrap {
+      overflow-x: auto;
+    }
+
+    /* ---- Demo notice ---- */
+    #demo-badge {
+      display: none;
+      position: fixed;
+      bottom: 20px; right: 20px;
+      background: rgba(245,200,66,0.12);
+      border: 1px solid rgba(245,200,66,0.3);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--gold);
+      align-items: center; gap: 8px;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Page transition overlay -->
+<div class="page-transition"></div>
+
+<!-- Demo badge -->
+<div id="demo-badge">⚠ Demo Data — Add your Sheet ID in config.js</div>
+
+<!-- ── NAV ──────────────────────────────────────── -->
+<nav class="nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links">
+    <li><a class="nav__link" href="index.html"   data-transition>Home</a></li>
+    <li><a class="nav__link" href="sylvans.html"  data-transition>Sylvans FC</a></li>
+    <li><a class="nav__link" href="cpfc.html"     data-transition>CP FC</a></li>
+    <li><a class="nav__link" href="history.html"  data-transition>History</a></li>
+    <li><a class="nav__link" href="about.html"    data-transition>About</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.4;pointer-events:none"></canvas>
+
+  <div class="hero__content">
+    <!-- Eyebrow -->
+    <div class="hero__eyebrow">⚽ Rockmount Lunchtime League · Season 2025</div>
+
+    <!-- Title -->
+    <h1 class="hero__title">THE TABLE</h1>
+
+    <!-- ── MAIN TEAM POINTS DISPLAY ── -->
+    <div class="hero__teams" id="hero-teams">
+      <!-- Sylvans -->
+      <a class="hero__team hero__team--sylvans" href="sylvans.html" data-transition>
+        <img
+          class="team-logo team-logo--sylvans"
+          src="assets/sylvans-logo.svg"
+          onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))"
+          alt="Sylvans FC"
+        />
+        <span class="hero__team-name">Sylvans FC</span>
+        <div class="hero__team-pts" id="hero-syl-pts">
+          <span class="loading" style="padding:0;gap:6px;border:none;font-family:var(--font-d);font-size:inherit;color:inherit">...</span>
+        </div>
+        <div class="hero__pts-label">Points</div>
+      </a>
+
+      <!-- VS -->
+      <div class="hero__vs">
+        <div class="hero__vs-line"></div>
+        <span>VS</span>
+        <div class="hero__vs-line"></div>
+      </div>
+
+      <!-- CP FC -->
+      <a class="hero__team hero__team--cpfc" href="cpfc.html" data-transition>
+        <img
+          class="team-logo team-logo--cpfc"
+          src="assets/cpfc-logo.svg"
+          onerror="this.replaceWith(buildFallbackLogo('C','var(--cpfc)'))"
+          alt="CP FC"
+        />
+        <span class="hero__team-name">CP FC</span>
+        <div class="hero__team-pts" id="hero-cpfc-pts">
+          <span class="loading" style="padding:0;gap:6px;border:none;font-family:var(--font-d);font-size:inherit;color:inherit">...</span>
+        </div>
+        <div class="hero__pts-label">Points</div>
+      </a>
+    </div>
+
+  </div><!-- /hero__content -->
+
+  <div class="hero__scroll">
+    <span>Scroll</span>
+    <div class="hero__scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ── LATEST MATCH ──────────────────────────────── -->
+<section class="section" id="latest-match-section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>Latest</span> Match</h2>
+    <div id="latest-match-wrap" class="reveal">
+      <div class="loading">Loading match data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WINS & GOALS ──────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="two-col">
+      <!-- Total Wins -->
+      <div>
+        <h2 class="section-title reveal"><span>Total</span> Wins</h2>
+        <div id="wins-wrap" class="reveal">
+          <div class="loading">Loading</div>
+        </div>
+      </div>
+      <!-- Total Goals -->
+      <div>
+        <h2 class="section-title reveal"><span>Goals</span> Scored</h2>
+        <div id="goals-wrap" class="reveal">
+          <div class="loading">Loading</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FULL STANDINGS TABLE ──────────────────────── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>League</span> Standings</h2>
+    <div class="league-table-wrap reveal">
+      <div id="standings-wrap">
+        <div class="loading">Loading standings</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── QUICK HISTORY ─────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:clamp(24px,4vw,48px)">
+      <h2 class="section-title" style="margin-bottom:0"><span>Recent</span> Games</h2>
+      <a href="history.html" data-transition style="font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);transition:color 0.3s;border-bottom:1px solid var(--border)">
+        Full History →
+      </a>
+    </div>
+    <div id="quick-history-wrap">
+      <div class="loading">Loading history</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────── -->
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League. All rights reserved.</p>
+  <nav class="footer__links">
+    <a href="sylvans.html" data-transition>Sylvans FC</a>
+    <a href="cpfc.html"    data-transition>CP FC</a>
+    <a href="history.html" data-transition>History</a>
+    <a href="about.html"   data-transition>About</a>
+  </nav>
+</footer>
+
+<!-- ── SCRIPTS ───────────────────────────────────── -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* Fallback logo builder — SVG circle with initial */
+  function buildFallbackLogo(letter, color) {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox","0 0 120 120");
+    svg.setAttribute("width","100%"); svg.setAttribute("height","100%");
+    svg.style.cssText = "display:block;max-width:100%";
+    svg.innerHTML = `
+      <circle cx="60" cy="60" r="58" fill="none" stroke="${color}" stroke-width="3" opacity="0.4"/>
+      <circle cx="60" cy="60" r="48" fill="${color}" opacity="0.08"/>
+      <text x="60" y="76" text-anchor="middle" font-family="Bebas Neue,Impact,sans-serif"
+            font-size="54" fill="${color}">${letter}</text>`;
+    return svg;
+  }
+
+  /* ── Page-specific init ── */
+  document.addEventListener("DOMContentLoaded", async () => {
+    initParticles("hero-canvas");
+
+    const data = await RLLData.load();
+    if (data.fromDemo) showDemoBadge();
+
+    /* Hero points — animate in with counter */
+    const sylEl  = document.getElementById("hero-syl-pts");
+    const cpfcEl = document.getElementById("hero-cpfc-pts");
+
+    sylEl.innerHTML  = `<span data-count="${data.sylvansPoints}" data-duration="1400">0</span>`;
+    cpfcEl.innerHTML = `<span data-count="${data.cpfcPoints}"    data-duration="1400">0</span>`;
+
+    Counter.initAll();
+
+    /* Score-flip the hero numbers after short delay */
+    setTimeout(() => {
+      const sylSpan  = sylEl.querySelector("span");
+      const cpfcSpan = cpfcEl.querySelector("span");
+      if (sylSpan)  animateScoreFlip(sylSpan,  data.sylvansPoints);
+      if (cpfcSpan) animateScoreFlip(cpfcSpan, data.cpfcPoints);
+    }, 300);
+
+    /* Latest match card */
+    document.getElementById("latest-match-wrap").innerHTML = buildMatchCard(data.latestMatch);
+
+    /* Wins comparison bar */
+    document.getElementById("wins-wrap").innerHTML =
+      buildComparisonBar(data,
+        "Sylvans", data.sylvansWins,
+        "CP FC",   data.cpfcWins
+      );
+
+    /* Goals comparison bar */
+    document.getElementById("goals-wrap").innerHTML =
+      buildComparisonBar(data,
+        "Sylvans", data.sylvansGoalsFor,
+        "CP FC",   data.cpfcGoalsFor
+      );
+
+    /* Full standings table */
+    const sylLead = data.sylvansPoints >= data.cpfcPoints;
+    document.getElementById("standings-wrap").innerHTML = `
+      <div class="standings-table">
+        <div class="standings-table__header">
+          <span>Club</span>
+          <span>P</span><span>W</span><span>D</span><span>L</span>
+          <span>GF</span><span>GA</span><span>GD</span><span>Pts</span>
+        </div>
+        ${buildStandingsRow(
+          sylLead ? 1 : 2,
+          "Sylvans FC", data.sylvansPlayed, data.sylvansWins, data.sylvansDraws,
+          data.sylvansLosses, data.sylvansGoalsFor, data.sylvansGoalsAgainst, data.sylvansPoints,
+          "sylvans"
+        )}
+        ${buildStandingsRow(
+          sylLead ? 2 : 1,
+          "Charlie Prevost FC", data.cpfcPlayed, data.cpfcWins, data.cpfcDraws,
+          data.cpfcLosses, data.cpfcGoalsFor, data.cpfcGoalsAgainst, data.cpfcPoints,
+          "cpfc"
+        )}
+      </div>
+    `;
+
+    /* Quick history — last 3 games */
+    document.getElementById("quick-history-wrap").innerHTML =
+      buildHistoryRows(data.history.slice(0, 3));
+
+    /* Re-init reveals for injected content */
+    document.querySelectorAll(".reveal").forEach(el => {
+      if (!el.classList.contains("visible")) Reveal.observe(el);
+    });
+    Bars.init();
+    Counter.initAll();
+  });
+
+  function buildStandingsRow(pos, name, p, w, d, l, gf, ga, pts, team) {
+    const gd = gf - ga;
+    return `
+      <div class="standings-row standings-row--${pos === 1 ? "1st" : "2nd"}">
+        <div class="standings-team">
+          <div class="standings-dot"></div>
+          <span>${name}</span>
+        </div>
+        <span>${p}</span>
+        <span>${w}</span>
+        <span>${d}</span>
+        <span>${l}</span>
+        <span>${gf}</span>
+        <span>${ga}</span>
+        <span>${gd > 0 ? "+" : ""}${gd}</span>
+        <span class="standings-pts">${pts}</span>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>
