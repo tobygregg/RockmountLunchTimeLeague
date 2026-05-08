@@ -22,10 +22,10 @@ const CONFIG = {
   Draws: "H12",
 
   // Latest Match
-  LatestMatchDate: "J6",
-  LatestSylvansScore: "K6",
-  LatestCPFCScore: "L6",
-  LatestMOTM: "M6",
+  LatestMatchDate: "I17",
+  LatestSylvansScore: "F17",
+  LatestCPFCScore: "G17",
+  LatestMOTM: "H17",
 
   // History Range
   HistoryRange: "B26:E110"
