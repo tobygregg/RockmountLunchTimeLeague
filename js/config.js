@@ -11,10 +11,10 @@ const RLL_CONFIG = {
      Paste your Sheet ID from the URL:
      https://docs.google.com/spreadsheets/d/  <<<THIS BIT>>>  /edit
   ─────────────────────────────────────────────────── */
-  SHEET_ID: "YOUR_SHEET_ID_HERE",
+  SHEET_ID: "1MKzj6fGVqAwzKjS0qXVnMj8mlust_amG_s3-OoJDO3A",
 
   /* Sheet tab name (default is Sheet1, change if yours differs) */
-  SHEET_NAME: "Sheet1",
+  SHEET_NAME: "SFC Rockmount League",
 
   /* ── LEAGUE TABLE CELLS ───────────────────────────
      These are the individual cells where your live
@@ -22,32 +22,32 @@ const RLL_CONFIG = {
   ─────────────────────────────────────────────────── */
   CELLS: {
     /* ---- Points ---- */
-    SYLVANS_POINTS:     "D6",
-    CPFC_POINTS:        "D8",
+    SYLVANS_POINTS:     "E6",
+    CPFC_POINTS:        "G6",
 
     /* ---- Wins ---- */
-    SYLVANS_WINS:       "E6",
-    CPFC_WINS:          "E8",
+    SYLVANS_WINS:       "F12",
+    CPFC_WINS:          "G12",
 
     /* ---- Draws ---- */
-    SYLVANS_DRAWS:      "F6",
-    CPFC_DRAWS:         "F8",
+    SYLVANS_DRAWS:      "H12",
+    CPFC_DRAWS:         "H12",
 
     /* ---- Losses ---- */
-    SYLVANS_LOSSES:     "G6",
-    CPFC_LOSSES:        "G8",
+    SYLVANS_LOSSES:     "G12",
+    CPFC_LOSSES:        "F12",
 
     /* ---- Goals For ---- */
-    SYLVANS_GOALS_FOR:  "H6",
-    CPFC_GOALS_FOR:     "H8",
+    SYLVANS_GOALS_FOR:  "B12",
+    CPFC_GOALS_FOR:     "C12",
 
     /* ---- Goals Against ---- */
-    SYLVANS_GOALS_AGAINST: "I6",
-    CPFC_GOALS_AGAINST:    "I8",
+    SYLVANS_GOALS_AGAINST: "C12",
+    CPFC_GOALS_AGAINST:    "B12",
 
     /* ---- Games Played ---- */
-    SYLVANS_PLAYED:     "C6",
-    CPFC_PLAYED:        "C8",
+    SYLVANS_PLAYED:     "I12",
+    CPFC_PLAYED:        "I12",
   },
 
   /* ── GAME HISTORY RANGE ───────────────────────────
@@ -55,7 +55,7 @@ const RLL_CONFIG = {
      Columns in order:  Date | Sylvans Score | CPFC Score | Man of the Match
      Example: "C18:F40" — change to match your sheet.
   ─────────────────────────────────────────────────── */
-  HISTORY_RANGE: "C18:F40",
+  HISTORY_RANGE: "B26:E110",
 
   /* Which column index (0-based) within your range each piece of data is:
      e.g. if range starts at col C:
