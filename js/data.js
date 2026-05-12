@@ -123,6 +123,7 @@ const RLLData = (() => {
       sylvansPlayed:  n(cells.SYLVANS_PLAYED),
       cpfcPlayed:     n(cells.CPFC_PLAYED),
       totalGoals:     sylvansGoalsFor + cpfcGoalsFor,
+      announcement:   (cells.ANNOUNCEMENT || "").trim(),
       history,
       latestMatch: history[0] || null,
       players,
