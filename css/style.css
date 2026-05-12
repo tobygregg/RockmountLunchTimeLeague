@@ -765,3 +765,396 @@ button { cursor:pointer; border:none; background:none; font:inherit; }
   .hero__teams { gap:14px; }
   .history-match { padding:14px 16px; gap:10px; }
 }
+
+/* =====================================================
+   PLAYER STATS — Squad cards, top scorer, stats table
+===================================================== */
+
+/* ── SQUAD GRID ──────────────────────────────────── */
+.squad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 10px;
+}
+
+.squad-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--t) var(--ease), background var(--t) var(--ease),
+              transform var(--t) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  cursor: default;
+}
+.squad-card:hover {
+  border-color: var(--border-md);
+  background: var(--bg-card-hv);
+  transform: translateX(4px);
+}
+.squad-card__bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  transition: opacity var(--t);
+}
+.squad-card:hover .squad-card__bar { opacity: 0.18 !important; }
+
+.squad-card__number {
+  font-family: var(--font-d);
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  min-width: clamp(36px, 7vw, 52px);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.squad-card__info { flex: 1; min-width: 0; }
+.squad-card__name {
+  font-weight: 700;
+  font-size: clamp(0.9rem, 2.5vw, 1.02rem);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.squad-card__badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.squad-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.squad-badge--goals {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted);
+}
+.squad-badge--motm {
+  background: rgba(245,200,66,0.1);
+  border: 1px solid rgba(245,200,66,0.22);
+  color: var(--gold);
+}
+.squad-badge--none {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ── TOP SCORER / MOTM CARD ──────────────────────── */
+.top-scorer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.top-scorer-card--motm { border-color: rgba(245,200,66,0.18); }
+
+.top-scorer-card__crown {
+  padding: 11px 20px;
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(245,200,66,0.05);
+  border-bottom: 1px solid rgba(245,200,66,0.12);
+}
+
+.top-scorer-card__hero {
+  padding: clamp(20px, 3vw, 28px);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.top-scorer-card__goals {
+  font-family: var(--font-d);
+  font-size: clamp(3.5rem, 8vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+.top-scorer-card__name {
+  font-weight: 700;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  margin-bottom: 4px;
+}
+.top-scorer-card__sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.top-scorer-card__runners {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.top-scorer-card__runner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--t);
+}
+.top-scorer-card__runner:last-child { border-bottom: none; }
+.top-scorer-card__runner:hover { background: rgba(255,255,255,0.02); }
+.top-scorer-card__runner-pos  { font-family: var(--font-d); font-size: 1.1rem; color: var(--text-dim); width: 28px; flex-shrink: 0; }
+.top-scorer-card__runner-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+.top-scorer-card__runner-goals { font-family: var(--font-d); font-size: 1.2rem; }
+
+/* ── SCORER CHIPS IN HISTORY ─────────────────────── */
+.history-match__scorers {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+}
+.scorer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+.latest-badge {
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold);
+  margin-left: 6px;
+}
+
+/* ── PLAYERS PAGE ────────────────────────────────── */
+.players-hero {
+  padding: calc(var(--nav-h) + clamp(64px, 10vw, 110px)) var(--pad-x) clamp(48px, 7vw, 80px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.players-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.players-hero::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 45% 50% at 20% 60%, rgba(230,48,48,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 50% at 80% 60%, rgba(26,109,212,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 55% at 50% 115%, rgba(0,0,0,0.85) 0%, transparent 65%);
+}
+.players-hero__inner { position: relative; z-index: 1; }
+.players-hero__title {
+  font-family: var(--font-d);
+  font-size: clamp(3rem, 10vw, 8rem);
+  line-height: 0.88; letter-spacing: 0.04em; margin-bottom: 16px;
+}
+.players-hero__sub {
+  font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+  color: var(--text-muted);
+  max-width: 520px; margin: 0 auto 32px;
+}
+.players-hero__stats {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 12px;
+}
+.players-hero__stat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-md);
+  border-radius: 10px;
+  padding: 14px 22px;
+  text-align: center;
+  min-width: 110px;
+}
+.players-hero__stat-val {
+  font-family: var(--font-d);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  letter-spacing: 0.04em; line-height: 1;
+}
+.players-hero__stat-lbl {
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-muted); margin-top: 4px;
+}
+
+/* Full stats table */
+.stats-table-wrap { overflow-x: auto; }
+.stats-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.stats-table th {
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.035);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.66rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--t);
+  user-select: none;
+}
+.stats-table th:hover { color: var(--text); }
+.stats-table th.sort-asc::after  { content: " ↑"; color: var(--text); }
+.stats-table th.sort-desc::after { content: " ↓"; color: var(--text); }
+
+.stats-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  transition: background var(--t);
+}
+.stats-table tr:last-child td { border-bottom: none; }
+.stats-table tbody tr:hover td { background: rgba(255,255,255,0.025); }
+
+.stats-table__num {
+  font-family: var(--font-d);
+  font-size: 1.4rem; letter-spacing: 0.04em;
+  color: var(--text-dim); text-align: center;
+  width: 44px;
+}
+.stats-table__name { font-weight: 700; }
+.stats-table__team-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.stats-table__team-badge--sylvans {
+  background: rgba(230,48,48,0.1);
+  border: 1px solid rgba(230,48,48,0.25);
+  color: var(--sylvans);
+}
+.stats-table__team-badge--cpfc {
+  background: rgba(26,109,212,0.1);
+  border: 1px solid rgba(26,109,212,0.25);
+  color: var(--cpfc);
+}
+.stats-table__val {
+  font-family: var(--font-d);
+  font-size: 1.4rem; letter-spacing: 0.04em;
+  text-align: center;
+}
+.stats-table__val--goals { color: var(--text); }
+.stats-table__val--motm  { color: var(--gold); }
+
+/* Goal bar inside table */
+.stats-table__bar-wrap { display: flex; align-items: center; gap: 10px; }
+.stats-table__bar-track {
+  flex: 1; height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px; overflow: hidden;
+  min-width: 40px;
+}
+.stats-table__bar-fill {
+  height: 100%; border-radius: 100px;
+  width: 0%; transition: width 1.2s var(--ease);
+}
+.stats-table__bar-fill--sylvans {
+  background: linear-gradient(90deg, var(--sylvans), var(--sylvans-lt));
+}
+.stats-table__bar-fill--cpfc {
+  background: linear-gradient(90deg, var(--cpfc), var(--cpfc-lt));
+}
+.stats-table__bar-fill--unknown {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Leaderboard cards */
+.scorer-leaderboard { display: flex; flex-direction: column; gap: 10px; }
+.scorer-lb-item {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  transition: background var(--t), border-color var(--t);
+}
+.scorer-lb-item:hover { background: var(--bg-card-hv); border-color: var(--border-md); }
+.scorer-lb-item--1st { border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.03); }
+.scorer-lb-pos {
+  font-family: var(--font-d); font-size: 1.4rem; letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+.scorer-lb-item--1st .scorer-lb-pos { color: var(--gold); }
+.scorer-lb-info { min-width: 0; }
+.scorer-lb-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.scorer-lb-team {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.scorer-lb-team--sylvans { color: var(--sylvans); }
+.scorer-lb-team--cpfc    { color: var(--cpfc);    }
+.scorer-lb-stat {
+  font-family: var(--font-d); font-size: 2rem; letter-spacing: 0.04em;
+  text-align: right; white-space: nowrap; flex-shrink: 0;
+}
+
+/* Team filter tabs */
+.team-filter-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.team-tab {
+  padding: 8px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 100px; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  transition: all var(--t) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.team-tab:hover { border-color: var(--border-md); color: var(--text); }
+.team-tab.active--all { background: rgba(255,255,255,0.08); border-color: var(--border-md); color: var(--text); }
+.team-tab.active--sylvans { background: rgba(230,48,48,0.1); border-color: var(--sylvans); color: var(--sylvans); }
+.team-tab.active--cpfc    { background: rgba(26,109,212,0.1); border-color: var(--cpfc);   color: var(--cpfc);   }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 640px) {
+  .squad-grid { grid-template-columns: 1fr; }
+
+  .top-scorer-card__hero { gap: 14px; }
+  .top-scorer-card__goals { font-size: clamp(3rem, 13vw, 4.5rem); }
+
+  .stats-table th, .stats-table td { padding: 10px 12px; }
+  /* Hide bar column on small screens */
+  .stats-table .col-bar { display: none; }
+
+  .scorer-lb-item { grid-template-columns: 28px 1fr auto; gap: 10px; padding: 12px 14px; }
+  .scorer-lb-stat { font-size: 1.6rem; }
+
+  .players-hero__stat { min-width: 90px; padding: 12px 14px; }
+}
+
+@media (max-width: 390px) {
+  .squad-card { padding: 14px 16px; gap: 12px; }
+  .squad-card__number { font-size: 1.8rem; min-width: 30px; }
+}
