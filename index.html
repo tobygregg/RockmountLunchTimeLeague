@@ -82,6 +82,13 @@
 <!-- Page transition overlay -->
 <div class="page-transition"></div>
 
+<!-- Announcement banner — shown only when sheet cell has text -->
+<div class="announcement-bar" id="announcement-bar" aria-live="polite" hidden>
+  <span class="announcement-bar__icon">📣</span>
+  <span class="announcement-bar__text" id="announcement-text"></span>
+  <button class="announcement-bar__close" id="announcement-close" aria-label="Dismiss">✕</button>
+</div>
+
 <!-- Demo badge -->
 <div id="demo-badge">⚠ Demo Data — Add your Sheet ID in config.js</div>
 
@@ -119,7 +126,7 @@
       <a class="hero__team hero__team--sylvans" href="sylvans.html" data-transition>
         <img
           class="team-logo team-logo--sylvans"
-          src="assets/sylvans-logo.svg"
+          src="assets/sylvans-logo.png"
           onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))"
           alt="Sylvans FC"
         />
@@ -141,7 +148,7 @@
       <a class="hero__team hero__team--cpfc" href="cpfc.html" data-transition>
         <img
           class="team-logo team-logo--cpfc"
-          src="assets/cpfc-logo.svg"
+          src="assets/cpfc-logo.png"
           onerror="this.replaceWith(buildFallbackLogo('C','var(--cpfc)'))"
           alt="CP FC"
         />
@@ -257,6 +264,21 @@
 
     const data = await RLLData.load();
     if (data.fromDemo) showDemoBadge();
+
+    /* Announcement banner */
+    if (data.announcement) {
+      const bar   = document.getElementById("announcement-bar");
+      const text  = document.getElementById("announcement-text");
+      const close = document.getElementById("announcement-close");
+      text.textContent = data.announcement;
+      bar.hidden = false;
+      // Slight delay so the entry animation is visible
+      requestAnimationFrame(() => setTimeout(() => bar.classList.add("visible"), 60));
+      close.addEventListener("click", () => {
+        bar.classList.add("hiding");
+        bar.addEventListener("transitionend", () => { bar.hidden = true; }, { once: true });
+      });
+    }
 
     /* Hero points — animate in with counter */
     const sylEl  = document.getElementById("hero-syl-pts");
