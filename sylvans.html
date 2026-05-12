@@ -3,193 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="assets/favicon.png">
   <title>Sylvans FC — Rockmount Lunchtime League</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    :root {
-      --team-color: var(--sylvans);
-      --team-glow:  var(--sylvans-glow);
-      --team-lt:    var(--sylvans-lt);
-    }
-
-    /* Override hero glow for red */
+    :root { --team-color:var(--sylvans); --team-glow:var(--sylvans-glow); --team-lt:var(--sylvans-lt); }
     .team-hero__bg::after {
       background:
         radial-gradient(ellipse 65% 50% at 5% 50%, rgba(230,48,48,0.09) 0%, transparent 60%),
         radial-gradient(ellipse 40% 60% at 90% 15%, rgba(230,48,48,0.05) 0%, transparent 60%);
     }
-
-    /* Accent stripe */
-    .team-accent-stripe {
-      height: 3px;
-      background: linear-gradient(90deg, var(--sylvans), transparent);
-      margin-bottom: 0;
-    }
-
-    .section-accent {
-      border-left: 3px solid var(--sylvans);
-      padding-left: 18px;
-    }
-
+    .team-accent-stripe { height:3px; background:linear-gradient(90deg,var(--sylvans),transparent); }
+    .section-accent { border-left:3px solid var(--sylvans); padding-left:18px; }
     .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      text-align: center;
-      transition: border-color var(--t), background var(--t);
+      background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg);
+      padding:28px; text-align:center; transition:border-color var(--t),background var(--t);
     }
-    .stat-card:hover { border-color: rgba(230,48,48,0.35); background: var(--bg-card-hv); }
+    .stat-card:hover { border-color:rgba(230,48,48,0.35); background:var(--bg-card-hv); }
     .stat-card__val {
-      font-family: var(--font-d);
-      font-size: clamp(2.8rem, 5vw, 4.5rem);
-      letter-spacing: 0.04em; line-height: 1;
-      color: var(--sylvans);
-      text-shadow: 0 0 40px var(--sylvans-glow);
+      font-family:var(--font-d); font-size:clamp(2.5rem,5vw,4rem);
+      letter-spacing:0.04em; line-height:1; color:var(--sylvans); text-shadow:0 0 40px var(--sylvans-glow);
     }
-    .stat-card__lbl {
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--text-muted); margin-top: 8px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 14px;
-    }
-
-    .head-to-head {
-      background: var(--bg-card);
-      border: 1px solid rgba(230,48,48,0.2);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-    }
-    .h2h-title {
-      font-family: var(--font-d);
-      font-size: 1.4rem; letter-spacing: 0.1em;
-      color: var(--text-muted); margin-bottom: 22px;
-    }
-    .h2h-bar-wrap { display: flex; flex-direction: column; gap: 14px; }
-    .h2h-row { display: flex; align-items: center; gap: 14px; }
-    .h2h-label {
-      width: 80px; font-family: var(--font-d);
-      font-size: 1rem; letter-spacing: 0.06em;
-    }
-    .h2h-track {
-      flex: 1; height: 6px;
-      background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden;
-    }
-    .h2h-fill {
-      height: 100%; border-radius: 100px; width: 0%;
-      transition: width 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    .h2h-fill--syl  { background: linear-gradient(90deg, var(--sylvans), var(--sylvans-lt)); box-shadow: 0 0 16px var(--sylvans-glow); }
-    .h2h-fill--draw { background: rgba(255,255,255,0.25); }
-    .h2h-fill--cpfc { background: linear-gradient(90deg, var(--cpfc), var(--cpfc-lt)); box-shadow: 0 0 16px var(--cpfc-glow); }
-    .h2h-val { width: 36px; text-align: right; font-family: var(--font-d); font-size: 1.3rem; }
+    .stat-card__lbl { font-size:0.7rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); margin-top:8px; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+    .head-to-head { background:var(--bg-card); border:1px solid rgba(230,48,48,0.2); border-radius:var(--radius-lg); padding:28px; }
+    .h2h-title { font-family:var(--font-d); font-size:1.3rem; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:20px; }
+    .h2h-bar-wrap { display:flex; flex-direction:column; gap:14px; }
+    .h2h-row { display:flex; align-items:center; gap:14px; }
+    .h2h-label { width:80px; font-family:var(--font-d); font-size:1rem; letter-spacing:0.06em; flex-shrink:0; }
+    .h2h-track { flex:1; height:6px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden; }
+    .h2h-fill { height:100%; border-radius:100px; width:0%; transition:width 1.4s var(--ease); }
+    .h2h-fill--syl  { background:linear-gradient(90deg,var(--sylvans),var(--sylvans-lt)); box-shadow:0 0 16px var(--sylvans-glow); }
+    .h2h-fill--draw { background:rgba(255,255,255,0.25); }
+    .h2h-fill--cpfc { background:linear-gradient(90deg,var(--cpfc),var(--cpfc-lt)); box-shadow:0 0 16px var(--cpfc-glow); }
+    .h2h-val { width:36px; text-align:right; font-family:var(--font-d); font-size:1.3rem; flex-shrink:0; }
+    .awards-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:580px) { .awards-grid { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-
 <div class="page-transition"></div>
-
-<!-- ── NAV ── -->
 <nav class="nav">
   <a class="nav__logo" href="index.html" data-transition>RLL</a>
   <ul class="nav__links">
     <li><a class="nav__link" href="index.html"   data-transition>Home</a></li>
     <li><a class="nav__link" href="sylvans.html"  data-transition>Sylvans FC</a></li>
-    <li><a class="nav__link" href="cpfc.html"     data-transition>CPFC</a></li>
+    <li><a class="nav__link" href="cpfc.html"     data-transition>CP FC</a></li>
     <li><a class="nav__link" href="history.html"  data-transition>History</a></li>
+    <li><a class="nav__link" href="players.html"  data-transition>Players</a></li>
     <li><a class="nav__link" href="about.html"    data-transition>About</a></li>
   </ul>
-  <button class="nav__toggle" aria-label="Toggle menu">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="nav__toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
 </nav>
 
-<!-- ── TEAM HERO ── -->
 <div class="team-accent-stripe"></div>
 <section class="team-hero">
   <div class="team-hero__bg"></div>
   <div class="team-hero__content container">
-
-    <img
-      class="team-hero__logo team-logo--sylvans"
-      src="assets/sylvans-logo.png"
-      onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))"
-      alt="Sylvans FC"
-    />
-
+    <img class="team-hero__logo team-logo--sylvans" src="assets/sylvans-logo.svg"
+         onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))" alt="Sylvans FC"/>
     <div class="team-hero__info">
       <span class="team-hero__eyebrow">Rockmount Lunchtime League</span>
       <h1 class="team-hero__name">Sylvans FC</h1>
-
-      <div class="team-hero__stats" id="hero-stats">
-        <div class="team-stat">
-          <span class="team-stat__val" id="stat-pts">—</span>
-          <span class="team-stat__lbl">Points</span>
-        </div>
-        <div class="team-stat">
-          <span class="team-stat__val" id="stat-wins">—</span>
-          <span class="team-stat__lbl">Wins</span>
-        </div>
-        <div class="team-stat">
-          <span class="team-stat__val" id="stat-gf">—</span>
-          <span class="team-stat__lbl">Goals For</span>
-        </div>
-        <div class="team-stat">
-          <span class="team-stat__val" id="stat-wr">—</span>
-          <span class="team-stat__lbl">Win Rate</span>
-        </div>
+      <div class="team-hero__stats">
+        <div class="team-stat"><span class="team-stat__val" style="color:var(--sylvans)" id="stat-pts">—</span><span class="team-stat__lbl">Points</span></div>
+        <div class="team-stat"><span class="team-stat__val" style="color:var(--sylvans)" id="stat-wins">—</span><span class="team-stat__lbl">Wins</span></div>
+        <div class="team-stat"><span class="team-stat__val" style="color:var(--sylvans)" id="stat-gf">—</span><span class="team-stat__lbl">Goals For</span></div>
+        <div class="team-stat"><span class="team-stat__val" style="color:var(--sylvans)" id="stat-wr">—</span><span class="team-stat__lbl">Win Rate</span></div>
       </div>
-
       <div id="form-guide-wrap" style="margin-top:18px"></div>
     </div>
-
   </div>
 </section>
 
-<!-- ── FULL STATS GRID ── -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title section-accent reveal"><span>Season</span> Stats</h2>
-    <div class="stats-grid" id="stats-grid">
-      <div class="loading">Loading stats</div>
-    </div>
-  </div>
-</section>
+<section class="section"><div class="container">
+  <h2 class="section-title section-accent reveal"><span>Season</span> Stats</h2>
+  <div class="stats-grid" id="stats-grid"><div class="loading">Loading</div></div>
+</div></section>
 
-<!-- ── HEAD TO HEAD ── -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title section-accent reveal"><span>Head</span> to Head</h2>
-    <div id="h2h-wrap" class="reveal">
-      <div class="loading">Loading</div>
-    </div>
-  </div>
-</section>
+<!-- ══ SQUAD ══ -->
+<section class="section"><div class="container">
+  <h2 class="section-title section-accent reveal"><span>The</span> Squad</h2>
+  <div id="squad-wrap"><div class="loading">Loading squad</div></div>
+</div></section>
 
-<!-- ── RECENT MATCHES ── -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title section-accent reveal"><span>Recent</span> Matches</h2>
-    <div id="matches-wrap">
-      <div class="loading">Loading matches</div>
-    </div>
-  </div>
-</section>
+<!-- ══ AWARDS ══ -->
+<section class="section"><div class="container">
+  <h2 class="section-title section-accent reveal"><span>Awards</span></h2>
+  <div class="awards-grid" id="awards-grid"><div class="loading">Loading</div></div>
+</div></section>
 
+<!-- ══ HEAD TO HEAD ══ -->
+<section class="section"><div class="container">
+  <h2 class="section-title section-accent reveal"><span>Head</span> to Head</h2>
+  <div id="h2h-wrap" class="reveal"><div class="loading">Loading</div></div>
+</div></section>
 
+<!-- ══ RECENT MATCHES ══ -->
+<section class="section"><div class="container">
+  <h2 class="section-title section-accent reveal"><span>Recent</span> Matches</h2>
+  <div id="matches-wrap"><div class="loading">Loading</div></div>
+</div></section>
 
-<!-- ── FOOTER ── -->
 <footer class="footer">
-  <p>© 2026 Rockmount Lunchtime League</p>
+  <p>© 2025 Rockmount Lunchtime League</p>
   <nav class="footer__links">
-    <a href="index.html"   data-transition>Home</a>
-    <a href="cpfc.html"    data-transition>CP FC</a>
+    <a href="index.html" data-transition>Home</a>
+    <a href="cpfc.html" data-transition>CP FC</a>
+    <a href="players.html" data-transition>Players</a>
     <a href="history.html" data-transition>History</a>
   </nav>
 </footer>
@@ -199,98 +119,70 @@
 <script src="js/main.js"></script>
 <script>
   function buildFallbackLogo(letter, color) {
-    const ns = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox","0 0 120 120");
-    svg.setAttribute("width","100%"); svg.setAttribute("height","100%");
-    svg.style.cssText = "display:block;max-width:100%";
-    svg.innerHTML = `
-      <circle cx="60" cy="60" r="58" fill="none" stroke="${color}" stroke-width="3" opacity="0.4"/>
+    const ns="http://www.w3.org/2000/svg", svg=document.createElementNS(ns,"svg");
+    svg.setAttribute("viewBox","0 0 120 120"); svg.setAttribute("width","100%"); svg.setAttribute("height","100%");
+    svg.style.cssText="display:block;max-width:100%";
+    svg.innerHTML=`<circle cx="60" cy="60" r="58" fill="none" stroke="${color}" stroke-width="3" opacity="0.4"/>
       <circle cx="60" cy="60" r="48" fill="${color}" opacity="0.08"/>
-      <text x="60" y="76" text-anchor="middle" font-family="Bebas Neue,Impact,sans-serif"
-            font-size="54" fill="${color}">${letter}</text>`;
+      <text x="60" y="76" text-anchor="middle" font-family="Bebas Neue,Impact,sans-serif" font-size="54" fill="${color}">${letter}</text>`;
     return svg;
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
     const data = await RLLData.load();
 
-    /* Hero stats — animate in */
-    function setAndAnimate(id, value, suffix = "") {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.dataset.count    = value;
-      el.dataset.suffix   = suffix;
-      el.dataset.duration = "1200";
-      el.textContent = "0" + suffix;
+    function setCount(id, val, sfx="") {
+      const el=document.getElementById(id); if(!el) return;
+      el.dataset.count=val; el.dataset.suffix=sfx; el.dataset.duration="1100"; el.textContent="0"+sfx;
     }
-
-    setAndAnimate("stat-pts",  data.sylvansPoints);
-    setAndAnimate("stat-wins", data.sylvansWins);
-    setAndAnimate("stat-gf",   data.sylvansGoalsFor);
-    setAndAnimate("stat-wr",   parseFloat(RLLData.winRate(data.sylvansWins, data.sylvansPlayed)), "%");
+    setCount("stat-pts",  data.sylvansPoints);
+    setCount("stat-wins", data.sylvansWins);
+    setCount("stat-gf",   data.sylvansGoalsFor);
+    setCount("stat-wr",   parseFloat(RLLData.winRate(data.sylvansWins, data.sylvansPlayed)), "%");
     Counter.initAll();
-
-    /* Form guide */
     document.getElementById("form-guide-wrap").innerHTML = buildFormGuide(data.history, "sylvans");
 
-    /* Full stats grid */
     const gd = data.sylvansGoalsFor - data.sylvansGoalsAgainst;
     document.getElementById("stats-grid").innerHTML = [
-      ["Played",       data.sylvansPlayed],
-      ["Wins",         data.sylvansWins],
-      ["Draws",        data.sylvansDraws],
-      ["Losses",       data.sylvansLosses],
-      ["Goals For",    data.sylvansGoalsFor],
-      ["Goals Against",data.sylvansGoalsAgainst],
-      ["Goal Diff",    (gd > 0 ? "+" : "") + gd],
-      ["Points",       data.sylvansPoints],
-    ].map(([lbl, val]) => `
+      ["Played",data.sylvansPlayed],["Wins",data.sylvansWins],["Draws",data.sylvansDraws],["Losses",data.sylvansLosses],
+      ["Goals For",data.sylvansGoalsFor],["Goals Against",data.sylvansGoalsAgainst],
+      ["Goal Diff",(gd>0?"+":"")+gd],["Points",data.sylvansPoints],
+    ].map(([lbl,val])=>`
       <div class="stat-card reveal">
-        <div class="stat-card__val" data-count="${Math.abs(parseInt(val)||0)}" data-duration="1000">${val}</div>
+        <div class="stat-card__val" data-count="${Math.abs(parseInt(val)||0)}" data-duration="900">${val}</div>
         <div class="stat-card__lbl">${lbl}</div>
-      </div>
-    `).join("");
+      </div>`).join("");
 
-    /* Head to Head */
-    const total  = data.sylvansWins + data.cpfcWins + data.sylvansDraws;
-    const pctSyl  = total ? Math.round((data.sylvansWins / total) * 100) : 0;
-    const pctDraw = total ? Math.round((data.sylvansDraws / total) * 100) : 0;
-    const pctCpfc = 100 - pctSyl - pctDraw;
+    document.getElementById("squad-wrap").innerHTML =
+      buildTeamSheet(data.sylvansPlayers, "Sylvans", "var(--sylvans)", "var(--sylvans-glow)");
 
-    document.getElementById("h2h-wrap").innerHTML = `
+    document.getElementById("awards-grid").innerHTML =
+      buildTopScorerCard(data.sylvansPlayers, "var(--sylvans)", "var(--sylvans-glow)") +
+      buildTopMOTMCard(data.sylvansPlayers, "var(--sylvans)", "var(--sylvans-glow)");
+
+    const total=data.sylvansWins+data.cpfcWins+data.sylvansDraws;
+    const pctSyl=total?Math.round(data.sylvansWins/total*100):0;
+    const pctDraw=total?Math.round(data.sylvansDraws/total*100):0;
+    const pctCpfc=100-pctSyl-pctDraw;
+    document.getElementById("h2h-wrap").innerHTML=`
       <div class="head-to-head">
         <div class="h2h-title">Sylvans FC vs Charlie Prevost FC</div>
         <div class="h2h-bar-wrap comparison-bar">
-          <div class="h2h-row">
-            <span class="h2h-label text-sylvans">Sylvans</span>
+          <div class="h2h-row"><span class="h2h-label text-sylvans">Sylvans</span>
             <div class="h2h-track"><div class="h2h-fill h2h-fill--syl comparison-bar__fill" data-pct="${pctSyl}"></div></div>
-            <span class="h2h-val text-sylvans">${data.sylvansWins}</span>
-          </div>
-          <div class="h2h-row">
-            <span class="h2h-label text-muted">Draws</span>
+            <span class="h2h-val text-sylvans">${data.sylvansWins}</span></div>
+          <div class="h2h-row"><span class="h2h-label text-muted">Draws</span>
             <div class="h2h-track"><div class="h2h-fill h2h-fill--draw comparison-bar__fill" data-pct="${pctDraw}"></div></div>
-            <span class="h2h-val text-muted">${data.sylvansDraws}</span>
-          </div>
-          <div class="h2h-row">
-            <span class="h2h-label text-cpfc">CP FC</span>
+            <span class="h2h-val text-muted">${data.sylvansDraws}</span></div>
+          <div class="h2h-row"><span class="h2h-label text-cpfc">CP FC</span>
             <div class="h2h-track"><div class="h2h-fill h2h-fill--cpfc comparison-bar__fill" data-pct="${pctCpfc}"></div></div>
-            <span class="h2h-val text-cpfc">${data.cpfcWins}</span>
-          </div>
+            <span class="h2h-val text-cpfc">${data.cpfcWins}</span></div>
         </div>
-      </div>
-    `;
+      </div>`;
 
-    /* Recent matches (all from Sylvans' POV) */
-    document.getElementById("matches-wrap").innerHTML = buildHistoryRows(data.history.slice(0, 5));
-
-  
-    /* Re-init */
-    document.querySelectorAll(".reveal").forEach(el => {
-      if (!el.classList.contains("visible")) Reveal.observe(el);
-    });
-    Bars.init();
-    Counter.initAll();
+    document.getElementById("matches-wrap").innerHTML = buildHistoryRows(data.history.slice(0,5));
+    document.querySelectorAll(".reveal").forEach(el=>{if(!el.classList.contains("visible"))Reveal.observe(el);});
+    Bars.init(); Counter.initAll();
   });
 </script>
 </body>
