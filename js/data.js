@@ -1,18 +1,15 @@
 /* =====================================================
    ROCKMOUNT LUNCHTIME LEAGUE — data.js
-   Handles all Google Sheets fetching + parsing.
-   Falls back to demo data if sheet isn't configured.
+   Fetches league data + player stats from Google Sheets.
+   Falls back to demo data gracefully.
 ===================================================== */
 
 const RLLData = (() => {
 
-  /* ---- Internal cache ---- */
   let _cache = null;
   let _promise = null;
 
-  /* ──────────────────────────────────────────────────
-     Core fetch: grab a range as CSV, return 2D array
-  ────────────────────────────────────────────────── */
+  /* ── SHEET FETCH ──────────────────────────────────── */
   async function fetchRange(range) {
     const url = sheetUrl(range);
     const res = await fetch(url);
@@ -21,40 +18,22 @@ const RLLData = (() => {
     return text.trim().split("\n").map(parseCSVRow);
   }
 
-  /* ──────────────────────────────────────────────────
-     Convert a cell reference like "D6" into a
-     single-cell range and return the value as string.
-  ────────────────────────────────────────────────── */
   async function fetchCell(ref) {
     try {
       const rows = await fetchRange(ref);
       return rows[0]?.[0] ?? "";
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
 
-  /* ──────────────────────────────────────────────────
-     Fetch all cells in parallel and return a flat map.
-  ────────────────────────────────────────────────── */
   async function fetchAllCells() {
-    const C = RLL_CONFIG.CELLS;
-    const entries = Object.entries(C);
-
-    const values = await Promise.all(
-      entries.map(([, ref]) => fetchCell(ref))
-    );
-
-    const result = {};
-    entries.forEach(([key], i) => {
-      result[key] = values[i];
-    });
+    const entries = Object.entries(RLL_CONFIG.CELLS);
+    const values  = await Promise.all(entries.map(([, ref]) => fetchCell(ref)));
+    const result  = {};
+    entries.forEach(([key], i) => { result[key] = values[i]; });
     return result;
   }
 
-  /* ──────────────────────────────────────────────────
-     Fetch game history range
-  ────────────────────────────────────────────────── */
+  /* ── HISTORY ──────────────────────────────────────── */
   async function fetchHistory() {
     const rows = await fetchRange(RLL_CONFIG.HISTORY_RANGE);
     const C = RLL_CONFIG.HISTORY_COLS;
@@ -62,26 +41,33 @@ const RLLData = (() => {
     return rows
       .filter(row => row[C.DATE] && row[C.SYLVANS_SCORE] !== "" && row[C.CPFC_SCORE] !== "")
       .map(row => ({
-        date:    row[C.DATE]   || "",
+        date:    row[C.DATE]          || "",
         sylvans: parseInt(row[C.SYLVANS_SCORE], 10) || 0,
         cpfc:    parseInt(row[C.CPFC_SCORE],    10) || 0,
-        motm:    row[C.MOTM]   || "—",
+        motm:    row[C.MOTM]          || "—",
+        // Scorers col is optional — older rows may not have it
+        scorers: C.SCORERS != null ? parseScorers(row[C.SCORERS] || "") : [],
       }))
-      /* Sort by date — most recent first.
-         Tries to parse the date; falls back to order as-is */
-      .sort((a, b) => {
-        const da = new Date(a.date), db = new Date(b.date);
-        if (isNaN(da) || isNaN(db)) return 0;
-        return db - da;
-      });
+      .reverse(); // newest at bottom of sheet → reverse so index 0 = latest
   }
 
-  /* ──────────────────────────────────────────────────
-     Master load function — returns the full data object.
-     Caches so subsequent calls are instant.
-  ────────────────────────────────────────────────── */
+  /* ── PLAYERS ──────────────────────────────────────── */
+  async function fetchPlayers() {
+    const rows = await fetchRange(RLL_CONFIG.PLAYERS_RANGE);
+    const C = RLL_CONFIG.PLAYERS_COLS;
+
+    return rows
+      .filter(row => row[C.NAME] && row[C.TEAM])
+      .map(row => ({
+        name:   row[C.NAME].trim(),
+        team:   row[C.TEAM].trim(),
+        number: row[C.NUMBER] != null ? row[C.NUMBER].trim() : "",
+      }));
+  }
+
+  /* ── MASTER LOAD ──────────────────────────────────── */
   async function load() {
-    if (_cache) return _cache;
+    if (_cache)   return _cache;
     if (_promise) return _promise;
 
     if (!isSheetConfigured()) {
@@ -92,35 +78,34 @@ const RLLData = (() => {
 
     _promise = (async () => {
       try {
-        const [cells, history] = await Promise.all([
+        const [cells, history, rawPlayers] = await Promise.all([
           fetchAllCells(),
           fetchHistory(),
+          fetchPlayers(),
         ]);
-
-        _cache = buildFromSheet(cells, history);
+        _cache = buildFromSheet(cells, history, rawPlayers);
         return _cache;
       } catch (err) {
-        console.warn("[RLL] Sheet fetch error, falling back to demo data.", err);
+        console.warn("[RLL] Sheet error — falling back to demo data.", err);
         _cache = buildFromDemo();
         return _cache;
       } finally {
         _promise = null;
       }
     })();
-
     return _promise;
   }
 
-  /* ──────────────────────────────────────────────────
-     Build the normalised data object from live cells
-  ────────────────────────────────────────────────── */
-  function buildFromSheet(cells, history) {
+  /* ── BUILD FROM SHEET ─────────────────────────────── */
+  function buildFromSheet(cells, history, rawPlayers) {
     const n = v => parseInt(v, 10) || 0;
 
     const sylvansGoalsFor     = n(cells.SYLVANS_GOALS_FOR);
     const cpfcGoalsFor        = n(cells.CPFC_GOALS_FOR);
     const sylvansGoalsAgainst = n(cells.SYLVANS_GOALS_AGAINST);
     const cpfcGoalsAgainst    = n(cells.CPFC_GOALS_AGAINST);
+
+    const players = computePlayerStats(rawPlayers, history);
 
     return {
       sylvansPoints:  n(cells.SYLVANS_POINTS),
@@ -139,46 +124,117 @@ const RLLData = (() => {
       cpfcPlayed:     n(cells.CPFC_PLAYED),
       totalGoals:     sylvansGoalsFor + cpfcGoalsFor,
       history,
-      latestMatch:    history[0] || null,
+      latestMatch: history[0] || null,
+      players,
+      sylvansPlayers: players.filter(p => p.team === RLL_CONFIG.TEAMS.SYLVANS.key),
+      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.CPFC.key),
       fromDemo: false,
     };
   }
 
-  /* ──────────────────────────────────────────────────
-     Build from static demo data in config.js
-  ────────────────────────────────────────────────── */
+  /* ── BUILD FROM DEMO ──────────────────────────────── */
   function buildFromDemo() {
     const D = RLL_CONFIG.DEMO;
+    const history = [...D.history];
+    const players = computePlayerStats(D.players, history);
+
     return {
       ...D,
+      history,
       totalGoals: D.sylvansGoalsFor + D.cpfcGoalsFor,
-      latestMatch: D.history[0] || null,
+      latestMatch: history[0] || null,
+      players,
+      sylvansPlayers: players.filter(p => p.team === RLL_CONFIG.TEAMS.SYLVANS.key),
+      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.CPFC.key),
       fromDemo: true,
     };
   }
 
-  /* ──────────────────────────────────────────────────
-     Helpers exposed to the pages
-  ────────────────────────────────────────────────── */
+  /* ── PLAYER STATS ENGINE ──────────────────────────── */
+  function computePlayerStats(players, history) {
+    // Count goals and MOTM awards from match history
+    const goalCounts = {};
+    const motmCounts = {};
 
-  /** Win rate as a percentage string, e.g. "66.7" */
+    history.forEach(match => {
+      // Goals from scorers column
+      (match.scorers || []).forEach(name => {
+        if (name) goalCounts[name] = (goalCounts[name] || 0) + 1;
+      });
+      // MOTM awards
+      const m = match.motm;
+      if (m && m !== "—") motmCounts[m] = (motmCounts[m] || 0) + 1;
+    });
+
+    // Attach stats to registered players
+    const enriched = players.map(p => ({
+      ...p,
+      goals:      goalCounts[p.name] || 0,
+      motmAwards: motmCounts[p.name] || 0,
+    }));
+
+    // Also add any scorer names NOT in the player list (data entry flexibility)
+    const registeredNames = new Set(players.map(p => p.name));
+    Object.keys(goalCounts).forEach(name => {
+      if (!registeredNames.has(name)) {
+        enriched.push({
+          name,
+          team:       "Unknown",
+          number:     "?",
+          goals:      goalCounts[name] || 0,
+          motmAwards: motmCounts[name] || 0,
+        });
+      }
+    });
+    // Same for MOTM-only players
+    Object.keys(motmCounts).forEach(name => {
+      if (!registeredNames.has(name) && !goalCounts[name]) {
+        enriched.push({
+          name,
+          team:       "Unknown",
+          number:     "?",
+          goals:      0,
+          motmAwards: motmCounts[name],
+        });
+      }
+    });
+
+    return enriched;
+  }
+
+  /* ── PUBLIC HELPERS ───────────────────────────────── */
+
   function winRate(wins, played) {
     if (!played) return "0.0";
     return ((wins / played) * 100).toFixed(1);
   }
 
-  /** Determine result string for a history row from a team's POV */
-  function matchResult(match, team /* "sylvans" | "cpfc" */) {
+  function matchResult(match, team) {
     const s = match.sylvans, c = match.cpfc;
     if (s === c) return "D";
     if (team === "sylvans") return s > c ? "W" : "L";
     return c > s ? "W" : "L";
   }
 
-  /** Get the last N results as W/L/D array for a team */
   function recentForm(history, team, n = 5) {
     return history.slice(0, n).map(m => matchResult(m, team));
   }
 
-  return { load, winRate, matchResult, recentForm };
+  /** Top N players sorted by goals, then MOTM as tiebreaker */
+  function topScorers(players, n = 5) {
+    return [...players]
+      .filter(p => p.goals > 0)
+      .sort((a, b) => b.goals - a.goals || b.motmAwards - a.motmAwards)
+      .slice(0, n);
+  }
+
+  /** Top N players sorted by MOTM awards */
+  function topMOTM(players, n = 5) {
+    return [...players]
+      .filter(p => p.motmAwards > 0)
+      .sort((a, b) => b.motmAwards - a.motmAwards || b.goals - a.goals)
+      .slice(0, n);
+  }
+
+  return { load, winRate, matchResult, recentForm, topScorers, topMOTM };
 })();
