@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/jpg" href="assets/shea.jpg">
+  <title>About — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .about-section-sub {
+      font-size: 1rem; line-height: 1.8; color: var(--text-muted);
+      max-width: 680px; margin-bottom: 48px;
+    }
+
+    /* Rules list */
+    .rules-list { display: flex; flex-direction: column; gap: 12px; list-style: none; }
+    .rules-list li {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 22px;
+      transition: border-color var(--t), background var(--t);
+    }
+    .rules-list li:hover { border-color: var(--border-md); background: var(--bg-card-hv); }
+    .rule-num {
+      font-family: var(--font-d); font-size: 1.5rem;
+      letter-spacing: 0.05em; color: var(--text-dim);
+      flex-shrink: 0; line-height: 1.2; width: 28px;
+    }
+    .rule-text { font-size: 0.93rem; line-height: 1.7; }
+    .rule-text strong { color: var(--text); font-weight: 700; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute;
+      left: 18px; top: 10px; bottom: 10px; width: 1px;
+      background: linear-gradient(180deg, var(--sylvans), var(--cpfc));
+      opacity: 0.3;
+    }
+    .timeline-item {
+      display: flex; gap: 28px; align-items: flex-start;
+      padding: 22px 0; position: relative;
+    }
+    .timeline-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center;
+      justify-content: center; font-size: 0.8rem; font-weight: 700;
+      position: relative; z-index: 1;
+    }
+    .timeline-dot--syl  { background: rgba(230,48,48,0.15); border: 1px solid var(--sylvans); color: var(--sylvans); }
+    .timeline-dot--cpfc { background: rgba(26,109,212,0.15); border: 1px solid var(--cpfc);   color: var(--cpfc);   }
+    .timeline-dot--rll  { background: rgba(255,255,255,0.07); border: 1px solid var(--border-md); }
+    .timeline-content { padding-top: 4px; }
+    .timeline-title { font-weight: 700; margin-bottom: 4px; }
+    .timeline-desc  { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+  </style>
+</head>
+<body>
+
+<div class="page-transition"></div>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links">
+    <li><a class="nav__link" href="index.html"   data-transition>Home</a></li>
+    <li><a class="nav__link" href="sylvans.html"  data-transition>Sylvans FC</a></li>
+    <li><a class="nav__link" href="cpfc.html"     data-transition>CPFC</a></li>
+    <li><a class="nav__link" href="history.html"  data-transition>History</a></li>
+    <li><a class="nav__link" href="about.html"    data-transition>About</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+
+  <section class="error-404">
+
+  <div class="glow glow-red"></div>
+  <div class="glow glow-blue"></div>
+
+  <div class="error-content">
+
+    <div class="logos">
+
+      <img src="assets/sylvans-logo.png" class="logo red-float">
+
+      <h2>VS</h2>
+
+      <img src="assets/cpfc-logo.png" class="logo blue-float">
+
+    </div>
+
+    <h1>404</h1>
+
+    <p class="subtitle">Looks like this match got postponed.</p>
+
+    <p class="description">
+      The page you’re looking for doesn’t exist or has been sent off.
+    </p>
+
+    <a href="index.html" class="home-btn">
+      Return Home
+    </a>
+
+  </div>
+
+</section>
+
+<style>
+
+.error-404 {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #050505;
+  padding: 120px 20px;
+}
+
+.error-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+}
+
+.error-content h1 {
+  font-size: clamp(7rem, 18vw, 14rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow:
+    0 0 30px rgba(255,255,255,0.15),
+    0 0 80px rgba(255,255,255,0.08);
+}
+
+.subtitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.description {
+  color: #9ca3af;
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: auto;
+  line-height: 1.7;
+  margin-bottom: 45px;
+}
+
+.logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 40px;
+}
+
+.logos h2 {
+  color: white;
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.logo {
+  width: 120px;
+  animation: float 5s ease-in-out infinite;
+}
+
+.red-float {
+  filter:
+    drop-shadow(0 0 15px rgba(255,0,0,0.8))
+    drop-shadow(0 0 35px rgba(255,0,0,0.4));
+}
+
+.blue-float {
+  filter:
+    drop-shadow(0 0 15px rgba(0,120,255,0.8))
+    drop-shadow(0 0 35px rgba(0,120,255,0.4));
+}
+
+.home-btn {
+  display: inline-block;
+  padding: 16px 34px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.03)
+  );
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.home-btn:hover {
+  transform: translateY(-4px) scale(1.03);
+  border-color: rgba(255,255,255,0.25);
+  box-shadow:
+    0 10px 30px rgba(255,255,255,0.08);
+}
+
+.glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.16;
+}
+
+.glow-red {
+  background: red;
+  top: -100px;
+  left: -100px;
+}
+
+.glow-blue {
+  background: #0066ff;
+  bottom: -100px;
+  right: -100px;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-18px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@media (max-width: 768px) {
+
+  .logos {
+    gap: 20px;
+  }
+
+  .logo {
+    width: 80px;
+  }
+
+  .logos h2 {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1.3rem;
+  }
+
+}
+
+</style>
+
+  
+<footer class="footer">
+  <p>© 2026 Rockmount Lunchtime League. All rights reserved.</p>
+  <nav class="footer__links">
+    <a href="index.html"   data-transition>Home</a>
+    <a href="history.html" data-transition>History</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+
+</html>
