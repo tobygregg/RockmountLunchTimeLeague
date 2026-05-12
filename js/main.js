@@ -375,3 +375,217 @@ document.addEventListener("DOMContentLoaded", () => {
   Counter.initAll();
   Bars.init();
 });
+
+/* =====================================================
+   PLAYER STAT BUILDERS — added for player stats update
+===================================================== */
+
+/* ── TEAM SHEET ──────────────────────────────────────
+   Shows the full squad list with kit number + stats.
+   teamKey: "Sylvans" or "CPFC"
+   accentColor / glowColor: CSS var strings
+─────────────────────────────────────────────────────── */
+function buildTeamSheet(players, teamKey, accentColor, glowColor) {
+  if (!players || players.length === 0) {
+    return '<p class="text-muted" style="padding:20px">No squad data yet.</p>';
+  }
+
+  // Sort by squad number (handle non-numeric gracefully)
+  const sorted = [...players].sort((a, b) => {
+    const na = parseInt(a.number, 10);
+    const nb = parseInt(b.number, 10);
+    if (isNaN(na) && isNaN(nb)) return 0;
+    if (isNaN(na)) return 1;
+    if (isNaN(nb)) return -1;
+    return na - nb;
+  });
+
+  return `
+    <div class="squad-grid">
+      ${sorted.map((p, i) => `
+        <div class="squad-card reveal" style="transition-delay:${i * 40}ms"
+             data-goals="${p.goals}" data-motm="${p.motmAwards}">
+          <div class="squad-card__number" style="color:${accentColor};text-shadow:0 0 30px ${glowColor}">
+            ${p.number || "—"}
+          </div>
+          <div class="squad-card__info">
+            <div class="squad-card__name">${p.name}</div>
+            <div class="squad-card__badges">
+              ${p.goals > 0 ? `
+                <span class="squad-badge squad-badge--goals">
+                  <span class="squad-badge__icon">⚽</span>
+                  <span>${p.goals} goal${p.goals !== 1 ? "s" : ""}</span>
+                </span>` : ""}
+              ${p.motmAwards > 0 ? `
+                <span class="squad-badge squad-badge--motm">
+                  <span class="squad-badge__icon">⭐</span>
+                  <span>${p.motmAwards} MOTM</span>
+                </span>` : ""}
+              ${p.goals === 0 && p.motmAwards === 0 ? `
+                <span class="squad-badge squad-badge--none">No stats yet</span>` : ""}
+            </div>
+          </div>
+          <div class="squad-card__bar" style="background:${accentColor};opacity:0.06"></div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+/* ── TOP SCORER CARD ──────────────────────────────── */
+function buildTopScorerCard(players, accentColor, glowColor) {
+  const top = RLLData.topScorers(players, 3);
+  if (!top.length) {
+    return '<p class="text-muted" style="padding:20px">No scorer data yet.</p>';
+  }
+  const [first, ...rest] = top;
+
+  return `
+    <div class="top-scorer-card reveal">
+      <div class="top-scorer-card__crown">👑 Top Scorer</div>
+      <div class="top-scorer-card__hero">
+        <div class="top-scorer-card__goals" style="color:${accentColor};text-shadow:0 0 40px ${glowColor}">
+          <span data-count="${first.goals}" data-duration="1000">${first.goals}</span>
+        </div>
+        <div class="top-scorer-card__info">
+          <div class="top-scorer-card__name">${first.name}</div>
+          <div class="top-scorer-card__sub">⚽ ${first.goals} goal${first.goals !== 1 ? "s" : ""}
+            ${first.motmAwards ? ` · ⭐ ${first.motmAwards} MOTM` : ""}
+          </div>
+        </div>
+      </div>
+      ${rest.length ? `
+        <div class="top-scorer-card__runners">
+          ${rest.map((p, i) => `
+            <div class="top-scorer-card__runner">
+              <span class="top-scorer-card__runner-pos">#${i + 2}</span>
+              <span class="top-scorer-card__runner-name">${p.name}</span>
+              <span class="top-scorer-card__runner-goals" style="color:${accentColor}">${p.goals}</span>
+            </div>
+          `).join("")}
+        </div>` : ""}
+    </div>
+  `;
+}
+
+/* ── TOP MOTM CARD ────────────────────────────────── */
+function buildTopMOTMCard(players, accentColor, glowColor) {
+  const top = RLLData.topMOTM(players, 3);
+  if (!top.length) {
+    return '<p class="text-muted" style="padding:20px">No MOTM data yet.</p>';
+  }
+  const [first, ...rest] = top;
+
+  return `
+    <div class="top-scorer-card top-scorer-card--motm reveal">
+      <div class="top-scorer-card__crown">⭐ Top MOTM</div>
+      <div class="top-scorer-card__hero">
+        <div class="top-scorer-card__goals" style="color:var(--gold);text-shadow:0 0 40px var(--gold-glow)">
+          <span data-count="${first.motmAwards}" data-duration="1000">${first.motmAwards}</span>
+        </div>
+        <div class="top-scorer-card__info">
+          <div class="top-scorer-card__name">${first.name}</div>
+          <div class="top-scorer-card__sub">⭐ ${first.motmAwards} award${first.motmAwards !== 1 ? "s" : ""}
+            ${first.goals ? ` · ⚽ ${first.goals} goals` : ""}
+          </div>
+        </div>
+      </div>
+      ${rest.length ? `
+        <div class="top-scorer-card__runners">
+          ${rest.map((p, i) => `
+            <div class="top-scorer-card__runner">
+              <span class="top-scorer-card__runner-pos">#${i + 2}</span>
+              <span class="top-scorer-card__runner-name">${p.name}</span>
+              <span class="top-scorer-card__runner-goals" style="color:var(--gold)">${p.motmAwards}</span>
+            </div>
+          `).join("")}
+        </div>` : ""}
+    </div>
+  `;
+}
+
+/* ── SCORERS IN HISTORY ROWS ─────────────────────── */
+/* Overrides the existing buildHistoryRows to also show scorers */
+function buildHistoryRows(history) {
+  if (!history || history.length === 0) {
+    return `<div class="loading" style="border:1px solid var(--border);border-radius:8px">No matches played yet</div>`;
+  }
+
+  return history.map((match, i) => {
+    const result = match.sylvans > match.cpfc ? "sylvans"
+                 : match.cpfc > match.sylvans ? "cpfc"
+                 : "draw";
+
+    const sylStyle  = result === "sylvans" ? `color:var(--sylvans)` : "";
+    const cpfcStyle = result === "cpfc"    ? `color:var(--cpfc)`    : "";
+    const isLatest  = i === 0;
+
+    const resultLabel = result === "sylvans"
+      ? `<span class="history-match__result text-sylvans">Sylvans Win</span>`
+      : result === "cpfc"
+      ? `<span class="history-match__result text-cpfc">CP FC Win</span>`
+      : `<span class="history-match__result text-muted">Draw</span>`;
+
+    // Scorer chips — count occurrences per name
+    let scorerHtml = "";
+    if (match.scorers && match.scorers.length > 0) {
+      const counts = {};
+      match.scorers.forEach(n => counts[n] = (counts[n] || 0) + 1);
+      scorerHtml = `
+        <div class="history-match__scorers">
+          ${Object.entries(counts).map(([name, count]) => `
+            <span class="scorer-chip">⚽ ${name}${count > 1 ? ` ×${count}` : ""}</span>
+          `).join("")}
+        </div>`;
+    }
+
+    return `
+      <div class="history-match reveal" style="transition-delay:${i * 40}ms">
+        <div class="history-match__team history-match__team--home" style="${sylStyle}">
+          ${RLL_CONFIG.TEAMS.SYLVANS.shortName}
+          ${isLatest ? '<span class="latest-badge">Latest</span>' : ""}
+        </div>
+        <div class="history-match__score">
+          <span class="history-match__score-num" style="${sylStyle}">${match.sylvans}</span>
+          <span class="history-match__score-sep">—</span>
+          <span class="history-match__score-num" style="${cpfcStyle}">${match.cpfc}</span>
+        </div>
+        <div class="history-match__team history-match__team--away" style="${cpfcStyle}">
+          ${RLL_CONFIG.TEAMS.CPFC.shortName}
+        </div>
+        <div class="history-match__meta">
+          <span class="history-match__date">📅 ${match.date}</span>
+          ${match.motm !== "—" ? `<span class="history-match__motm">⭐ ${match.motm}</span>` : ""}
+          ${resultLabel}
+        </div>
+        ${scorerHtml}
+      </div>
+    `;
+  }).join("");
+}
+
+/* ── ALL-TEAM MOTM LEADERBOARD (central, for history/home) ── */
+function buildMOTMLeaderboard(history) {
+  const counts = {};
+  history.forEach(m => {
+    if (m.motm && m.motm !== "—") counts[m.motm] = (counts[m.motm] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if (!sorted.length) return '<p class="text-muted">No data yet.</p>';
+  const max = sorted[0][1];
+
+  return `<div class="motm-list">
+    ${sorted.map(([name, count], i) => `
+      <div class="motm-row reveal" style="transition-delay:${i*40}ms">
+        <span class="motm-rank">#${i + 1}</span>
+        <span class="motm-name">${name}</span>
+        <div class="motm-bar-wrap">
+          <div class="motm-bar-track">
+            <div class="motm-bar-fill comparison-bar__fill" data-pct="${Math.round((count/max)*100)}"></div>
+          </div>
+        </div>
+        <span class="motm-count">${count}× ⭐</span>
+      </div>
+    `).join("")}
+  </div>`;
+}
