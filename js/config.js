@@ -11,10 +11,10 @@ const RLL_CONFIG = {
      Paste your Sheet ID from the URL:
      https://docs.google.com/spreadsheets/d/  <<<THIS BIT>>>  /edit
   ─────────────────────────────────────────────────── */
-  SHEET_ID: "YOUR_SHEET_ID_HERE",
+  SHEET_ID: "1MKzj6fGVqAwzKjS0qXVnMj8mlust_amG_s3-OoJDO3A",
 
   /* Sheet tab name (default is Sheet1, change if yours differs) */
-  SHEET_NAME: "Sheet1",
+  SHEET_NAME: "SFC Rockmount League",
 
   /* ── LEAGUE TABLE CELLS ───────────────────────────
      Individual cells for live stats. Format: "A1", "D6" etc.
@@ -48,7 +48,7 @@ const RLL_CONFIG = {
      e.g. if Scorers is column G: "C18:G40"
      Older rows without scorer data are handled gracefully.
   ─────────────────────────────────────────────────── */
-  HISTORY_RANGE: "C18:G40",
+  HISTORY_RANGE: "B26:F110",
 
   HISTORY_COLS: {
     DATE:          0,   // C
@@ -64,7 +64,7 @@ const RLL_CONFIG = {
      e.g. "A2:C20" — change to match your sheet.
      Team values must be exactly "Sylvans" or "CPFC".
   ─────────────────────────────────────────────────── */
-  PLAYERS_RANGE: "A2:C20",
+  PLAYERS_RANGE: "K26:M49",
 
   PLAYERS_COLS: {
     NAME:   0,   // e.g. "Tom LT"
