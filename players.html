@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Stats — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Two-tone section titles ── */
+    .section-accent-syl { border-left: 3px solid var(--sylvans); padding-left: 18px; }
+    .section-accent-cpfc { border-left: 3px solid var(--cpfc); padding-left: 18px; }
+    .section-accent-gold { border-left: 3px solid var(--gold); padding-left: 18px; }
+
+    /* ── Side-by-side two-team leaderboards ── */
+    .dual-lb { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media(max-width:680px) { .dual-lb { grid-template-columns: 1fr; } }
+
+    .team-lb-block { display: flex; flex-direction: column; gap: 12px; }
+    .team-lb-header {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .team-lb-header__dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .team-lb-header__name {
+      font-family: var(--font-d); font-size: 1.4rem; letter-spacing: 0.07em;
+    }
+
+    /* ── MOTM split ── */
+    .motm-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media(max-width:680px) { .motm-split { grid-template-columns: 1fr; } }
+
+    /* ── Overall top scorers bar chart ── */
+    .scorer-bars { display: flex; flex-direction: column; gap: 12px; }
+    .scorer-bar-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 44px;
+      align-items: center;
+      gap: 14px;
+    }
+    @media(max-width:480px) { .scorer-bar-row { grid-template-columns: 90px 1fr 36px; } }
+    .scorer-bar-row__name {
+      font-weight: 700; font-size: 0.88rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .scorer-bar-row__sub { font-size: 0.68rem; color: var(--text-muted); }
+    .scorer-bar-row__track {
+      height: 10px; background: rgba(255,255,255,0.05);
+      border-radius: 100px; overflow: hidden; position: relative;
+    }
+    .scorer-bar-row__fill {
+      height: 100%; border-radius: 100px;
+      width: 0%; transition: width 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .scorer-bar-row__val {
+      font-family: var(--font-d); font-size: 1.4rem;
+      letter-spacing: 0.04em; text-align: right;
+    }
+
+    /* ── Highlight row for leader ── */
+    .scorer-bar-row--1st .scorer-bar-row__track {
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-muted); font-size: 0.9rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    /* ── Table controls ── */
+    .table-controls {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+    }
+    .table-count {
+      font-size: 0.78rem; color: var(--text-muted); font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Sticky table header ── */
+    .stats-table thead th {
+      position: sticky; top: 0; z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-transition"></div>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links">
+    <li><a class="nav__link" href="index.html"   data-transition>Home</a></li>
+    <li><a class="nav__link" href="sylvans.html"  data-transition>Sylvans FC</a></li>
+    <li><a class="nav__link" href="cpfc.html"     data-transition>CP FC</a></li>
+    <li><a class="nav__link" href="history.html"  data-transition>History</a></li>
+    <li><a class="nav__link" href="players.html"  data-transition>Players</a></li>
+    <li><a class="nav__link" href="about.html"    data-transition>About</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="players-hero">
+  <div class="players-hero__inner">
+    <h1 class="players-hero__title">Player<br>Stats</h1>
+    <p class="players-hero__sub">
+      Goals, MOTM awards and season stats for every Rockmount Lunchtime League player.
+    </p>
+    <div class="players-hero__stats" id="hero-stats">
+      <!-- injected -->
+    </div>
+  </div>
+</section>
+
+<!-- ── TOP SCORERS — ALL ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title section-accent-gold reveal"><span>Top</span> Scorers</h2>
+    <div class="scorer-bars reveal" id="top-scorers-bars">
+      <div class="loading">Loading</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TOP SCORERS — PER TEAM ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>By</span> Team</h2>
+    <div class="dual-lb" id="team-scorer-lb">
+      <div class="loading">Loading</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MOTM LEADERBOARD ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title section-accent-gold reveal"><span>Man of</span> the Match</h2>
+    <div class="motm-split" id="motm-split">
+      <div class="loading">Loading</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FULL STATS TABLE ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>All</span> Players</h2>
+
+    <div class="table-controls">
+      <div class="team-filter-tabs">
+        <button class="team-tab active--all" data-team="all">All Players</button>
+        <button class="team-tab" data-team="Sylvans">Sylvans FC</button>
+        <button class="team-tab" data-team="CPFC">CP FC</button>
+      </div>
+      <span class="table-count" id="table-count"></span>
+    </div>
+
+    <div class="stats-table-wrap reveal" id="stats-table-wrap">
+      <div class="loading">Loading player data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League</p>
+  <nav class="footer__links">
+    <a href="index.html"   data-transition>Home</a>
+    <a href="sylvans.html" data-transition>Sylvans FC</a>
+    <a href="cpfc.html"    data-transition>CP FC</a>
+    <a href="history.html" data-transition>History</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* ── state ── */
+  let allPlayers = [];
+  let sortCol    = "goals";
+  let sortDir    = "desc";
+  let teamFilter = "all";
+
+  /* ── top scorer bars ── */
+  function buildTopScorerBars(players) {
+    const scorers = RLLData.topScorers(players, 8);
+    if (!scorers.length) return `<div class="empty-state">No scorer data yet — it will appear here once scorers are added to the history sheet.</div>`;
+
+    const max = scorers[0].goals;
+    return scorers.map((p, i) => {
+      const pct  = Math.round((p.goals / max) * 100);
+      const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
+                 : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc"
+                 : "unknown";
+      const color = team === "sylvans" ? "var(--sylvans)"
+                  : team === "cpfc"    ? "var(--cpfc)"
+                  : "rgba(255,255,255,0.4)";
+      const glow  = team === "sylvans" ? "var(--sylvans-glow)"
+                  : team === "cpfc"    ? "var(--cpfc-glow)"
+                  : "transparent";
+      return `
+        <div class="scorer-bar-row${i === 0 ? " scorer-bar-row--1st" : ""} reveal"
+             style="transition-delay:${i * 50}ms">
+          <div>
+            <div class="scorer-bar-row__name">${i === 0 ? "🏆 " : ""}${p.name}</div>
+            <div class="scorer-bar-row__sub">${p.team}</div>
+          </div>
+          <div class="scorer-bar-row__track">
+            <div class="scorer-bar-row__fill stats-bar-animate"
+                 data-pct="${pct}"
+                 style="background:linear-gradient(90deg,${color},${color});box-shadow:0 0 12px ${glow}">
+            </div>
+          </div>
+          <div class="scorer-bar-row__val" style="color:${color}">${p.goals}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /* ── per-team scorer leaderboard ── */
+  function buildTeamScorerList(players, teamKey, accentColor, labelClass) {
+    const top = RLLData.topScorers(players.filter(p => p.team === teamKey), 5);
+    if (!top.length) return `<div class="empty-state" style="padding:20px;font-size:0.8rem">No scorer data yet</div>`;
+
+    return top.map((p, i) => `
+      <div class="scorer-lb-item${i === 0 ? " scorer-lb-item--1st" : ""} reveal" style="transition-delay:${i*40}ms">
+        <div class="scorer-lb-pos">#${i + 1}</div>
+        <div class="scorer-lb-info">
+          <div class="scorer-lb-name">${i === 0 ? "🏆 " : ""}${p.name}</div>
+          <div class="scorer-lb-team ${labelClass}">${p.motmAwards ? `⭐ ${p.motmAwards} MOTM` : "No MOTM yet"}</div>
+        </div>
+        <div class="scorer-lb-stat" style="color:${accentColor}">
+          ${p.goals}<span style="font-size:0.7em;opacity:0.6">g</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  /* ── per-team MOTM leaderboard ── */
+  function buildTeamMOTMList(players, teamKey, accentColor, labelClass) {
+    const top = RLLData.topMOTM(players.filter(p => p.team === teamKey), 5);
+    if (!top.length) return `<div class="empty-state" style="padding:20px;font-size:0.8rem">No MOTM data yet</div>`;
+
+    return top.map((p, i) => `
+      <div class="scorer-lb-item${i === 0 ? " scorer-lb-item--1st" : ""} reveal" style="transition-delay:${i*40}ms">
+        <div class="scorer-lb-pos">#${i + 1}</div>
+        <div class="scorer-lb-info">
+          <div class="scorer-lb-name">${i === 0 ? "⭐ " : ""}${p.name}</div>
+          <div class="scorer-lb-team ${labelClass}">${p.goals ? `⚽ ${p.goals} goals` : "No goals yet"}</div>
+        </div>
+        <div class="scorer-lb-stat" style="color:var(--gold)">
+          ${p.motmAwards}<span style="font-size:0.7em;opacity:0.6">×</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  /* ── full stats table ── */
+  function buildStatsTable(players, filter, sortBy, dir) {
+    let rows = filter === "all" ? players : players.filter(p => p.team === filter);
+
+    // Sort
+    rows = [...rows].sort((a, b) => {
+      let av = a[sortBy], bv = b[sortBy];
+      if (typeof av === "string") av = av.toLowerCase();
+      if (typeof bv === "string") bv = bv.toLowerCase();
+      if (av < bv) return dir === "asc" ? -1 : 1;
+      if (av > bv) return dir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    document.getElementById("table-count").textContent = `${rows.length} player${rows.length !== 1 ? "s" : ""}`;
+
+    if (!rows.length) return `<div class="empty-state">No players match this filter.</div>`;
+
+    const maxGoals = Math.max(...rows.map(p => p.goals), 1);
+    const maxMOTM  = Math.max(...rows.map(p => p.motmAwards), 1);
+
+    const th = (col, label, cls = "") => {
+      const active = sortCol === col;
+      const dirCls = active ? (sortDir === "desc" ? "sort-desc" : "sort-asc") : "";
+      return `<th class="${dirCls} ${cls}" data-sort="${col}">${label}</th>`;
+    };
+
+    return `
+      <table class="stats-table" id="the-stats-table">
+        <thead>
+          <tr>
+            ${th("number", "#")}
+            ${th("name",   "Player")}
+            ${th("team",   "Team")}
+            ${th("goals",  "Goals")}
+            <th class="col-bar">Goals (visual)</th>
+            ${th("motmAwards", "MOTM ⭐")}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((p, i) => {
+            const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
+                       : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc"
+                       : "unknown";
+            const badgeCls = team === "sylvans" ? "stats-table__team-badge--sylvans"
+                           : team === "cpfc"    ? "stats-table__team-badge--cpfc"
+                           : "";
+            const barCls   = team === "sylvans" ? "stats-table__bar-fill--sylvans"
+                           : team === "cpfc"    ? "stats-table__bar-fill--cpfc"
+                           : "stats-table__bar-fill--unknown";
+            const goalPct  = Math.round((p.goals / maxGoals) * 100);
+            const motmPct  = Math.round((p.motmAwards / maxMOTM) * 100);
+
+            return `
+              <tr>
+                <td class="stats-table__num">${p.number || "—"}</td>
+                <td class="stats-table__name">${p.name}</td>
+                <td>
+                  <span class="stats-table__team-badge ${badgeCls}">${p.team}</span>
+                </td>
+                <td class="stats-table__val stats-table__val--goals">${p.goals}</td>
+                <td class="col-bar">
+                  <div class="stats-table__bar-wrap">
+                    <div class="stats-table__bar-track">
+                      <div class="stats-table__bar-fill ${barCls} stats-bar-animate" data-pct="${goalPct}"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="stats-table__val stats-table__val--motm">${p.motmAwards > 0 ? p.motmAwards + "×" : "—"}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  /* ── animate stat bars ── */
+  function animateStatBars() {
+    document.querySelectorAll(".stats-bar-animate").forEach(bar => {
+      const pct = bar.dataset.pct || "0";
+      requestAnimationFrame(() => { bar.style.width = pct + "%"; });
+    });
+  }
+
+  /* ── render table ── */
+  function renderTable() {
+    const wrap = document.getElementById("stats-table-wrap");
+    wrap.innerHTML = buildStatsTable(allPlayers, teamFilter, sortCol, sortDir);
+
+    // Sort headers
+    wrap.querySelectorAll("th[data-sort]").forEach(th => {
+      th.addEventListener("click", () => {
+        const col = th.dataset.sort;
+        if (sortCol === col) {
+          sortDir = sortDir === "desc" ? "asc" : "desc";
+        } else {
+          sortCol = col;
+          sortDir = col === "name" || col === "team" ? "asc" : "desc";
+        }
+        renderTable();
+        animateStatBars();
+      });
+    });
+
+    animateStatBars();
+    wrap.querySelectorAll(".reveal").forEach(el => Reveal.observe(el));
+  }
+
+  /* ── init ── */
+  document.addEventListener("DOMContentLoaded", async () => {
+    const data = await RLLData.load();
+    allPlayers = data.players;
+
+    /* Hero stats */
+    const totalGoals = allPlayers.reduce((a, p) => a + p.goals, 0);
+    const topScorer  = [...allPlayers].sort((a,b) => b.goals - a.goals)[0];
+    const topMOTMp   = [...allPlayers].sort((a,b) => b.motmAwards - a.motmAwards)[0];
+    document.getElementById("hero-stats").innerHTML = `
+      <div class="players-hero__stat">
+        <div class="players-hero__stat-val" data-count="${allPlayers.length}">${allPlayers.length}</div>
+        <div class="players-hero__stat-lbl">Players</div>
+      </div>
+      <div class="players-hero__stat">
+        <div class="players-hero__stat-val text-gold" data-count="${totalGoals}">${totalGoals}</div>
+        <div class="players-hero__stat-lbl">Goals Scored</div>
+      </div>
+      ${topScorer && topScorer.goals > 0 ? `
+      <div class="players-hero__stat">
+        <div class="players-hero__stat-val text-sylvans">${topScorer.goals}</div>
+        <div class="players-hero__stat-lbl">Top Scorer Goals</div>
+      </div>` : ""}
+      ${topMOTMp && topMOTMp.motmAwards > 0 ? `
+      <div class="players-hero__stat">
+        <div class="players-hero__stat-val text-gold">${topMOTMp.motmAwards}×</div>
+        <div class="players-hero__stat-lbl">Most MOTM Awards</div>
+      </div>` : ""}
+    `;
+
+    /* Top scorer bars (all players combined) */
+    document.getElementById("top-scorers-bars").innerHTML = buildTopScorerBars(allPlayers);
+
+    /* Per-team scorer LBs */
+    document.getElementById("team-scorer-lb").innerHTML = `
+      <div class="team-lb-block">
+        <div class="team-lb-header">
+          <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
+          <span class="team-lb-header__name text-sylvans">Sylvans FC</span>
+        </div>
+        ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
+      </div>
+      <div class="team-lb-block">
+        <div class="team-lb-header">
+          <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
+          <span class="team-lb-header__name text-cpfc">CP FC</span>
+        </div>
+        ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
+      </div>
+    `;
+
+    /* MOTM split */
+    document.getElementById("motm-split").innerHTML = `
+      <div class="team-lb-block">
+        <div class="team-lb-header">
+          <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
+          <span class="team-lb-header__name text-sylvans">Sylvans FC</span>
+        </div>
+        ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
+      </div>
+      <div class="team-lb-block">
+        <div class="team-lb-header">
+          <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
+          <span class="team-lb-header__name text-cpfc">CP FC</span>
+        </div>
+        ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
+      </div>
+    `;
+
+    /* Team filter buttons */
+    document.querySelectorAll(".team-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const t = btn.dataset.team;
+        teamFilter = t;
+        document.querySelectorAll(".team-tab").forEach(b => {
+          b.className = "team-tab";
+        });
+        btn.classList.add(t === "all" ? "active--all" : t === "Sylvans" ? "active--sylvans" : "active--cpfc");
+        renderTable();
+      });
+    });
+
+    /* Initial table render */
+    renderTable();
+
+    /* Animate all bars on scroll */
+    const barObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll(".scorer-bar-row__fill, .stats-bar-animate").forEach(bar => {
+            bar.style.width = (bar.dataset.pct || "0") + "%";
+          });
+          barObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll(".scorer-bars, .stats-table-wrap").forEach(el => barObserver.observe(el));
+
+    /* Reveal everything */
+    document.querySelectorAll(".reveal").forEach(el => {
+      if (!el.classList.contains("visible")) Reveal.observe(el);
+    });
+    Counter.initAll();
+  });
+</script>
+</body>
+</html>
