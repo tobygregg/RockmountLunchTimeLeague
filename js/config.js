@@ -11,10 +11,10 @@ const RLL_CONFIG = {
      Paste your Sheet ID from the URL:
      https://docs.google.com/spreadsheets/d/  <<<THIS BIT>>>  /edit
   ─────────────────────────────────────────────────── */
-  SHEET_ID: "1MKzj6fGVqAwzKjS0qXVnMj8mlust_amG_s3-OoJDO3A",
+  SHEET_ID: "YOUR_SHEET_ID_HERE",
 
   /* Sheet tab name (default is Sheet1, change if yours differs) */
-  SHEET_NAME: "SFC Rockmount League",
+  SHEET_NAME: "Sheet1",
 
   /* ── LEAGUE TABLE CELLS ───────────────────────────
      Individual cells for live stats. Format: "A1", "D6" etc.
@@ -34,6 +34,11 @@ const RLL_CONFIG = {
     CPFC_GOALS_AGAINST:    "B12",
     SYLVANS_PLAYED:        "I12",
     CPFC_PLAYED:           "I12",
+
+    /* ---- Announcement banner (index page) ----
+       Put text in this cell to show a banner at the top of the home page.
+       Leave it empty to hide the banner entirely. */
+    ANNOUNCEMENT:          "K11",
   },
 
   /* ── GAME HISTORY RANGE ───────────────────────────
@@ -43,7 +48,7 @@ const RLL_CONFIG = {
      e.g. if Scorers is column G: "C18:G40"
      Older rows without scorer data are handled gracefully.
   ─────────────────────────────────────────────────── */
-  HISTORY_RANGE: "B26:F110",
+  HISTORY_RANGE: "C18:G40",
 
   HISTORY_COLS: {
     DATE:          0,   // C
@@ -59,7 +64,7 @@ const RLL_CONFIG = {
      e.g. "A2:C20" — change to match your sheet.
      Team values must be exactly "Sylvans" or "CPFC".
   ─────────────────────────────────────────────────── */
-  PLAYERS_RANGE: "K26:M49",
+  PLAYERS_RANGE: "A2:C20",
 
   PLAYERS_COLS: {
     NAME:   0,   // e.g. "Tom LT"
@@ -80,7 +85,7 @@ const RLL_CONFIG = {
     },
     CPFC: {
       name:      "Charlie Prevost FC",
-      shortName: "CPFC",
+      shortName: "CP FC",
       abbr:      "CPFC",
       color:     "#1a6dd4",
       key:       "CPFC",      // must match sheet value exactly
