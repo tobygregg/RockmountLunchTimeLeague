@@ -337,7 +337,7 @@ const PlayerPopup = (() => {
       // Desktop: position near trigger
       const rect   = triggerEl.getBoundingClientRect();
       const scrollY = window.scrollY;
-      const pw = 300;
+      const pw = 380;
       const gap = 12;
       const margin = 12;
 
