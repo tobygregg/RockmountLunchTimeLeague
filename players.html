@@ -212,7 +212,7 @@
         <div class="scorer-bar-row${i === 0 ? " scorer-bar-row--1st" : ""} reveal"
              style="transition-delay:${i * 50}ms">
           <div>
-            <div class="scorer-bar-row__name">${i === 0 ? "🏆 " : ""}${p.name}</div>
+            <div class="scorer-bar-row__name">${i === 0 ? "🏆 " : ""}<span class="player-link" data-player="${p.name}">${p.name}</span></div>
             <div class="scorer-bar-row__sub">${p.team}</div>
           </div>
           <div class="scorer-bar-row__track">
@@ -236,7 +236,7 @@
       <div class="scorer-lb-item${i === 0 ? " scorer-lb-item--1st" : ""} reveal" style="transition-delay:${i*40}ms">
         <div class="scorer-lb-pos">#${i + 1}</div>
         <div class="scorer-lb-info">
-          <div class="scorer-lb-name">${i === 0 ? "🏆 " : ""}${p.name}</div>
+          <div class="scorer-lb-name">${i === 0 ? "🏆 " : ""}<span class="player-link" data-player="${p.name}">${p.name}</span></div>
           <div class="scorer-lb-team ${labelClass}">${p.motmAwards ? `⭐ ${p.motmAwards} MOTM` : "No MOTM yet"}</div>
         </div>
         <div class="scorer-lb-stat" style="color:${accentColor}">
@@ -255,7 +255,7 @@
       <div class="scorer-lb-item${i === 0 ? " scorer-lb-item--1st" : ""} reveal" style="transition-delay:${i*40}ms">
         <div class="scorer-lb-pos">#${i + 1}</div>
         <div class="scorer-lb-info">
-          <div class="scorer-lb-name">${i === 0 ? "⭐ " : ""}${p.name}</div>
+          <div class="scorer-lb-name">${i === 0 ? "⭐ " : ""}<span class="player-link" data-player="${p.name}">${p.name}</span></div>
           <div class="scorer-lb-team ${labelClass}">${p.goals ? `⚽ ${p.goals} goals` : "No goals yet"}</div>
         </div>
         <div class="scorer-lb-stat" style="color:var(--gold)">
@@ -321,7 +321,7 @@
             return `
               <tr>
                 <td class="stats-table__num">${p.number || "—"}</td>
-                <td class="stats-table__name">${p.name}</td>
+                <td class="stats-table__name"><span class="player-link" data-player="${p.name}">${p.name}</span></td>
                 <td>
                   <span class="stats-table__team-badge ${badgeCls}">${p.team}</span>
                 </td>
