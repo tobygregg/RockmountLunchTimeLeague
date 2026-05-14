@@ -170,28 +170,30 @@ function showDemoBadge() {
 /* =====================================================
    PLAYER POPUP
    Attach to any element with data-player="Name"
-   Will look up the player from window.__RLL_PLAYERS__
+   Reads from window.__RLL_PLAYERS__
 ===================================================== */
 const PlayerPopup = (() => {
-  let popup    = null;
-  let current  = null;
-  let hideTimer = null;
+  let popup        = null;
+  let mobileOverlay = null;
+  let current      = null;
+  let hideTimer    = null;
 
   function getPlayers() { return window.__RLL_PLAYERS__ || []; }
 
   function findPlayer(name) {
+    if (!name) return null;
     const nl = name.toLowerCase().trim();
     return getPlayers().find(p => p.name.toLowerCase().trim() === nl) || null;
   }
 
   function teamColor(team) {
-    if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "var(--sylvans)";
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "var(--cpfc)";
-    return "rgba(255,255,255,0.5)";
+    if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "#e63030";
+    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "#1a6dd4";
+    return "rgba(255,255,255,0.4)";
   }
   function teamGlow(team) {
-    if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "var(--sylvans-glow)";
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "var(--cpfc-glow)";
+    if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "rgba(230,48,48,0.4)";
+    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "rgba(26,109,212,0.4)";
     return "transparent";
   }
   function teamName(team) {
@@ -199,45 +201,114 @@ const PlayerPopup = (() => {
     if (team === RLL_CONFIG.TEAMS.CPFC.key)    return RLL_CONFIG.TEAMS.CPFC.name;
     return team;
   }
+  function teamBg(team) {
+    if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "rgba(230,48,48,0.12)";
+    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "rgba(26,109,212,0.12)";
+    return "rgba(255,255,255,0.08)";
+  }
+
+  function buildAvatarEl(player) {
+    const div = document.createElement("div");
+    div.className = "pp__avatar-fallback";
+    div.style.background = teamBg(player.team);
+    div.style.color = teamColor(player.team);
+    div.style.border = `2px solid ${teamColor(player.team)}`;
+    div.style.boxShadow = `0 0 20px ${teamGlow(player.team)}`;
+    div.textContent = (player.name || "?")[0].toUpperCase();
+    return div;
+  }
 
   function build(player) {
     const col  = teamColor(player.team);
     const glow = teamGlow(player.team);
     const tn   = teamName(player.team);
 
-    const imgHtml = player.image
-      ? `<img class="pp__img" src="${player.image}" alt="${player.name}"
-              onerror="this.replaceWith(buildAvatarFallback('${player.name[0]}','${player.team}'))"/>`
-      : buildAvatarFallback(player.name[0], player.team).outerHTML;
-
     const stats = [];
-    if (player.goals      > 0) stats.push(`⚽ ${player.goals} goal${player.goals!==1?"s":""}`);
-    if (player.motmAwards > 0) stats.push(`⭐ ${player.motmAwards} MOTM`);
+    if (player.goals      > 0) stats.push({ label: `⚽ ${player.goals} goal${player.goals !== 1 ? "s" : ""}`, cls: "pp__stat--goals" });
+    if (player.motmAwards > 0) stats.push({ label: `⭐ ${player.motmAwards} MOTM`, cls: "pp__stat--motm" });
 
-    return `
-      <div class="pp__inner">
-        <button class="pp__close" id="pp-close" aria-label="Close">✕</button>
-        <div class="pp__left">
-          ${imgHtml}
-          <div class="pp__number" style="color:${col};text-shadow:0 0 20px ${glow}">#${player.number||"—"}</div>
-        </div>
-        <div class="pp__right">
-          <div class="pp__team" style="color:${col}">${tn}</div>
-          <div class="pp__name">${player.name}</div>
-          ${player.bio ? `<div class="pp__bio">${player.bio}</div>` : ""}
-          ${stats.length ? `<div class="pp__stats">${stats.map(s=>`<span class="pp__stat">${s}</span>`).join("")}</div>` : ""}
-        </div>
-      </div>
-    `;
-  }
+    const wrapper = document.createElement("div");
+    wrapper.className = "pp__inner";
 
-  function buildAvatarFallback(letter, team) {
-    const col = teamColor(team);
-    const div = document.createElement("div");
-    div.className = "pp__avatar-fallback";
-    div.style.cssText = `background:${col === "var(--sylvans)" ? "rgba(230,48,48,0.15)" : col === "var(--cpfc)" ? "rgba(26,109,212,0.15)" : "rgba(255,255,255,0.08)"};color:${col};border:2px solid ${col}`;
-    div.textContent = (letter || "?").toUpperCase();
-    return div;
+    // Coloured accent bar at the top
+    const accent = document.createElement("div");
+    accent.className = "pp__accent";
+    accent.style.background = `linear-gradient(90deg, ${col}, transparent)`;
+    wrapper.appendChild(accent);
+
+    // Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "pp__close";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.textContent = "✕";
+    closeBtn.addEventListener("click", (e) => { e.stopPropagation(); hide(); });
+    wrapper.appendChild(closeBtn);
+
+    // Body
+    const body = document.createElement("div");
+    body.className = "pp__body";
+
+    // Left — avatar + number
+    const left = document.createElement("div");
+    left.className = "pp__left";
+
+    if (player.image) {
+      const img = document.createElement("img");
+      img.className = "pp__img";
+      img.src = player.image;
+      img.alt = player.name;
+      img.onerror = () => img.replaceWith(buildAvatarEl(player));
+      left.appendChild(img);
+    } else {
+      left.appendChild(buildAvatarEl(player));
+    }
+
+    const num = document.createElement("div");
+    num.className = "pp__number";
+    num.style.color = col;
+    num.style.textShadow = `0 0 20px ${glow}`;
+    num.textContent = "#" + (player.number || "—");
+    left.appendChild(num);
+
+    // Right — info
+    const right = document.createElement("div");
+    right.className = "pp__right";
+
+    const teamLabel = document.createElement("div");
+    teamLabel.className = "pp__team-label";
+    teamLabel.style.color = col;
+    teamLabel.textContent = tn;
+    right.appendChild(teamLabel);
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "pp__name";
+    nameEl.textContent = player.name;
+    right.appendChild(nameEl);
+
+    if (player.bio) {
+      const bio = document.createElement("div");
+      bio.className = "pp__bio";
+      bio.textContent = player.bio;
+      right.appendChild(bio);
+    }
+
+    if (stats.length) {
+      const statsEl = document.createElement("div");
+      statsEl.className = "pp__stats";
+      stats.forEach(s => {
+        const span = document.createElement("span");
+        span.className = `pp__stat ${s.cls}`;
+        span.textContent = s.label;
+        statsEl.appendChild(span);
+      });
+      right.appendChild(statsEl);
+    }
+
+    body.appendChild(left);
+    body.appendChild(right);
+    wrapper.appendChild(body);
+
+    return wrapper;
   }
 
   function show(triggerEl, playerName) {
@@ -246,67 +317,84 @@ const PlayerPopup = (() => {
     if (current === playerName && popup) return;
 
     clearTimeout(hideTimer);
-    hide(true); // instant hide previous
+    hide(true);
 
     current = playerName;
-    popup   = document.createElement("div");
+    const isMobile = window.innerWidth <= 640;
+
+    popup = document.createElement("div");
     popup.className = "player-popup";
-    popup.innerHTML = build(player);
+    popup.appendChild(build(player));
     document.body.appendChild(popup);
 
-    // Position relative to trigger
-    const rect = triggerEl.getBoundingClientRect();
-    const scrollY = window.scrollY;
-    const scrollX = window.scrollX;
-    const pw = 320, gap = 10;
+    if (isMobile) {
+      // Mobile: slide up from bottom with dim overlay
+      mobileOverlay = document.createElement("div");
+      mobileOverlay.className = "pp-mobile-overlay";
+      mobileOverlay.addEventListener("click", () => hide());
+      document.body.appendChild(mobileOverlay);
+    } else {
+      // Desktop: position near trigger
+      const rect   = triggerEl.getBoundingClientRect();
+      const scrollY = window.scrollY;
+      const pw = 300;
+      const gap = 12;
+      const margin = 12;
 
-    let top  = rect.bottom + scrollY + gap;
-    let left = rect.left   + scrollX + rect.width/2 - pw/2;
+      let left = rect.left + rect.width / 2 - pw / 2;
+      let top  = rect.bottom + scrollY + gap;
+      let above = false;
 
-    // Clamp horizontally
-    const margin = 12;
-    if (left < margin) left = margin;
-    if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+      // Flip above if near bottom of viewport
+      if (rect.bottom + 250 > window.innerHeight) {
+        top = rect.top + scrollY - gap;
+        above = true;
+        popup.classList.add("pp--above");
+      }
 
-    // Flip above if too close to bottom
-    if (rect.bottom + 200 > window.innerHeight) {
-      top = rect.top + scrollY - gap;
-      popup.classList.add("pp--above");
+      // Clamp left
+      if (left < margin) left = margin;
+      if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+
+      popup.style.top  = top + "px";
+      popup.style.left = left + "px";
+
+      if (above) {
+        // We'll shift up after render when we know the height
+        requestAnimationFrame(() => {
+          const ph = popup.offsetHeight;
+          popup.style.top = (rect.top + scrollY - ph - gap) + "px";
+        });
+      }
     }
 
-    popup.style.cssText = `top:${top}px;left:${left}px;width:${pw}px`;
-
-    // Close button
-    popup.querySelector("#pp-close").addEventListener("click", () => hide());
-
     // Animate in
-    requestAnimationFrame(() => { popup.classList.add("pp--visible"); });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { popup.classList.add("pp--visible"); });
+    });
 
     // Close on outside click
     setTimeout(() => {
-      document.addEventListener("click", outsideClick, { once: false });
+      document.addEventListener("click", outsideClick);
     }, 10);
   }
 
   function outsideClick(e) {
     if (popup && !popup.contains(e.target) && !e.target.closest("[data-player]")) {
       hide();
-      document.removeEventListener("click", outsideClick);
     }
   }
 
   function hide(instant = false) {
-    if (!popup) return;
     document.removeEventListener("click", outsideClick);
-    if (instant) {
-      popup.remove(); popup = null; current = null; return;
-    }
+    if (mobileOverlay) { mobileOverlay.remove(); mobileOverlay = null; }
+    if (!popup) return;
+    if (instant) { popup.remove(); popup = null; current = null; return; }
     popup.classList.remove("pp--visible");
-    const p = popup;
-    hideTimer = setTimeout(() => { p.remove(); if (popup === p) { popup = null; current = null; } }, 280);
+    const p = popup; popup = null; current = null;
+    hideTimer = setTimeout(() => p.remove(), 300);
   }
 
-  /* Attach to all [data-player] elements in a container (or whole doc) */
   function attachAll(root = document) {
     root.querySelectorAll("[data-player]").forEach(el => {
       if (el.dataset.ppBound) return;
@@ -550,4 +638,22 @@ document.addEventListener("DOMContentLoaded", () => {
   Reveal.init();
   Counter.initAll();
   Bars.init();
+
+  /* ── Auto-wire player popups on every page ──────────
+     Load players once, store globally, then use a
+     MutationObserver so dynamically-injected [data-player]
+     elements get picked up automatically.
+  ─────────────────────────────────────────────────── */
+  RLLData.load().then(data => {
+    window.__RLL_PLAYERS__ = data.players || [];
+
+    // Attach to anything already in the DOM
+    PlayerPopup.attachAll(document);
+
+    // Watch for new content injected by page scripts
+    const observer = new MutationObserver(() => {
+      PlayerPopup.attachAll(document);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
 });
