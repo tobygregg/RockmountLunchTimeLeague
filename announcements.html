@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .chat-hero{padding:calc(var(--nav-h) + clamp(60px,9vw,100px)) var(--pad-x) clamp(40px,6vw,72px);text-align:center;position:relative;overflow:hidden;}
+    .chat-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:64px 64px;}
+    .chat-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 45% 55% at 18% 60%,rgba(230,48,48,.06) 0%,transparent 60%),radial-gradient(ellipse 45% 55% at 82% 60%,rgba(26,109,212,.06) 0%,transparent 60%),radial-gradient(ellipse 80% 50% at 50% 120%,rgba(0,0,0,.9) 0%,transparent 65%);}
+    .chat-hero__inner{position:relative;z-index:1;max-width:640px;margin:0 auto;}
+    .chat-hero__title{font-family:var(--font-d);font-size:clamp(2.6rem,8vw,6.5rem);line-height:.88;letter-spacing:.04em;margin-bottom:14px;}
+    .chat-hero__sub{font-size:clamp(.88rem,2.2vw,1rem);color:var(--text-muted);line-height:1.7;}
+
+    .chat-panels{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start;}
+    @media(max-width:860px){.chat-panels{grid-template-columns:1fr;gap:14px;}}
+
+    .chat-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);display:flex;flex-direction:column;overflow:hidden;}
+    .chat-panel--announcements{border-top:3px solid var(--gold);}
+    .chat-panel--match{border-top:3px solid var(--sylvans);}
+    .chat-panel--general{border-top:3px solid var(--cpfc);}
+
+    .chat-panel__hd{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .chat-panel__icon{font-size:1.1rem;flex-shrink:0;}
+    .chat-panel__title{font-family:var(--font-d);font-size:1.3rem;letter-spacing:.08em;flex:1;}
+    .chat-panel--announcements .chat-panel__title{color:var(--gold);}
+    .chat-panel--match .chat-panel__title{color:var(--sylvans);}
+    .chat-panel--general .chat-panel__title{color:var(--cpfc);}
+    .chat-panel__badge{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:100px;}
+    .chat-panel--announcements .chat-panel__badge{background:rgba(245,200,66,.12);color:var(--gold);}
+    .chat-panel--match .chat-panel__badge{background:rgba(230,48,48,.1);color:var(--sylvans);}
+    .chat-panel--general .chat-panel__badge{background:rgba(26,109,212,.1);color:var(--cpfc);}
+
+    .match-pin{padding:12px 18px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+    .match-pin__score{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
+    .match-pin__team{font-family:var(--font-d);font-size:.85rem;letter-spacing:.06em;color:var(--text-muted);}
+    .match-pin__num{font-family:var(--font-d);font-size:1.8rem;line-height:1;letter-spacing:.04em;}
+    .match-pin__sep{font-family:var(--font-d);font-size:1rem;color:var(--text-dim);}
+    .match-pin__syl{color:var(--sylvans);text-shadow:0 0 20px var(--sylvans-glow);}
+    .match-pin__cpfc{color:var(--cpfc);text-shadow:0 0 20px var(--cpfc-glow);}
+    .match-pin__meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;}
+    .match-pin__chip{font-size:.68rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:4px;}
+
+    .chat-panel__messages{padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-height:140px;}
+    .chat-panel__open-btn{margin:0;padding:14px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;background:none;transition:background var(--t),color var(--t);-webkit-tap-highlight-color:transparent;width:100%;}
+    .chat-panel__open-btn:hover{background:rgba(255,255,255,.03);}
+    .chat-panel--announcements .chat-panel__open-btn:hover{color:var(--gold);}
+    .chat-panel--match .chat-panel__open-btn:hover{color:var(--sylvans);}
+    .chat-panel--general .chat-panel__open-btn:hover{color:var(--cpfc);}
+
+    /* Messages */
+    .chat-msg{display:grid;grid-template-columns:32px 1fr;gap:0 10px;padding:9px 8px;border-radius:8px;transition:background var(--t);animation:msgIn .35s var(--ease-bounce) both;}
+    .chat-msg:hover{background:rgba(255,255,255,.03);}
+    .chat-msg--announcement{grid-template-columns:auto 1fr;background:rgba(245,200,66,.04);border:1px solid rgba(245,200,66,.1);border-radius:8px;padding:10px 12px;}
+    .chat-msg--announcement:hover{background:rgba(245,200,66,.07);}
+    .chat-msg__avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;margin-top:1px;text-transform:uppercase;}
+    .chat-msg--announcement .chat-msg__avatar{width:22px;height:22px;background:rgba(245,200,66,.15);color:var(--gold);font-size:.75rem;}
+    .chat-msg__top{display:flex;align-items:baseline;gap:7px;margin-bottom:2px;flex-wrap:wrap;}
+    .chat-msg__name{font-weight:700;font-size:.82rem;line-height:1;}
+    .chat-msg__time{font-size:.65rem;color:var(--text-dim);font-weight:500;flex-shrink:0;}
+    .chat-msg__text{font-size:.86rem;color:var(--text-muted);line-height:1.5;word-break:break-word;}
+    .chat-msg--preview .chat-msg__text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .chat-empty{text-align:center;padding:20px 12px;color:var(--text-dim);font-size:.8rem;letter-spacing:.05em;}
+    .chat-loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;color:var(--text-dim);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;}
+    .chat-loading::before{content:'';width:14px;height:14px;border:2px solid var(--border-md);border-top-color:var(--text-dim);border-radius:50%;animation:spin .75s linear infinite;flex-shrink:0;}
+    .chat-setup{padding:16px;margin:8px;background:rgba(245,200,66,.05);border:1px dashed rgba(245,200,66,.25);border-radius:8px;text-align:center;}
+    .chat-setup p{font-size:.78rem;color:var(--text-muted);line-height:1.6;}
+    .chat-setup strong{color:var(--gold);}
+
+    /* Modal */
+    .chat-modal{position:fixed;inset:0;z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);}
+    .chat-modal.open{opacity:1;pointer-events:all;}
+    .chat-modal__overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);cursor:pointer;}
+    .chat-modal__sheet{position:relative;z-index:1;width:min(680px,100%);max-height:88svh;background:var(--bg-raised);border:1px solid var(--border-md);border-bottom:none;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .42s cubic-bezier(.34,1.15,.64,1);overflow:hidden;}
+    .chat-modal.open .chat-modal__sheet{transform:translateY(0);}
+    .chat-modal__handle{width:36px;height:4px;background:var(--border-md);border-radius:100px;margin:10px auto 0;flex-shrink:0;}
+    .chat-modal__hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .chat-modal__hd-icon{font-size:1.1rem;flex-shrink:0;}
+    .chat-modal__title{font-family:var(--font-d);font-size:1.4rem;letter-spacing:.08em;flex:1;}
+    .chat-modal__close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text-muted);font-size:.72rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background var(--t),color var(--t);-webkit-tap-highlight-color:transparent;}
+    .chat-modal__close:hover{background:rgba(255,255,255,.14);color:var(--text);}
+    .chat-modal__match-pin{padding:14px 18px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);flex-shrink:0;}
+    .chat-modal__messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth;overscroll-behavior:contain;}
+    .chat-modal__messages::-webkit-scrollbar{width:4px;}
+    .chat-modal__messages::-webkit-scrollbar-track{background:transparent;}
+    .chat-modal__messages::-webkit-scrollbar-thumb{background:var(--border-md);border-radius:100px;}
+    .chat-compose{border-top:1px solid var(--border);padding:14px 16px;flex-shrink:0;background:var(--bg);}
+    .chat-compose__row{display:flex;gap:8px;margin-bottom:8px;}
+    .chat-compose__row:last-child{margin-bottom:0;}
+    .chat-compose__input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border-md);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-b);font-size:.88rem;outline:none;resize:none;transition:border-color var(--t);-webkit-appearance:none;}
+    .chat-compose__input::placeholder{color:var(--text-dim);}
+    .chat-compose__input:focus{box-shadow:0 0 0 3px rgba(255,255,255,.04);}
+    .chat-compose__name{width:140px;flex-shrink:0;}
+    .chat-compose__textarea{min-height:70px;line-height:1.5;}
+    .chat-compose__footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .chat-compose__char{font-size:.68rem;color:var(--text-dim);}
+    .chat-compose__error{font-size:.72rem;color:var(--red-soft);flex:1;}
+    .chat-compose__btn{padding:10px 22px;border-radius:8px;font-family:var(--font-d);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;transition:all var(--t) var(--ease);flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+    .chat-compose__btn--match{background:var(--sylvans);color:#fff;box-shadow:0 4px 20px rgba(230,48,48,.3);}
+    .chat-compose__btn--match:hover{background:var(--sylvans-lt);box-shadow:0 4px 28px rgba(230,48,48,.5);}
+    .chat-compose__btn--general{background:var(--cpfc);color:#fff;box-shadow:0 4px 20px rgba(26,109,212,.3);}
+    .chat-compose__btn--general:hover{background:var(--cpfc-lt);box-shadow:0 4px 28px rgba(26,109,212,.5);}
+    .chat-compose__btn:disabled{opacity:.5;cursor:not-allowed;}
+    .chat-compose__btn.sending{color:transparent;position:relative;}
+    .chat-compose__btn.sending::after{content:'';position:absolute;inset:0;width:16px;height:16px;margin:auto;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+    .chat-date-divider{text-align:center;padding:10px 0;font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);position:relative;}
+    .chat-date-divider::before,.chat-date-divider::after{content:'';position:absolute;top:50%;width:calc(50% - 40px);height:1px;background:var(--border);}
+    .chat-date-divider::before{left:0;}
+    .chat-date-divider::after{right:0;}
+    .new-msg-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;background:rgba(46,213,115,.12);border:1px solid rgba(46,213,115,.25);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin:4px auto;align-self:center;}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(min-width:641px){
+      .chat-modal{align-items:center;}
+      .chat-modal__sheet{border-radius:var(--radius-lg);border-bottom:1px solid var(--border-md);max-height:82svh;transform:translateY(40px) scale(.97);transition:transform .4s cubic-bezier(.34,1.15,.64,1);}
+      .chat-modal.open .chat-modal__sheet{transform:translateY(0) scale(1);}
+      .chat-modal__handle{display:none;}
+    }
+    @media(max-width:420px){.chat-compose__name{width:110px;}}
+  </style>
+</head>
+<body>
+<div class="page-transition"></div>
+
+<nav class="nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links">
+    <li><a class="nav__link" href="index.html" data-transition>Home</a></li>
+    <li><a class="nav__link" href="sylvans.html" data-transition>Sylvans FC</a></li>
+    <li><a class="nav__link" href="cpfc.html" data-transition>CP FC</a></li>
+    <li><a class="nav__link" href="history.html" data-transition>History</a></li>
+    <li><a class="nav__link" href="players.html" data-transition>Players</a></li>
+    <li><a class="nav__link" href="announcements.html" data-transition>Chat</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="chat-hero">
+  <div class="chat-hero__inner">
+    <h1 class="chat-hero__title">Buzz &amp;<br>Banter</h1>
+    <p class="chat-hero__sub">Announcements, match reactions and general chat for the Rockmount Lunchtime League.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="chat-panels">
+      <!-- ANNOUNCEMENTS -->
+      <div class="chat-panel chat-panel--announcements reveal">
+        <div class="chat-panel__hd">
+          <span class="chat-panel__icon">📢</span>
+          <h2 class="chat-panel__title">Announcements</h2>
+          <span class="chat-panel__badge">Official</span>
+        </div>
+        <div class="chat-panel__messages" id="ann-preview"><div class="chat-loading">Loading</div></div>
+        <button class="chat-panel__open-btn" data-open="announcements">
+          <span id="ann-count">View all</span><span>→</span>
+        </button>
+      </div>
+
+      <!-- MATCH CHAT -->
+      <div class="chat-panel chat-panel--match reveal" style="transition-delay:60ms">
+        <div class="chat-panel__hd">
+          <span class="chat-panel__icon">⚽</span>
+          <h2 class="chat-panel__title">Match Chat</h2>
+          <span class="chat-panel__badge">Live</span>
+        </div>
+        <div class="match-pin" id="match-pin-panel"><div class="chat-loading" style="padding:8px">Loading</div></div>
+        <div class="chat-panel__messages" id="match-preview"><div class="chat-loading">Loading</div></div>
+        <button class="chat-panel__open-btn" data-open="match">
+          <span id="match-count">Open chat</span><span>→</span>
+        </button>
+      </div>
+
+      <!-- GENERAL CHAT -->
+      <div class="chat-panel chat-panel--general reveal" style="transition-delay:120ms">
+        <div class="chat-panel__hd">
+          <span class="chat-panel__icon">💬</span>
+          <h2 class="chat-panel__title">General</h2>
+          <span class="chat-panel__badge">Open</span>
+        </div>
+        <div class="chat-panel__messages" id="general-preview"><div class="chat-loading">Loading</div></div>
+        <button class="chat-panel__open-btn" data-open="general">
+          <span id="general-count">Open chat</span><span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="chat-modal" id="chat-modal" role="dialog" aria-modal="true">
+  <div class="chat-modal__overlay" id="modal-overlay"></div>
+  <div class="chat-modal__sheet">
+    <div class="chat-modal__handle"></div>
+    <div class="chat-modal__hd">
+      <span class="chat-modal__hd-icon" id="modal-icon">💬</span>
+      <h3 class="chat-modal__title" id="modal-title">Chat</h3>
+      <button class="chat-modal__close" id="modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="chat-modal__match-pin" id="modal-match-pin" style="display:none"></div>
+    <div class="chat-modal__messages" id="modal-messages"><div class="chat-loading">Loading</div></div>
+    <div class="chat-compose" id="modal-compose" style="display:none">
+      <div class="chat-compose__row">
+        <input class="chat-compose__input chat-compose__name" id="compose-name" type="text" placeholder="Your name" maxlength="50" autocomplete="nickname"/>
+      </div>
+      <div class="chat-compose__row">
+        <textarea class="chat-compose__input chat-compose__textarea" id="compose-msg" placeholder="Say something..." maxlength="400" rows="3"></textarea>
+      </div>
+      <div class="chat-compose__footer">
+        <span class="chat-compose__error" id="compose-error"></span>
+        <span class="chat-compose__char" id="compose-char">0 / 400</span>
+        <button class="chat-compose__btn" id="compose-send">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League</p>
+  <nav class="footer__links">
+    <a href="index.html" data-transition>Home</a>
+    <a href="history.html" data-transition>History</a>
+    <a href="players.html" data-transition>Players</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+let _players=[], _announcements=[], _matchMsgs=[], _generalMsgs=[];
+let _currentModal=null, _submitting=false;
+
+function playerColor(name){
+  if(!name)return null;
+  const p=_players.find(p=>p.name.toLowerCase().trim()===name.toLowerCase().trim());
+  if(!p)return null;
+  if(p.team===RLL_CONFIG.TEAMS.SYLVANS.key)return"var(--sylvans)";
+  if(p.team===RLL_CONFIG.TEAMS.CPFC.key)return"var(--cpfc)";
+  return null;
+}
+function teamBg(name){
+  const c=playerColor(name);
+  if(!c)return"rgba(255,255,255,0.1)";
+  if(c==="var(--sylvans)")return"rgba(230,48,48,0.2)";
+  if(c==="var(--cpfc)")return"rgba(26,109,212,0.2)";
+  return"rgba(255,255,255,0.1)";
+}
+function initial(n){return(n||"?").trim()[0].toUpperCase();}
+function fmtTime(ts){
+  if(!ts)return"";
+  const d=new Date(ts); if(isNaN(d))return String(ts);
+  const now=new Date(), diff=now-d, days=Math.floor(diff/86400000);
+  const t=`${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}`;
+  if(days===0)return t; if(days===1)return`Yesterday ${t}`;
+  if(days<7)return`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${t}`;
+  return`${d.getDate()} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]}`;
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function msgHTML(item, preview=false){
+  const col=playerColor(item.name);
+  const nameStyle=col?`color:${col}`:"color:var(--text)";
+  const time="ts" in item?fmtTime(item.ts):(item.date||"");
+  return`<div class="chat-msg${preview?" chat-msg--preview":""}">
+    <div class="chat-msg__avatar" style="background:${teamBg(item.name)};color:${col||"var(--text-muted)"}">
+      ${initial(item.name)}
+    </div>
+    <div>
+      <div class="chat-msg__top">
+        <span class="chat-msg__name player-link" data-player="${esc(item.name)}" style="${nameStyle}">${esc(item.name)}</span>
+        <span class="chat-msg__time">${esc(time)}</span>
+      </div>
+      <div class="chat-msg__text">${esc(item.msg||item.message||"")}</div>
+    </div>
+  </div>`;
+}
+function annHTML(item, preview=false){
+  return`<div class="chat-msg chat-msg--announcement${preview?" chat-msg--preview":""}">
+    <div class="chat-msg__avatar">📢</div>
+    <div>
+      <div class="chat-msg__top">
+        <span class="chat-msg__name" style="color:var(--gold)">RLL</span>
+        <span class="chat-msg__time">${esc(item.date||"")}</span>
+      </div>
+      <div class="chat-msg__text">${esc(item.message||"")}</div>
+    </div>
+  </div>`;
+}
+
+function buildMatchPin(match){
+  if(!match)return`<div class="chat-empty">No match yet</div>`;
+  const sw=match.sylvans>match.cpfc, cw=match.cpfc>match.sylvans;
+  let scorers="";
+  if(match.scorers&&match.scorers.length){
+    const c={};match.scorers.forEach(n=>c[n]=(c[n]||0)+1);
+    scorers=Object.entries(c).map(([n,x])=>`${n}${x>1?` ×${x}`:""}`).join(", ");
+  }
+  return`<div class="match-pin__score">
+    <span class="match-pin__team">${RLL_CONFIG.TEAMS.SYLVANS.shortName}</span>
+    <span class="match-pin__num match-pin__syl" style="${sw?"":"opacity:.55"}">${match.sylvans}</span>
+    <span class="match-pin__sep">—</span>
+    <span class="match-pin__num match-pin__cpfc" style="${cw?"":"opacity:.55"}">${match.cpfc}</span>
+    <span class="match-pin__team">${RLL_CONFIG.TEAMS.CPFC.shortName}</span>
+  </div>
+  <div class="match-pin__meta">
+    ${match.date?`<span class="match-pin__chip">📅 ${match.date}</span>`:""}
+    ${match.motm&&match.motm!=="—"?`<span class="match-pin__chip">⭐ ${esc(match.motm)}</span>`:""}
+    ${scorers?`<span class="match-pin__chip">⚽ ${esc(scorers)}</span>`:""}
+  </div>`;
+}
+
+function chatSetupHTML(){
+  return`<div class="chat-setup"><p>⚙️ Chat requires <strong>Google Apps Script</strong>.<br>See <strong>google-apps-script.js</strong> for setup instructions.</p></div>`;
+}
+
+function countLabel(msgs, noun){
+  if(!msgs.length)return`Open ${noun}`;
+  return`${msgs.length} message${msgs.length!==1?"s":""} — view all`;
+}
+
+function renderPreviews(latestMatch){
+  // Announcements
+  const last3a=_announcements.slice(0,3);
+  document.getElementById("ann-preview").innerHTML=last3a.length?last3a.map(a=>annHTML(a,true)).join(""):`<div class="chat-empty">No announcements yet</div>`;
+  document.getElementById("ann-count").textContent=_announcements.length>3?`${_announcements.length} announcements — view all`:"View all announcements";
+  // Match pin
+  document.getElementById("match-pin-panel").innerHTML=buildMatchPin(latestMatch);
+  // Match chat
+  const matchPrev=document.getElementById("match-preview");
+  if(!isAppsScriptConfigured()){matchPrev.innerHTML=chatSetupHTML();}
+  else{const l=_matchMsgs.slice(-3);matchPrev.innerHTML=l.length?l.map(m=>msgHTML(m,true)).join(""):`<div class="chat-empty">No messages yet — be first! 👇</div>`;document.getElementById("match-count").textContent=countLabel(_matchMsgs,"match chat");}
+  // General chat
+  const genPrev=document.getElementById("general-preview");
+  if(!isAppsScriptConfigured()){genPrev.innerHTML=chatSetupHTML();}
+  else{const l=_generalMsgs.slice(-3);genPrev.innerHTML=l.length?l.map(m=>msgHTML(m,true)).join(""):`<div class="chat-empty">No messages yet — be first! 👇</div>`;document.getElementById("general-count").textContent=countLabel(_generalMsgs,"general chat");}
+  // Re-attach player links
+  PlayerPopup.attachAll();
+}
+
+// MODAL
+const modal=document.getElementById("chat-modal");
+const modalTitle=document.getElementById("modal-title");
+const modalIcon=document.getElementById("modal-icon");
+const modalMsgs=document.getElementById("modal-messages");
+const modalPin=document.getElementById("modal-match-pin");
+const compose=document.getElementById("modal-compose");
+const sendBtn=document.getElementById("compose-send");
+const nameInput=document.getElementById("compose-name");
+const msgInput=document.getElementById("compose-msg");
+const charCount=document.getElementById("compose-char");
+const errEl=document.getElementById("compose-error");
+
+function openModal(type){
+  _currentModal=type;
+  const cfg={announcements:{icon:"📢",title:"Announcements",color:"var(--gold)"},match:{icon:"⚽",title:"Match Chat",color:"var(--sylvans)"},general:{icon:"💬",title:"General Chat",color:"var(--cpfc)"}};
+  const c=cfg[type];
+  modalIcon.textContent=c.icon; modalTitle.textContent=c.title; modalTitle.style.color=c.color;
+  if(type==="match"){modalPin.innerHTML=buildMatchPin(window._latestMatch||null);modalPin.style.display="";}
+  else modalPin.style.display="none";
+  if(type==="announcements"){compose.style.display="none";}
+  else{
+    compose.style.display="";
+    sendBtn.className=`chat-compose__btn chat-compose__btn--${type}`;
+    nameInput.value=localStorage.getItem("rll_chat_name")||"";
+    msgInput.value=""; charCount.textContent="0 / 400"; errEl.textContent="";
+  }
+  renderModalMessages(type);
+  modal.classList.add("open");
+  document.body.style.overflow="hidden";
+  setTimeout(()=>{modalMsgs.scrollTop=modalMsgs.scrollHeight;},120);
+}
+
+function renderModalMessages(type){
+  if(type==="announcements"){
+    const items=[..._announcements].reverse();
+    if(!items.length){modalMsgs.innerHTML=`<div class="chat-empty">No announcements yet.</div>`;return;}
+    modalMsgs.innerHTML=items.map(a=>annHTML(a)).join("");
+  } else {
+    const items=type==="match"?_matchMsgs:_generalMsgs;
+    if(!isAppsScriptConfigured()){modalMsgs.innerHTML=chatSetupHTML();return;}
+    if(!items.length){modalMsgs.innerHTML=`<div class="chat-empty">No messages yet — add one below! 💬</div>`;return;}
+    let html="", lastDate=null;
+    items.forEach(m=>{
+      const d=m.ts?new Date(m.ts):null;
+      const ds=d&&!isNaN(d)?d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):null;
+      if(ds&&ds!==lastDate){html+=`<div class="chat-date-divider">${ds}</div>`;lastDate=ds;}
+      html+=msgHTML(m);
+    });
+    modalMsgs.innerHTML=html;
+  }
+  PlayerPopup.attachAll(modalMsgs);
+}
+
+function closeModal(){
+  modal.classList.remove("open");
+  document.body.style.overflow="";
+  setTimeout(()=>{_currentModal=null;modalMsgs.innerHTML="";},450);
+}
+
+async function sendMessage(){
+  if(_submitting)return;
+  const name=nameInput.value.trim(), msg=msgInput.value.trim();
+  errEl.textContent="";
+  if(!name){errEl.textContent="Enter your name";nameInput.focus();return;}
+  if(!msg){errEl.textContent="Write a message";msgInput.focus();return;}
+  const last=parseInt(localStorage.getItem("rll_last_post")||"0",10);
+  if(Date.now()-last<15000){const s=Math.ceil((15000-(Date.now()-last))/1000);errEl.textContent=`Wait ${s}s before posting again`;return;}
+  _submitting=true; sendBtn.disabled=true; sendBtn.classList.add("sending");
+  try{
+    await RLLData.postMessage(_currentModal,name,msg);
+    localStorage.setItem("rll_chat_name",name);
+    localStorage.setItem("rll_last_post",Date.now().toString());
+    const nm={ts:new Date().toISOString(),name,msg};
+    if(_currentModal==="match")_matchMsgs.push(nm);
+    if(_currentModal==="general")_generalMsgs.push(nm);
+    msgInput.value=""; charCount.textContent="0 / 400";
+    renderModalMessages(_currentModal);
+    setTimeout(()=>{modalMsgs.scrollTop=modalMsgs.scrollHeight;},60);
+    const badge=document.createElement("div");
+    badge.className="new-msg-badge"; badge.textContent="✓ Message sent!";
+    modalMsgs.appendChild(badge);
+    setTimeout(()=>badge.remove(),2500);
+    renderPreviews(window._latestMatch);
+  }catch(err){errEl.textContent=err.message||"Failed to send — try again";}
+  finally{_submitting=false;sendBtn.disabled=false;sendBtn.classList.remove("sending");}
+}
+
+// Events
+document.querySelectorAll(".chat-panel__open-btn").forEach(btn=>btn.addEventListener("click",()=>openModal(btn.dataset.open)));
+document.getElementById("modal-close").addEventListener("click",closeModal);
+document.getElementById("modal-overlay").addEventListener("click",closeModal);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))closeModal();});
+sendBtn.addEventListener("click",sendMessage);
+msgInput.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")sendMessage();});
+msgInput.addEventListener("input",()=>{charCount.textContent=`${msgInput.value.length} / 400`;});
+
+// Init
+document.addEventListener("DOMContentLoaded",async()=>{
+  const data=await RLLData.load();
+  _players=data.players||[];
+  window.__RLL_PLAYERS__=_players;
+  _announcements=data.announcements||[];
+  window._latestMatch=data.latestMatch||null;
+  if(isAppsScriptConfigured()){
+    try{
+      const [mm,gm]=await Promise.all([RLLData.fetchChat("match"),RLLData.fetchChat("general")]);
+      _matchMsgs=mm.length?mm:(data.fromDemo?(data.matchChat||[]):[]);
+      _generalMsgs=gm.length?gm:(data.fromDemo?(data.generalChat||[]):[]);
+    }catch{_matchMsgs=data.fromDemo?(data.matchChat||[]):[];_generalMsgs=data.fromDemo?(data.generalChat||[]):[]; }
+  } else {
+    _matchMsgs=data.matchChat||RLL_CONFIG.DEMO.matchChat||[];
+    _generalMsgs=data.generalChat||RLL_CONFIG.DEMO.generalChat||[];
+  }
+  renderPreviews(data.latestMatch);
+  document.querySelectorAll(".reveal").forEach(el=>{if(!el.classList.contains("visible"))Reveal.observe(el);});
+});
+</script>
+</body>
+</html>
