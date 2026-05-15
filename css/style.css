@@ -464,13 +464,13 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 
 .pp__name {
   font-family: var(--font-d);
-  font-size: 3rem; letter-spacing: .04em;
+  font-size: 5rem; letter-spacing: .04em;
   line-height: 1.1;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .pp__bio {
-  font-size: 1.6rem; line-height: 1.6;
+  font-size: 1.1rem; line-height: 1.6;
   color: var(--text-muted);
   margin-top: 4px;
 }
