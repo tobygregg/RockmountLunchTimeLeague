@@ -324,18 +324,23 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 .announcement-bar__close:hover{background:rgba(255,255,255,.15);color:var(--text);}
 
 /* =====================================================
-   PLAYER POPUP
+   PLAYER POPUP (FULL FIXED VERSION)
 ===================================================== */
+
 .player-popup {
   position: absolute;
   z-index: 1000;
-  width: auto;
-  height: 320px; /* set this to whatever your current height visually is */
-  display: inline-block;
+
+  /* controlled width so it never gets huge */
+  width: min(540px, 92vw);
+
   filter: drop-shadow(0 20px 60px rgba(0,0,0,.8));
 }
 
-/* Arrow pointing up at the trigger */
+/* =====================================================
+   ARROW
+===================================================== */
+
 .player-popup::before {
   content: '';
   position: absolute;
@@ -347,6 +352,7 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
   border-bottom: 9px solid var(--border-md);
   z-index: 1;
 }
+
 .player-popup::after {
   content: '';
   position: absolute;
@@ -358,186 +364,281 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
   border-bottom: 8px solid #1a1a1a;
   z-index: 2;
 }
+
 .player-popup.pp--above::before {
-  top: auto; bottom: -8px;
+  top: auto;
+  bottom: -8px;
   border-bottom: none;
   border-top: 9px solid var(--border-md);
 }
+
 .player-popup.pp--above::after {
-  top: auto; bottom: -6px;
+  top: auto;
+  bottom: -6px;
   border-bottom: none;
   border-top: 8px solid #1a1a1a;
 }
+
+/* =====================================================
+   INNER CARD
+===================================================== */
 
 .pp__inner {
   background: #1a1a1a;
   border: 1px solid var(--border-md);
   border-radius: var(--radius-lg);
   overflow: hidden;
+
   display: flex;
   flex-direction: column;
+
   opacity: 0;
   transform: translateY(10px) scale(.95);
   transition: opacity .22s var(--ease), transform .28s var(--ease-bounce);
+
   position: relative;
 }
+
 .player-popup.pp--visible .pp__inner {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-/* Coloured top accent bar — set via inline style on pp__inner */
+/* Accent bar */
 .pp__accent {
   height: 3px;
   width: 100%;
   flex-shrink: 0;
 }
 
+/* Close button */
 .pp__close {
-  position: absolute; top: 10px; right: 10px;
-  width: 24px; height: 24px; border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+
   background: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.12);
-  color: var(--text-muted); font-size: .65rem;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; z-index: 10;
+
+  color: var(--text-muted);
+  font-size: .65rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  z-index: 10;
+
   transition: background var(--t), color var(--t), transform var(--t);
-  -webkit-tap-highlight-color: transparent;
   line-height: 1;
 }
+
 .pp__close:hover {
   background: rgba(255,255,255,.18);
   color: var(--text);
   transform: rotate(90deg);
 }
 
-/* Body layout */
+/* =====================================================
+   BODY LAYOUT
+===================================================== */
+
 .pp__body {
   display: flex;
-  gap: 0;
+  align-items: stretch;
 }
 
+/* LEFT SIDE */
 .pp__left {
-  flex: 0 0 220px;
+  flex: 0 0 180px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 22px 0 22px 20px;
+
+  padding: 20px 0 20px 18px;
+  gap: 10px;
 }
 
 .pp__img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 140px;
+  height: 140px;
+
   object-fit: cover;
-  border-radius: 10%;
+  border-radius: 12px;
+
   border: 2px solid rgba(255,255,255,.15);
   display: block;
 }
 
 .pp__avatar-fallback {
-  width: 88px; height: 88px;
+  width: 88px;
+  height: 88px;
+
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   font-family: var(--font-d);
-  font-size: 2.4rem; letter-spacing: .04em;
-  flex-shrink: 0;
+  font-size: 2.4rem;
 }
 
+/* number */
 .pp__number {
   font-family: var(--font-d);
-  font-size: 2.2rem; letter-spacing: .06em; line-height: 1;
-  margin-top: 2px;
+  font-size: 2rem;
+  letter-spacing: .06em;
+  line-height: 1;
 }
 
+/* RIGHT SIDE */
 .pp__right {
   flex: 1;
-  padding: 18px 42px 18px 16px;
+  min-width: 0;
+
+  padding: 18px 22px 18px 14px;
+
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-  max-width: 225;
+  gap: 6px;
 }
 
+/* =====================================================
+   TEXT
+===================================================== */
+
 .pp__team-label {
-  font-size: .65rem; font-weight: 800;
-  letter-spacing: .22em; text-transform: uppercase;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
   line-height: 1;
 }
 
 .pp__name {
   font-family: var(--font-d);
-  font-size: 5rem; letter-spacing: .04em;
+
+  font-size: 1.8rem;
+  letter-spacing: .04em;
   line-height: 1.1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pp__bio {
-  font-size: 1.1rem; line-height: 1.6;
+  font-size: .9rem;
+  line-height: 1.5;
   color: var(--text-muted);
-  margin-top: 4px;
 }
 
 .pp__stats {
-  display: flex; gap: 6px; flex-wrap: wrap;
-  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .pp__stat {
-  font-size: .7rem; font-weight: 700;
-  padding: 4px 10px; border-radius: 100px;
+  font-size: .7rem;
+  font-weight: 700;
+
+  padding: 4px 10px;
+  border-radius: 100px;
+
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.1);
+
   color: var(--text-muted);
   white-space: nowrap;
 }
 
 .pp__stat--goals { color: var(--text); }
-.pp__stat--motm  { color: var(--gold); background: rgba(245,200,66,.08); border-color: rgba(245,200,66,.2); }
+.pp__stat--motm {
+  color: var(--gold);
+  background: rgba(245,200,66,.08);
+  border-color: rgba(245,200,66,.2);
+}
 
-/* Mobile: slide up from bottom */
+/* =====================================================
+   MOBILE
+===================================================== */
+
 @media (max-width: 640px) {
+
   .player-popup {
     position: fixed !important;
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
     width: 100% !important;
     filter: none;
   }
+
   .player-popup::before,
-  .player-popup::after { display: none; }
+  .player-popup::after {
+    display: none;
+  }
+
   .pp__inner {
     border-radius: 16px 16px 0 0;
-    border-bottom: none;
     transform: translateY(100%);
     opacity: 1;
   }
+
   .player-popup.pp--visible .pp__inner {
     transform: translateY(0);
-    opacity: 1;
   }
-  .pp__left { padding: 20px 0 20px 20px; }
-  .pp__right { padding: 20px 48px 20px 14px; }
-  .pp__bio { max-width: 100%; }
-  .pp__name { font-size: 1.6rem; }
-  /* Dim overlay on mobile */
-  .pp-mobile-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.6);
-    backdrop-filter: blur(2px);
-    z-index: 999;
-    animation: fadeIn .2s ease;
+
+  .pp__body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .pp__left {
+    padding: 18px 0 10px;
+  }
+
+  .pp__img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pp__right {
+    padding: 10px 18px 20px;
+    align-items: center;
+  }
+
+  .pp__name {
+    font-size: 1.4rem;
+  }
+
+  .pp__bio {
+    font-size: .85rem;
+  }
+
+  .pp__stat {
+    font-size: .65rem;
   }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-@keyframes glowSylvans{0%,100%{filter:drop-shadow(0 8px 24px rgba(230,48,48,.28))}50%{filter:drop-shadow(0 8px 48px rgba(230,48,48,.65))}}
-@keyframes glowCPFC{0%,100%{filter:drop-shadow(0 8px 24px rgba(26,109,212,.28))}50%{filter:drop-shadow(0 8px 48px rgba(26,109,212,.65))}}
-@keyframes scrollBounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* =====================================================
    RESPONSIVE
