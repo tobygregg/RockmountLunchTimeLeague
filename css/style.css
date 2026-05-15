@@ -427,11 +427,10 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 }
 
 .pp__img {
-  width: 160px; height: 160px;
-  border-radius: 10%;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
-  border: 2px solid rgba(255,255,255,.15);
-  display: block;
+  outline: 3px solid red;
 }
 
 .pp__avatar-fallback {
