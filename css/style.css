@@ -456,6 +456,7 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
   flex-direction: column;
   gap: 5px;
   min-width: 0;
+  max-width: 400;
 }
 
 .pp__team-label {
