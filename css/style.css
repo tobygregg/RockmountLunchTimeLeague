@@ -329,7 +329,9 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 .player-popup {
   position: absolute;
   z-index: 1000;
-  width: 1000px;
+  width: auto;
+  height: 320px; /* set this to whatever your current height visually is */
+  display: inline-block;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,.8));
 }
 
