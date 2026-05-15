@@ -329,7 +329,7 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 .player-popup {
   position: absolute;
   z-index: 1000;
-  width: 380px;
+  width: 600px;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,.8));
 }
 
@@ -427,8 +427,8 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 }
 
 .pp__img {
-  width: 88px; height: 88px;
-  border-radius: 50%;
+  width: 160px; height: 160px;
+  border-radius: 10%;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,.15);
   display: block;
