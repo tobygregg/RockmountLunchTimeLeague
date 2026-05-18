@@ -5,8 +5,8 @@
 
 const RLL_CONFIG = {
 
-  SHEET_ID:   "YOUR_SHEET_ID_HERE",
-  SHEET_NAME: "Sheet1",
+  SHEET_ID:   "1MKzj6fGVqAwzKjS0qXVnMj8mlust_amG_s3-OoJDO3A",
+  SHEET_NAME: "SFC Rockmount League",
 
   /* ── LEAGUE TABLE CELLS ────────────────────────── */
   CELLS: {
