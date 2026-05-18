@@ -651,3 +651,24 @@
   .picker-info-row { flex-direction: column; align-items: stretch; }
   .budget-display  { justify-content: center; }
 }
+
+/* ── Show more button ── */
+.lb-show-more {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: var(--radius-lg);
+  color: var(--fantasy-lt);
+  font-size: .82rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--t), border-color var(--t);
+  -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; justify-content: center;
+}
+.lb-show-more:hover {
+  background: rgba(124,58,237,0.12);
+  border-color: rgba(124,58,237,0.4);
+}
