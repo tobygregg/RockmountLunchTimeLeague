@@ -195,9 +195,9 @@ const RLLData = (() => {
   }
 
   function calcPts(player, goals, assists, motmCount, gkPoints) {
-    const F = RLL_CONFIG.FANTASY;
-    if (player.position === "GK") return gkPoints;
-    return (goals * F.POINTS_GOAL) + (assists * F.POINTS_ASSIST) + (motmCount * F.POINTS_MOTM);
+    const F = RLL_CONFIG.FANTASY || { POINTS_GOAL:2, POINTS_ASSIST:1, POINTS_MOTM:6 };
+    if ((player.position || "") === "GK") return gkPoints || 0;
+    return ((goals||0) * F.POINTS_GOAL) + ((assists||0) * F.POINTS_ASSIST) + ((motmCount||0) * F.POINTS_MOTM);
   }
 
   /* ── PUBLIC HELPERS ────────────────────────────── */
