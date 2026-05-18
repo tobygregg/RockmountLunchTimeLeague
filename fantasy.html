@@ -639,11 +639,45 @@ async function saveSquad() {
 /* ─────────────────────────────────────────────────────
    RENDER: Leaderboard
 ───────────────────────────────────────────────────── */
+function buildLbRow(m, rank) {
+  const isMe   = _session && m.username.toLowerCase() === _session.username.toLowerCase();
+  const posCls = ["fantasy-lb-row--1st","fantasy-lb-row--2nd","fantasy-lb-row--3rd"][rank] || "";
+  const pos    = ["🏆","🥈","🥉"][rank] || (rank + 1);
+  const preview = (m.squad||[]).map(n => `<span>${esc(n)}${n===m.captain?" ⭐":""}</span>`).join(", ") || "<em>No squad</em>";
+  return `
+    <div class="fantasy-lb-row ${posCls}${isMe?" fantasy-lb-row--me":""}" data-idx="${rank}">
+      <div class="fantasy-lb-main">
+        <div class="fantasy-lb-pos">${pos}</div>
+        <div class="fantasy-lb-info">
+          <div class="fantasy-lb-name">${esc(m.username)}${isMe?'<span class="fantasy-lb-me-badge">You</span>':""}</div>
+          <div class="fantasy-lb-squad-preview">${preview}</div>
+        </div>
+        <div class="fantasy-lb-pts">
+          <div class="fantasy-lb-pts-val">${m.total}</div>
+          <div class="fantasy-lb-pts-lbl">pts</div>
+        </div>
+      </div>
+      ${m.breakdown&&m.breakdown.length?`
+      <div class="fantasy-lb-breakdown" id="lb-bd-${rank}">
+        ${m.breakdown.map(bp => {
+          const isGK = bp.isGK;
+          const detail = isGK ? `🧤${bp.gkPts||0}pt` : `⚽${bp.goals||0} 🎯${bp.assists||0} ⭐${bp.motm||0}`;
+          return `<div class="lb-player-chip${bp.isCaptain?" lb-player-chip--captain":""}">
+            ${bp.isCaptain?"⭐ ":""}
+            <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}">${esc(bp.name)}</span>
+            <span style="font-size:.65rem;color:var(--text-dim)">${detail}</span>
+            <span class="lb-player-chip__pts">${bp.pts}p</span>
+          </div>`;
+        }).join("")}
+      </div>`:""
+      }
+    </div>`;
+}
+
 function renderLeaderboard(data) {
   const wrap = document.getElementById("leaderboard-wrap");
   _leaderboard = data;
 
-  // Update hero chips
   if (data.length) {
     document.getElementById("chip-managers").textContent = data.length;
     document.getElementById("chip-leader").textContent   = data[0].username;
@@ -655,59 +689,45 @@ function renderLeaderboard(data) {
     return;
   }
 
-  wrap.innerHTML = `<div class="fantasy-lb">
-    ${data.map((m, i) => {
-      const isMe  = _session && m.username.toLowerCase() === _session.username.toLowerCase();
-      const posCls = ["fantasy-lb-row--1st","fantasy-lb-row--2nd","fantasy-lb-row--3rd"][i] || "";
-      const pos    = [" 🏆","🥈","🥉"][i] || (i+1);
-      const preview = (m.squad||[]).map(name => {
-        return `<span>${esc(name)}${name===m.captain?" ⭐":""}</span>`;
-      }).join(", ") || "<em>No squad</em>";
+  const top5    = data.slice(0, 5);
+  const rest    = data.slice(5);
+  const hasMore = rest.length > 0;
 
-      return `
-        <div class="fantasy-lb-row ${posCls}${isMe?" fantasy-lb-row--me":""}" data-idx="${i}">
-          <div class="fantasy-lb-main">
-            <div class="fantasy-lb-pos">${pos}</div>
-            <div class="fantasy-lb-info">
-              <div class="fantasy-lb-name">
-                ${esc(m.username)}
-                ${isMe?`<span class="fantasy-lb-me-badge">You</span>`:""}
-              </div>
-              <div class="fantasy-lb-squad-preview">${preview}</div>
-            </div>
-            <div class="fantasy-lb-pts">
-              <div class="fantasy-lb-pts-val">${m.total}</div>
-              <div class="fantasy-lb-pts-lbl">pts</div>
-            </div>
-          </div>
-          ${m.breakdown&&m.breakdown.length?`
-          <div class="fantasy-lb-breakdown" id="lb-bd-${i}">
-            ${m.breakdown.map(bp => {
-              const p = _allPlayers.find(pl=>pl.name===bp.name);
-              const col = "var(--text-muted)";
-              const isGK = p && p.position==="GK";
-              const detail = isGK
-                ? `🧤${bp.gkPts||0}pt`
-                : `⚽${bp.goals||0} 🎯${bp.assists||0} ⭐${bp.motm||0}`;
-              return `
-                <div class="lb-player-chip${bp.isCaptain?" lb-player-chip--captain":""}">
-                  ${bp.isCaptain?"⭐ ":""}
-                  <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}">${esc(bp.name)}</span>
-                  <span style="font-size:.65rem;color:var(--text-dim)">${detail}</span>
-                  <span class="lb-player-chip__pts">${bp.pts}p</span>
-                </div>`;
-            }).join("")}
-          </div>`:""
-          }
-        </div>`;
-    }).join("")}
-  </div>`;
+  wrap.innerHTML = `
+    <div class="fantasy-lb">${top5.map((m,i) => buildLbRow(m, i)).join("")}</div>
+    ${hasMore ? `
+      <div class="fantasy-lb" id="lb-rest" style="display:none;margin-top:8px">
+        ${rest.map((m,i) => buildLbRow(m, 5+i)).join("")}
+      </div>
+      <button class="lb-show-more" id="lb-show-more">
+        Show all ${data.length} managers
+        <svg viewBox="0 0 10 6" fill="none" style="width:10px;height:10px;margin-left:6px;vertical-align:middle;transition:transform .3s"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>` : ""}
+  `;
 
-  // Toggle breakdowns on row click
-  wrap.querySelectorAll(".fantasy-lb-row").forEach((row, i) => {
+  if (hasMore) {
+    let open = false;
+    document.getElementById("lb-show-more").addEventListener("click", function() {
+      open = !open;
+      const restEl = document.getElementById("lb-rest");
+      const svg    = this.querySelector("svg");
+      restEl.style.display = open ? "" : "none";
+      svg.style.transform  = open ? "rotate(180deg)" : "";
+      this.childNodes[0].textContent = open ? "Show less " : `Show all ${data.length} managers `;
+      if (open) {
+        restEl.querySelectorAll(".fantasy-lb-row").forEach((row, i) => {
+          row.style.cssText = "opacity:0;transform:translateY(8px)";
+          setTimeout(() => { row.style.cssText = "transition:opacity .3s,transform .3s;opacity:1;transform:translateY(0)"; }, i * 50);
+        });
+        PlayerPopup.attachAll(restEl);
+      }
+    });
+  }
+
+  wrap.querySelectorAll(".fantasy-lb-row").forEach(row => {
     row.addEventListener("click", e => {
       if (e.target.closest(".player-link")) return;
-      const bd = document.getElementById(`lb-bd-${i}`);
+      const bd = document.getElementById(`lb-bd-${row.dataset.idx}`);
       if (bd) bd.classList.toggle("open");
     });
   });
