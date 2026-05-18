@@ -165,11 +165,13 @@ const RLLData = (() => {
       (m.assists || []).forEach(n => { if(n){ assists[n]=(assists[n]||0)+1; }});
       if (m.motm && m.motm !== "—") motm[m.motm] = (motm[m.motm]||0) + 1;
 
-      // GK: per-match conceded
-      players.filter(p => p.position === "GK").forEach(gk => {
-        const conceded = gk.team === RLL_CONFIG.TEAMS.SYLVANS.key ? m.cpfc : m.sylvans;
-        gkPts[gk.name] = (gkPts[gk.name] || 0) + Math.max(10 - conceded, 0);
-      });
+      // GK: only count matches where scorer data exists
+      if ((m.scorers || []).length > 0) {
+        players.filter(p => (p.position||"").toUpperCase() === "GK").forEach(gk => {
+          const conceded = gk.team === RLL_CONFIG.TEAMS.SYLVANS.key ? m.cpfc : m.sylvans;
+          gkPts[gk.name] = (gkPts[gk.name] || 0) + Math.max(10 - conceded, 0);
+        });
+      }
     });
 
     const enriched   = players.map(p => ({
