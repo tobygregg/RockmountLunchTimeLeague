@@ -193,6 +193,24 @@ const RLLData = (() => {
         registered.add(name);
       }
     });
+    // ── SLUGGER SPECIAL OVERRIDE ──────────────────────────────
+    // Slugger's GK points come from cell H28, updated manually.
+    // Fetched separately and overrides any calculated value.
+    if (isSheetConfigured()) {
+      try {
+        const sluggerUrl = sheetUrlDirect("H28");
+        const res  = await fetch(sluggerUrl);
+        const text = await res.text();
+        const val  = parseFloat(text.replace(/"/g,"").trim()) || 0;
+        const found = enriched.find(p => p.name === "Slugger");
+        if (found) {
+          found.gkPts    = val;
+          found.fantasyPts = val; // GK pts are the fantasy pts for Slugger
+        }
+      } catch(e) { console.warn("Slugger cell fetch failed:", e); }
+    }
+    // ── END SLUGGER OVERRIDE ───────────────────────────────────
+
     return enriched;
   }
 
