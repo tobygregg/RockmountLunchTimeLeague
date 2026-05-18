@@ -41,7 +41,7 @@
     <div class="fantasy-hero__text reveal">
       <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2026</div>
       <h1 class="fantasy-hero__title">Fantasy<br>League</h1>
-      <p class="fantasy-hero__sub">Budget of 50 million to build your squad of 5. Pick a captain for double points. Sell players up to 3 times. Top the leaderboard.</p>
+      <p class="fantasy-hero__sub">Budget of 50 to build your squad of 5. Pick a captain for double points. Sell players up to 3 times. Top the leaderboard.</p>
       <div class="fantasy-hero__chips" id="hero-chips">
         <div class="fantasy-chip"><div class="fantasy-chip__val" id="chip-managers">—</div><div class="fantasy-chip__lbl">Managers</div></div>
         <div class="fantasy-chip"><div class="fantasy-chip__val" id="chip-leader">—</div><div class="fantasy-chip__lbl">Leader</div></div>
@@ -72,7 +72,7 @@
           </div>
           <div class="auth-form" id="register-form" style="display:none">
             <div>
-              <label class="auth-label" for="reg-user">Choose a Username (Please use your name)</label>
+              <label class="auth-label" for="reg-user">Choose a Username</label>
               <input class="auth-input" id="reg-user" type="text" placeholder="At least 2 characters" autocomplete="username" spellcheck="false" maxlength="50"/>
             </div>
             <div>
@@ -396,9 +396,9 @@ function renderMySquad() {
           else breakdown = `⚽${p.goals||0}g · 🎯${p.assists||0}a · ⭐${p.motmAwards||0}${cap?" · 2× cap":""}`;
         }
         return `
-          <div class="squad-player-card ${p?"squad-player-card--"+p.team.toLowerCase():""}${cap?" squad-player-card--captain":""}">
+          <div class="squad-player-card${cap?" squad-player-card--captain":""}">
             ${cap?`<div class="squad-player-card__captain-badge">⭐ Captain</div>`:""}
-            <div class="squad-player-card__name player-link" data-player="${esc(name)}" style="color:${col}">${esc(name)}</div>
+            <div class="squad-player-card__name player-link" data-player="${esc(name)}">${esc(name)}</div>
             <div class="squad-player-card__pos">${p?posLabel(p.position):""} · £${p?p.price:0}</div>
             <div class="squad-player-card__pts">${pts}</div>
             <div class="squad-player-card__pts-breakdown">${breakdown}</div>
@@ -504,8 +504,8 @@ function renderPicker() {
         <div class="picker-card__team-stripe" style="background:${col}"></div>
         <div class="picker-card__top">
           <div style="flex:1;min-width:0">
-            <div class="picker-card__name player-link" data-player="${esc(p.name)}" style="color:${col}">${esc(p.name)}</div>
-            <div class="picker-card__pos-team">${posLabel(p.position)} · ${esc(p.team)}</div>
+            <div class="picker-card__name player-link" data-player="${esc(p.name)}">${esc(p.name)}</div>
+            <div class="picker-card__pos-team">${posLabel(p.position)}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div class="picker-card__number">${esc(p.number||"")}</div>
@@ -661,8 +661,7 @@ function renderLeaderboard(data) {
       const posCls = ["fantasy-lb-row--1st","fantasy-lb-row--2nd","fantasy-lb-row--3rd"][i] || "";
       const pos    = [" 🏆","🥈","🥉"][i] || (i+1);
       const preview = (m.squad||[]).map(name => {
-        const p = _allPlayers.find(p=>p.name===name);
-        return `<span style="color:${p?teamColor(p.team):"var(--text-muted)"}">${esc(name)}${name===m.captain?" ⭐":""}</span>`;
+        return `<span>${esc(name)}${name===m.captain?" ⭐":""}</span>`;
       }).join(", ") || "<em>No squad</em>";
 
       return `
@@ -693,7 +692,7 @@ function renderLeaderboard(data) {
               return `
                 <div class="lb-player-chip${bp.isCaptain?" lb-player-chip--captain":""}">
                   ${bp.isCaptain?"⭐ ":""}
-                  <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}" style="color:${col}">${esc(bp.name)}</span>
+                  <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}">${esc(bp.name)}</span>
                   <span style="font-size:.65rem;color:var(--text-dim)">${detail}</span>
                   <span class="lb-player-chip__pts">${bp.pts}p</span>
                 </div>`;
