@@ -39,7 +39,7 @@
 <section class="fantasy-hero">
   <div class="fantasy-hero__inner">
     <div class="fantasy-hero__text reveal">
-      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2026</div>
+      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2025</div>
       <h1 class="fantasy-hero__title">Fantasy<br>League</h1>
       <p class="fantasy-hero__sub">Budget of 50 to build your squad of 5. Pick a captain for double points. Sell players up to 3 times. Top the leaderboard.</p>
       <div class="fantasy-hero__chips" id="hero-chips">
@@ -204,8 +204,7 @@ let _savedSquad    = [];      // last saved version
 let _myCaptain     = "";
 let _savedCaptain  = "";
 let _budget        = RLL_CONFIG.FANTASY.BUDGET;
-let _sellHistory   = {};      // { playerName: sellCount } — from server
-let _pendingSells   = {};         // { name: count } — only ever increments, never decremented on re-add
+let _sellHistory   = {};      // { playerName: sellCount } — always from server, persists on refresh
 let _session       = null;    // { username, token }
 let _pickerFilter  = "all";
 let _leaderboard   = [];
@@ -297,9 +296,8 @@ function calcPendingBudget() {
 
 /* ── Sell count remaining for a player ── */
 function sellsLeft(name) {
-  const committed = _sellHistory[name]  || 0;
-  const pending   = _pendingSells[name] || 0;
-  return F.MAX_SELLS - committed - pending;
+  // Always uses server-committed data — persists across refreshes
+  return F.MAX_SELLS - (_sellHistory[name] || 0);
 }
 
 /* ── Can we add a player? ── */
@@ -540,6 +538,7 @@ function renderPicker() {
             </button>
           `}
         </div>
+        ${!inSquad && wasSaved && sl < F.MAX_SELLS ? `<div style="font-size:.62rem;color:var(--gold);margin-top:4px;text-align:center;font-weight:700">${sl} sell${sl!==1?"s":""} left</div>` : ""}
         ${!inSquad && sl === 0 ? `<div style="font-size:.62rem;color:var(--red-soft);margin-top:6px;text-align:center">Sell limit reached</div>` : ""}
       </div>`;
   }).join("");
@@ -565,33 +564,36 @@ function addPlayer(name) {
   if (_mySquad.includes(name)) return;
   if (_mySquad.length >= F.SQUAD_SIZE) return;
   if (!canAdd(name)) return;
-  // Re-adding a sold player does NOT give back the sell slot (_pendingSells unchanged)
+  // Re-adding a sold player does NOT auto-save — only sells trigger auto-save
   _mySquad.push(name);
   if (!_myCaptain) _myCaptain = name;
   renderMySquad();
   renderPicker();
 }
 
-function removePlayer(name) {
+async function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
 
   const isRealSell = _savedSquad.includes(name);
 
-  // Block if sell limit already exhausted
+  // Block if sell limit exhausted (uses server data — always accurate)
   if (isRealSell && sellsLeft(name) <= 0) {
-    showToast('❌ Sell limit reached for ' + name + ' (' + F.MAX_SELLS + '× max)');
+    showToast('❌ Sell limit reached for ' + name + ' — ' + F.MAX_SELLS + ' sells max');
     return;
   }
 
-  // Increment pending sell counter — never decremented on re-add
-  if (isRealSell) {
-    _pendingSells[name] = (_pendingSells[name] || 0) + 1;
-  }
-
   _mySquad = _mySquad.filter(n => n !== name);
-  if (_myCaptain === name) _myCaptain = _mySquad[0] || "";
-  renderMySquad();   // update "X sells remaining" in My Squad section
-  renderPicker();
+  if (_myCaptain === name) _myCaptain = _mySquad[0] || '';
+
+  if (isRealSell) {
+    // Auto-save immediately so sell count persists on refresh
+    renderMySquad();
+    renderPicker();
+    await saveSquad(true); // silent=true suppresses "Squad saved!" toast
+  } else {
+    // Just a new pick being undone — no server call needed
+    renderPicker();
+  }
 }
 
 function setCaptain(name) {
@@ -603,7 +605,7 @@ function setCaptain(name) {
 /* ─────────────────────────────────────────────────────
    SAVE SQUAD
 ───────────────────────────────────────────────────── */
-async function saveSquad() {
+async function saveSquad(silent = false) {
   if (!_session) return;
   const btn = document.getElementById("save-squad-btn");
   setBtnLoading(btn, true);
@@ -630,7 +632,6 @@ async function saveSquad() {
     // Update local state from server response
     _budget         = res.budget;
     _sellHistory    = res.sellHistory || {};
-    _pendingSells   = {};          // reset — sells now committed to server
     _savedSquad     = [...res.squad];
     _savedCaptain   = res.captain;
     _mySquad        = [..._savedSquad];
@@ -640,7 +641,7 @@ async function saveSquad() {
     renderMySquad();
     renderPicker();
     refreshLeaderboard();
-    showToast("✅ Squad saved!");
+    if (!silent) showToast("✅ Squad saved!");
   } catch(e) {
     showToast("❌ Failed to save — check your connection");
     console.error(e);
@@ -779,7 +780,6 @@ async function handleLogin() {
     saveSession(res.username, res.token);
     _budget       = res.budget      ?? F.BUDGET;
     _sellHistory  = res.sellHistory ?? {};
-    _pendingSells = {};
     _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
     _savedCaptain   = res.captain || (_savedSquad[0]||"");
     _mySquad        = [..._savedSquad];
@@ -841,7 +841,7 @@ async function handleRegister() {
 function logout() {
   clearSession();
   _savedSquad = []; _mySquad = []; _myCaptain = ""; _savedCaptain = "";
-  _budget = F.BUDGET; _sellHistory = {}; _pendingSells = {};
+  _budget = F.BUDGET; _sellHistory = {};
   setLoggedIn(false);
   document.getElementById("user-bar-inner").innerHTML = "";
   renderPicker();
@@ -931,8 +931,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok) {
         _budget       = res.budget      ?? F.BUDGET;
         _sellHistory  = res.sellHistory ?? {};
-        _pendingSells = {};
-        _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
+            _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
         _savedCaptain = res.captain || (_savedSquad[0]||"");
         _mySquad     = [..._savedSquad];
         _myCaptain   = _savedCaptain;
