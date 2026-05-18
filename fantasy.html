@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fantasy League — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/fantasy.css"/>
+</head>
+<body>
+
+<div class="page-transition"></div>
+
+<!-- ── NAV (includes fantasy purple accent) ── -->
+<nav class="nav" id="main-nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links" id="nav-links">
+
+    <li class="nav__item">
+      <button class="nav__item-btn" data-dropdown="teams">
+        Teams
+        <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <ul class="nav__dropdown">
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span>Sylvans FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span>CP FC</a></li>
+      </ul>
+    </li>
+
+    <li class="nav__item">
+      <button class="nav__item-btn" data-dropdown="stats">
+        Stats
+        <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <ul class="nav__dropdown">
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="players.html" data-transition><span class="nav__dropdown-link__icon">👤</span>Players</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="history.html" data-transition><span class="nav__dropdown-link__icon">📋</span>History</a></li>
+      </ul>
+    </li>
+
+    <li class="nav__item"><a class="nav__link" href="announcements.html" data-transition>About</a></li>
+
+    <li class="nav__item nav__item--fantasy">
+      <button class="nav__item-btn active" style="color:#a855f7">
+        ⚡ Fantasy
+      </button>
+    </li>
+
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu" id="nav-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="fantasy-hero">
+  <div class="fantasy-hero__inner">
+    <div class="fantasy-hero__text">
+      <div class="fantasy-hero__eyebrow">⚡ Season 2025</div>
+      <h1 class="fantasy-hero__title">Fantasy<br>League</h1>
+      <p class="fantasy-hero__sub">Pick your squad of 5 players, name your captain, and rack up points every time your players score or win MOTM.</p>
+      <div class="fantasy-hero__chips" id="hero-chips">
+        <div class="fantasy-chip"><div class="fantasy-chip__val" id="chip-managers">—</div><div class="fantasy-chip__lbl">Managers</div></div>
+        <div class="fantasy-chip"><div class="fantasy-chip__val" id="chip-leader">—</div><div class="fantasy-chip__lbl">Leader</div></div>
+        <div class="fantasy-chip"><div class="fantasy-chip__val" id="chip-top-pts">—</div><div class="fantasy-chip__lbl">Top Pts</div></div>
+      </div>
+    </div>
+
+    <!-- Auth panel (logged out) / User bar (logged in) -->
+    <div id="auth-area">
+      <div class="show-logged-out" id="auth-panel-wrap">
+        <div class="auth-panel">
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Sign In</button>
+            <button class="auth-tab" data-tab="register">Register</button>
+          </div>
+          <!-- Login form -->
+          <div class="auth-form" id="login-form">
+            <div>
+              <label class="auth-label">Username</label>
+              <input class="auth-input" id="login-user" type="text" placeholder="Your username" autocomplete="username"/>
+            </div>
+            <div>
+              <label class="auth-label">Password</label>
+              <input class="auth-input" id="login-pass" type="password" placeholder="Your password" autocomplete="current-password"/>
+            </div>
+            <div class="auth-error" id="login-error"></div>
+            <button class="auth-btn" id="login-btn">Sign In</button>
+          </div>
+          <!-- Register form -->
+          <div class="auth-form" id="register-form" style="display:none">
+            <div>
+              <label class="auth-label">Choose a Username</label>
+              <input class="auth-input" id="reg-user" type="text" placeholder="Min 3 characters" autocomplete="username"/>
+            </div>
+            <div>
+              <label class="auth-label">Password</label>
+              <input class="auth-input" id="reg-pass" type="password" placeholder="Min 4 characters" autocomplete="new-password"/>
+            </div>
+            <div class="auth-error" id="reg-error"></div>
+            <button class="auth-btn" id="reg-btn">Create Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── POINTS LEGEND ── -->
+<section class="section" style="padding-top:0;padding-bottom:clamp(24px,3vw,40px)">
+  <div class="container">
+    <div class="points-legend">
+      <div class="points-pill"><span class="points-pill__val">3</span> pts per Goal ⚽</div>
+      <div class="points-pill"><span class="points-pill__val">2</span> pts per MOTM ⭐</div>
+      <div class="points-pill"><span class="points-pill__val">2×</span> Captain multiplier 🏅</div>
+      <div class="points-pill"><span class="points-pill__val">5</span> players per squad 👥</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MY TEAM (logged in only) ── -->
+<section class="section show-logged-in" id="my-team-section" style="padding-top:0">
+  <div class="container">
+    <div id="user-bar-wrap"></div>
+    <h2 class="section-title section-accent-fantasy reveal"><span>My</span> Squad</h2>
+    <div id="my-squad-wrap">
+      <div class="no-squad">
+        <p>You haven't picked a squad yet.</p>
+        <p style="color:var(--text-dim);font-size:.82rem">Scroll down to the player picker to build your team.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LEADERBOARD ── -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title section-accent-fantasy reveal"><span>Leaderboard</span></h2>
+    <div id="leaderboard-wrap">
+      <div class="loading">Loading leaderboard</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PLAYER PICKER (logged in only) ── -->
+<section class="section show-logged-in" id="picker-section">
+  <div class="container">
+    <h2 class="section-title section-accent-fantasy reveal"><span>Pick</span> Your Squad</h2>
+    <p class="text-muted reveal" style="margin-bottom:20px;font-size:.88rem">
+      Click a player to add them. Click again to make them captain (⭐ = 2× points). Pick 5 total.
+    </p>
+
+    <div class="picker-header">
+      <div class="picker-counter">Selected: <span id="picker-count">0</span> / 5</div>
+      <button class="save-squad-btn" id="save-squad-btn" disabled>Save Squad</button>
+    </div>
+
+    <div class="picker-filters" id="picker-filters">
+      <button class="picker-filter active" data-filter="all">All Players</button>
+      <button class="picker-filter" data-filter="Sylvans">Sylvans FC</button>
+      <button class="picker-filter" data-filter="CPFC">CP FC</button>
+      <button class="picker-filter" data-filter="GK">Goalkeepers</button>
+    </div>
+
+    <div class="picker-grid" id="picker-grid">
+      <div class="loading">Loading players</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NOT CONFIGURED NOTICE ── -->
+<section class="section" id="setup-notice" style="display:none">
+  <div class="container">
+    <div class="no-squad" style="max-width:500px;margin:0 auto">
+      <p style="font-size:1.1rem;margin-bottom:12px">⚙️ Fantasy League Setup Required</p>
+      <p>Add your <strong>APPS_SCRIPT_URL</strong> to <code>js/config.js</code> and follow the setup in <code>google-apps-script.js</code> to enable logins and the leaderboard.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Save toast -->
+<div class="save-toast" id="save-toast"></div>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League</p>
+  <nav class="footer__links">
+    <a href="index.html" data-transition>Home</a>
+    <a href="players.html" data-transition>Players</a>
+    <a href="history.html" data-transition>History</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* =====================================================
+   FANTASY LEAGUE — client logic
+===================================================== */
+
+/* ── State ── */
+let _allPlayers   = [];   // from RLLData (with goals/motm)
+let _mySquad      = [];   // array of player names
+let _myCaptain    = "";
+let _leaderboard  = [];
+let _session      = null; // { username, token }
+let _pickerFilter = "all";
+
+const SQUAD_SIZE  = 5;
+
+/* ── Session persistence ── */
+function saveSession(username, token) {
+  localStorage.setItem("rll_fantasy_user",  username);
+  localStorage.setItem("rll_fantasy_token", token);
+  _session = { username, token };
+}
+function loadSession() {
+  const u = localStorage.getItem("rll_fantasy_user");
+  const t = localStorage.getItem("rll_fantasy_token");
+  if (u && t) { _session = { username: u, token: t }; return true; }
+  return false;
+}
+function clearSession() {
+  localStorage.removeItem("rll_fantasy_user");
+  localStorage.removeItem("rll_fantasy_token");
+  _session = null;
+}
+
+/* ── API helpers ── */
+async function apiFetch(params) {
+  const url = RLL_CONFIG.APPS_SCRIPT_URL + "?" + new URLSearchParams(params);
+  const res  = await fetch(url);
+  return res.json();
+}
+async function apiPost(body) {
+  const res = await fetch(RLL_CONFIG.APPS_SCRIPT_URL, {
+    method: "POST",
+    body:   JSON.stringify(body),
+  });
+  return res.json();
+}
+
+/* ── Logged-in / out state ── */
+function setLoggedIn(yes) {
+  document.body.classList.toggle("logged-in", yes);
+}
+
+/* ── Escape HTML ── */
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ── Team helpers ── */
+function teamClass(team) {
+  if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "squad-player-card--sylvans";
+  if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "squad-player-card--cpfc";
+  return "";
+}
+function teamColor(team) {
+  if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "var(--sylvans)";
+  if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "var(--cpfc)";
+  return "var(--text-muted)";
+}
+function teamStripeColor(team) {
+  if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "var(--sylvans)";
+  if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "var(--cpfc)";
+  return "transparent";
+}
+
+/* ── Calculate points for a player ── */
+function calcPoints(playerName, isCaptain) {
+  const p = _allPlayers.find(p => p.name === playerName);
+  if (!p) return 0;
+  const base = (p.goals * 3) + (p.motmAwards * 2);
+  return isCaptain ? base * 2 : base;
+}
+
+/* ── Render user bar ── */
+function renderUserBar() {
+  if (!_session) return;
+  const totalPts = _mySquad.reduce((a,n) => a + calcPoints(n, n === _myCaptain), 0);
+  document.getElementById("user-bar-wrap").innerHTML = `
+    <div class="user-bar">
+      <div class="user-bar__avatar">${_session.username[0].toUpperCase()}</div>
+      <div class="user-bar__name">${esc(_session.username)}</div>
+      <div class="user-bar__pts">${totalPts} pts</div>
+      <button class="user-bar__logout" id="logout-btn">Sign out</button>
+    </div>`;
+  document.getElementById("logout-btn").addEventListener("click", logout);
+}
+
+/* ── Render my squad ── */
+function renderMySquad() {
+  const wrap = document.getElementById("my-squad-wrap");
+  if (!_mySquad.length) {
+    wrap.innerHTML = `<div class="no-squad"><p>You haven't picked a squad yet.</p><p style="color:var(--text-dim);font-size:.82rem">Scroll down to the player picker to build your team.</p></div>`;
+    return;
+  }
+  const totalPts = _mySquad.reduce((a,n) => a + calcPoints(n, n === _myCaptain), 0);
+  wrap.innerHTML = `
+    <div class="my-team-header">
+      <div>
+        <div class="my-team-pts">${totalPts}</div>
+        <div class="my-team-pts-lbl">Total Points</div>
+      </div>
+    </div>
+    <div class="squad-display">
+      ${_mySquad.map(name => {
+        const p   = _allPlayers.find(p => p.name === name);
+        const cap = name === _myCaptain;
+        const pts = calcPoints(name, cap);
+        const col = p ? teamColor(p.team) : "var(--text-muted)";
+        return `
+          <div class="squad-player-card ${p ? teamClass(p.team) : ""}${cap ? " squad-player-card--captain" : ""}">
+            ${cap ? `<div class="squad-player-card__captain-badge">Captain ⭐</div>` : ""}
+            <div class="squad-player-card__name player-link" data-player="${esc(name)}" style="color:${col}">${esc(name)}</div>
+            <div class="squad-player-card__pos">${p ? (p.position || p.team) : "Unknown"}</div>
+            <div class="squad-player-card__pts">${pts}</div>
+            <div class="squad-player-card__pts-breakdown">
+              ${p ? `⚽${p.goals}g · ⭐${p.motmAwards} MOTM${cap ? " · 2× cap" : ""}` : "No stats"}
+            </div>
+          </div>`;
+      }).join("")}
+    </div>`;
+  PlayerPopup.attachAll(wrap);
+}
+
+/* ── Render leaderboard ── */
+function renderLeaderboard(data) {
+  const wrap = document.getElementById("leaderboard-wrap");
+  if (!data.length) {
+    wrap.innerHTML = `<div class="no-squad"><p>No managers yet — be the first to register! 🏆</p></div>`;
+    return;
+  }
+
+  // Hero chips
+  document.getElementById("chip-managers").textContent = data.length;
+  document.getElementById("chip-leader").textContent   = data[0].username;
+  document.getElementById("chip-top-pts").textContent  = data[0].total + " pts";
+
+  wrap.innerHTML = `<div class="fantasy-lb">
+    ${data.map((m, i) => {
+      const isMe  = _session && m.username.toLowerCase() === _session.username.toLowerCase();
+      const posCls = i===0 ? "fantasy-lb-row--1st" : i===1 ? "fantasy-lb-row--2nd" : i===2 ? "fantasy-lb-row--3rd" : "";
+      const preview = m.squad.slice(0,3).join(", ") + (m.squad.length > 3 ? " +" + (m.squad.length-3) : "");
+      return `
+        <div class="fantasy-lb-row ${posCls}${isMe ? " fantasy-lb-row--me" : ""}" data-idx="${i}">
+          <div class="fantasy-lb-main">
+            <div class="fantasy-lb-pos">${i===0?"🏆":i===1?"🥈":i===2?"🥉":i+1}</div>
+            <div class="fantasy-lb-info">
+              <div class="fantasy-lb-name">
+                ${esc(m.username)}
+                ${isMe ? `<span class="fantasy-lb-me-badge">You</span>` : ""}
+              </div>
+              <div class="fantasy-lb-squad-preview">${esc(preview || "No squad yet")}</div>
+            </div>
+            <div class="fantasy-lb-pts">
+              <div class="fantasy-lb-pts-val">${m.total}</div>
+              <div class="fantasy-lb-pts-lbl">pts</div>
+            </div>
+          </div>
+          ${m.breakdown && m.breakdown.length ? `
+          <div class="fantasy-lb-breakdown" id="lb-bd-${i}">
+            ${m.breakdown.map(p => `
+              <div class="lb-player-chip${p.isCaptain ? " lb-player-chip--captain" : ""}">
+                ${p.isCaptain ? "⭐ " : ""}<span class="lb-player-chip__name player-link" data-player="${esc(p.name)}">${esc(p.name)}</span>
+                <span class="lb-player-chip__pts">${p.pts}p</span>
+              </div>`).join("")}
+          </div>` : ""}
+        </div>`;
+    }).join("")}
+  </div>`;
+
+  // Toggle breakdowns
+  wrap.querySelectorAll(".fantasy-lb-row").forEach((row, i) => {
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".lb-player-chip__name")) return;
+      const bd = document.getElementById(`lb-bd-${i}`);
+      if (bd) bd.classList.toggle("open");
+    });
+  });
+
+  PlayerPopup.attachAll(wrap);
+}
+
+/* ── Render picker ── */
+function renderPicker() {
+  const grid = document.getElementById("picker-grid");
+  let players = _allPlayers.filter(p =>
+    p.team === RLL_CONFIG.TEAMS.SYLVANS.key || p.team === RLL_CONFIG.TEAMS.CPFC.key
+  );
+  if (_pickerFilter !== "all") {
+    if (_pickerFilter === "GK") {
+      players = players.filter(p => (p.position||"").toUpperCase() === "GK");
+    } else {
+      players = players.filter(p => p.team === _pickerFilter);
+    }
+  }
+  // Sort by points desc then name
+  players = [...players].sort((a,b) => {
+    const pa = (a.goals*3)+(a.motmAwards*2);
+    const pb = (b.goals*3)+(b.motmAwards*2);
+    return pb - pa || a.name.localeCompare(b.name);
+  });
+
+  const maxed = _mySquad.length >= SQUAD_SIZE;
+
+  grid.innerHTML = players.map(p => {
+    const selected = _mySquad.includes(p.name);
+    const captain  = p.name === _myCaptain;
+    const pts = (p.goals*3) + (p.motmAwards*2);
+    const col = teamColor(p.team);
+    let cardCls = "picker-card";
+    if (captain) cardCls += " selected-captain";
+    else if (selected) cardCls += " selected";
+    else if (maxed) cardCls += " maxed";
+
+    return `
+      <div class="${cardCls}" data-name="${esc(p.name)}">
+        <div class="picker-card__team-stripe" style="background:${teamStripeColor(p.team)}"></div>
+        <div class="picker-card__top">
+          <div>
+            <div class="picker-card__name player-link" data-player="${esc(p.name)}" style="color:${col}">${esc(p.name)}</div>
+            <div class="picker-card__pos-team">${p.position || "—"} · ${p.team}</div>
+          </div>
+          <div class="picker-card__number">${esc(p.number||"")}</div>
+        </div>
+        <div class="picker-card__stats">
+          <span class="picker-stat">⚽ <strong>${p.goals}</strong></span>
+          <span class="picker-stat">⭐ <strong>${p.motmAwards}</strong></span>
+          <span class="picker-stat" style="color:var(--fantasy-lt)"><strong>${pts}</strong>p</span>
+        </div>
+        <div class="picker-card__actions">
+          ${selected || captain
+            ? `<button class="picker-card__btn picker-card__btn--remove" data-action="remove" data-name="${esc(p.name)}">✕ Remove</button>
+               <button class="picker-card__btn picker-card__btn--captain${captain?" active":""}" data-action="captain" data-name="${esc(p.name)}">${captain?"⭐ Captain":"Make Captain"}</button>`
+            : `<button class="picker-card__btn picker-card__btn--add" data-action="add" data-name="${esc(p.name)}" ${maxed?"disabled":""}>+ Add</button>`
+          }
+        </div>
+      </div>`;
+  }).join("");
+
+  // Picker action events
+  grid.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const action = btn.dataset.action;
+      const name   = btn.dataset.name;
+      if (action === "add"    && _mySquad.length < SQUAD_SIZE && !_mySquad.includes(name)) {
+        _mySquad.push(name);
+        if (!_myCaptain) _myCaptain = name; // auto-captain first pick
+      }
+      if (action === "remove") {
+        _mySquad = _mySquad.filter(n => n !== name);
+        if (_myCaptain === name) _myCaptain = _mySquad[0] || "";
+      }
+      if (action === "captain") { _myCaptain = name; }
+      updatePickerCounter();
+      renderPicker();
+      renderMySquad();
+      renderUserBar();
+    });
+  });
+
+  PlayerPopup.attachAll(grid);
+  updatePickerCounter();
+}
+
+function updatePickerCounter() {
+  document.getElementById("picker-count").textContent = _mySquad.length;
+  document.getElementById("save-squad-btn").disabled  = _mySquad.length === 0;
+}
+
+/* ── Save squad ── */
+async function saveSquad() {
+  if (!_session) return;
+  const btn = document.getElementById("save-squad-btn");
+  btn.disabled = true; btn.textContent = "Saving...";
+  try {
+    const res = await apiPost({
+      action:   "savesquad",
+      username: _session.username,
+      token:    _session.token,
+      squad:    _mySquad,
+      captain:  _myCaptain,
+    });
+    if (res.error) {
+      showToast("❌ " + res.error);
+      if (res.error.includes("Session")) logout();
+    } else {
+      showToast("✅ Squad saved!");
+      refreshLeaderboard();
+    }
+  } catch(e) {
+    showToast("❌ Failed to save");
+  } finally {
+    btn.disabled  = _mySquad.length === 0;
+    btn.textContent = "Save Squad";
+  }
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById("save-toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+/* ── Auth: Login ── */
+async function handleLogin() {
+  const user = document.getElementById("login-user").value.trim();
+  const pass = document.getElementById("login-pass").value.trim();
+  const errEl = document.getElementById("login-error");
+  const btn   = document.getElementById("login-btn");
+  errEl.textContent = "";
+  if (!user || !pass) { errEl.textContent = "Please fill in all fields"; return; }
+  btn.disabled = true; btn.classList.add("loading");
+  try {
+    const res = await apiFetch({ action: "login", username: user, password: pass });
+    if (res.error) { errEl.textContent = res.error; return; }
+    saveSession(res.username, res.token);
+    _mySquad   = Array.isArray(res.squad) ? res.squad : [];
+    _myCaptain = res.captain || (_mySquad[0] || "");
+    onLoggedIn();
+  } catch(e) {
+    errEl.textContent = "Connection error — try again";
+  } finally {
+    btn.disabled = false; btn.classList.remove("loading");
+  }
+}
+
+/* ── Auth: Register ── */
+async function handleRegister() {
+  const user  = document.getElementById("reg-user").value.trim();
+  const pass  = document.getElementById("reg-pass").value.trim();
+  const errEl = document.getElementById("reg-error");
+  const btn   = document.getElementById("reg-btn");
+  errEl.textContent = "";
+  if (!user || !pass) { errEl.textContent = "Please fill in all fields"; return; }
+  btn.disabled = true; btn.classList.add("loading");
+  try {
+    const res = await apiFetch({ action: "register", username: user, password: pass });
+    if (res.error) { errEl.textContent = res.error; return; }
+    saveSession(res.username, res.token);
+    _mySquad   = []; _myCaptain = "";
+    onLoggedIn();
+    showToast("🎉 Welcome to the league, " + res.username + "!");
+  } catch(e) {
+    errEl.textContent = "Connection error — try again";
+  } finally {
+    btn.disabled = false; btn.classList.remove("loading");
+  }
+}
+
+/* ── Logout ── */
+function logout() {
+  clearSession();
+  _mySquad = []; _myCaptain = "";
+  setLoggedIn(false);
+  document.getElementById("user-bar-wrap").innerHTML = "";
+  showToast("👋 Signed out");
+}
+
+/* ── On logged in ── */
+function onLoggedIn() {
+  setLoggedIn(true);
+  renderUserBar();
+  renderMySquad();
+  renderPicker();
+  refreshLeaderboard();
+}
+
+/* ── Refresh leaderboard ── */
+async function refreshLeaderboard() {
+  if (!isAppsScriptConfigured()) return;
+  try {
+    const data = await apiFetch({ action: "leaderboard" });
+    if (Array.isArray(data)) {
+      _leaderboard = data;
+      renderLeaderboard(data);
+    }
+  } catch(e) {
+    console.warn("Leaderboard fetch failed:", e);
+  }
+}
+
+/* ── Init ── */
+document.addEventListener("DOMContentLoaded", async () => {
+  // Check Apps Script configured
+  if (!isAppsScriptConfigured()) {
+    document.getElementById("setup-notice").style.display = "";
+    document.getElementById("auth-panel-wrap").style.display = "none";
+  }
+
+  // Load player data
+  const data = await RLLData.load();
+  _allPlayers = data.players || [];
+  window.__RLL_PLAYERS__ = _allPlayers;
+
+  // Auth tab switching
+  document.querySelectorAll(".auth-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("login-form").style.display    = tab.dataset.tab === "login"    ? "" : "none";
+      document.getElementById("register-form").style.display = tab.dataset.tab === "register" ? "" : "none";
+    });
+  });
+
+  // Auth buttons
+  document.getElementById("login-btn").addEventListener("click", handleLogin);
+  document.getElementById("reg-btn").addEventListener("click", handleRegister);
+  ["login-user","login-pass"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", e => { if(e.key==="Enter") handleLogin(); });
+  });
+  ["reg-user","reg-pass"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", e => { if(e.key==="Enter") handleRegister(); });
+  });
+
+  // Save squad
+  document.getElementById("save-squad-btn").addEventListener("click", saveSquad);
+
+  // Picker filters
+  document.querySelectorAll(".picker-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".picker-filter").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      _pickerFilter = btn.dataset.filter;
+      renderPicker();
+    });
+  });
+
+  // Try restore session
+  if (isAppsScriptConfigured() && loadSession()) {
+    try {
+      const res = await apiFetch({ action: "mysquad", username: _session.username, token: _session.token });
+      if (res.ok) {
+        _mySquad   = res.squad   || [];
+        _myCaptain = res.captain || (_mySquad[0] || "");
+        onLoggedIn();
+      } else {
+        clearSession();
+        renderPicker();
+      }
+    } catch {
+      clearSession();
+      renderPicker();
+    }
+  } else {
+    renderPicker();
+  }
+
+  // Leaderboard (visible always)
+  if (isAppsScriptConfigured()) {
+    refreshLeaderboard();
+  } else {
+    document.getElementById("leaderboard-wrap").innerHTML =
+      `<div class="no-squad"><p>⚙️ Configure Apps Script to enable the leaderboard.</p></div>`;
+  }
+
+  // MutationObserver for player links
+  const obs = new MutationObserver(() => PlayerPopup.attachAll(document));
+  obs.observe(document.body, { childList: true, subtree: true });
+  PlayerPopup.attachAll(document);
+
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (!el.classList.contains("visible")) Reveal.observe(el);
+  });
+});
+</script>
+</body>
+</html>
