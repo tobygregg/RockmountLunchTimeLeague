@@ -575,3 +575,79 @@
   .squad-display { grid-template-columns: 1fr; }
   .picker-grid   { grid-template-columns: 1fr; }
 }
+
+/* ── Budget display ── */
+.picker-info-row {
+  display: flex; align-items: center;
+  gap: 14px; flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.18);
+  border-radius: var(--radius-lg);
+}
+.budget-display {
+  display: flex; align-items: center; gap: 8px; flex: 1;
+}
+.budget-display__val {
+  font-family: var(--font-d);
+  font-size: 2rem; letter-spacing: .04em;
+  line-height: 1; color: var(--fantasy-lt);
+  transition: color .3s;
+}
+.budget-display__lbl {
+  font-size: .68rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Pending squad strip ── */
+.pending-squad { margin-bottom: 16px; }
+.pending-squad__inner {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.pending-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.28);
+  border-radius: 100px;
+  padding: 6px 12px;
+  transition: all .2s;
+}
+.pending-chip--captain {
+  background: rgba(245,200,66,0.1);
+  border-color: rgba(245,200,66,0.3);
+}
+.pending-chip__star { font-size: .8rem; }
+.pending-chip__name {
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+  transition: opacity .2s;
+}
+.pending-chip__name:hover { opacity: .7; }
+.pending-chip__price {
+  font-size: .72rem; color: var(--text-muted); font-weight: 600;
+}
+.pending-chip__remove {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted); font-size: .55rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s;
+  -webkit-tap-highlight-color: transparent; line-height: 1;
+}
+.pending-chip__remove:hover {
+  background: rgba(255,71,87,0.2);
+  border-color: var(--red-soft);
+  color: var(--red-soft);
+}
+
+/* Disabled picker button */
+.picker-card__btn:disabled {
+  opacity: .35; cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .picker-info-row { flex-direction: column; align-items: stretch; }
+  .budget-display  { justify-content: center; }
+}
