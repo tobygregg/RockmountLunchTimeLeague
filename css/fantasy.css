@@ -1,0 +1,577 @@
+/* =====================================================
+   ROCKMOUNT LUNCHTIME LEAGUE — fantasy.css
+   Fantasy league specific styles
+===================================================== */
+
+/* ── Fantasy colour palette ── */
+:root {
+  --fantasy:        #7c3aed;
+  --fantasy-lt:     #a855f7;
+  --fantasy-glow:   rgba(124, 58, 237, 0.45);
+  --fantasy-dim:    rgba(124, 58, 237, 0.12);
+  --fantasy-gold:   #f5c842;
+  --fantasy-gold-g: rgba(245, 200, 66, 0.35);
+  --pitch-green:    #1a4a2e;
+  --pitch-line:     rgba(255,255,255,0.08);
+}
+
+/* ── Override nav accent for fantasy pages ── */
+.nav__logo::after {
+  background: linear-gradient(90deg, var(--fantasy), var(--fantasy-lt));
+}
+
+/* =====================================================
+   FANTASY HERO
+===================================================== */
+.fantasy-hero {
+  min-height: 50vh;
+  padding: calc(var(--nav-h) + clamp(60px,9vw,100px)) var(--pad-x) clamp(40px,6vw,60px);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center;
+}
+.fantasy-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.fantasy-hero::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 55% 55% at 5% 50%, rgba(124,58,237,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 95% 20%, rgba(168,85,247,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 110%, rgba(0,0,0,0.9) 0%, transparent 65%);
+}
+.fantasy-hero__inner {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto; width: 100%;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 40px; flex-wrap: wrap;
+}
+.fantasy-hero__text { flex: 1; min-width: 280px; }
+.fantasy-hero__eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--fantasy-lt);
+  border: 1px solid rgba(124,58,237,0.35);
+  padding: 6px 16px; border-radius: 100px;
+  margin-bottom: 16px;
+}
+.fantasy-hero__title {
+  font-family: var(--font-d);
+  font-size: clamp(3rem,9vw,7rem);
+  line-height: .88; letter-spacing: .04em;
+  background: linear-gradient(160deg, #fff 0%, rgba(168,85,247,0.85) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.fantasy-hero__sub {
+  font-size: clamp(.88rem,2vw,1rem);
+  color: var(--text-muted); line-height: 1.7;
+  max-width: 440px;
+}
+
+/* ── Hero stats chips ── */
+.fantasy-hero__chips {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px;
+}
+.fantasy-chip {
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 8px; padding: 12px 18px; text-align: center;
+}
+.fantasy-chip__val {
+  font-family: var(--font-d); font-size: 1.8rem;
+  letter-spacing: .04em; line-height: 1; color: var(--fantasy-lt);
+}
+.fantasy-chip__lbl {
+  font-size: .62rem; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--text-muted); margin-top: 3px;
+}
+
+/* ── Points legend ── */
+.points-legend {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.points-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 100px; padding: 7px 14px;
+  font-size: .75rem; color: var(--text-muted);
+}
+.points-pill__val {
+  font-family: var(--font-d); font-size: 1.1rem;
+  letter-spacing: .04em; color: var(--fantasy-lt);
+}
+
+/* =====================================================
+   AUTH PANEL
+===================================================== */
+.auth-panel {
+  background: var(--bg-card);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: var(--radius-lg);
+  overflow: hidden; max-width: 460px; width: 100%;
+}
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.auth-tab {
+  padding: 14px; text-align: center;
+  font-size: .78rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  transition: color var(--t), background var(--t);
+  background: none; border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.auth-tab.active {
+  color: var(--fantasy-lt);
+  background: rgba(124,58,237,0.08);
+  border-bottom: 2px solid var(--fantasy);
+}
+.auth-tab:not(.active):hover { background: rgba(255,255,255,0.02); color: var(--text); }
+
+.auth-form { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.auth-label {
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 5px;
+  display: block;
+}
+.auth-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-md);
+  border-radius: 8px; padding: 12px 16px;
+  color: var(--text); font-family: var(--font-b); font-size: .92rem;
+  outline: none; transition: border-color var(--t), box-shadow var(--t);
+  -webkit-appearance: none;
+}
+.auth-input:focus {
+  border-color: var(--fantasy);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+.auth-input::placeholder { color: var(--text-dim); }
+.auth-error {
+  font-size: .75rem; color: var(--red-soft);
+  font-weight: 600; min-height: 1em;
+}
+.auth-btn {
+  width: 100%; padding: 13px;
+  background: var(--fantasy);
+  border: none; border-radius: 8px;
+  color: #fff; font-family: var(--font-d);
+  font-size: 1.1rem; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--t), box-shadow var(--t), transform var(--t);
+  box-shadow: 0 4px 24px rgba(124,58,237,0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+.auth-btn:hover { background: var(--fantasy-lt); box-shadow: 0 4px 32px rgba(124,58,237,0.5); }
+.auth-btn:active { transform: scale(.98); }
+.auth-btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+.auth-btn.loading { color: transparent; position: relative; }
+.auth-btn.loading::after {
+  content: ''; position: absolute; inset: 0;
+  width: 18px; height: 18px; margin: auto;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+
+/* =====================================================
+   MY TEAM CARD
+===================================================== */
+.my-team-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 20px;
+}
+.my-team-pts {
+  font-family: var(--font-d);
+  font-size: clamp(2.5rem,5vw,4rem);
+  letter-spacing: .04em; line-height: 1;
+  color: var(--fantasy-lt);
+  text-shadow: 0 0 40px var(--fantasy-glow);
+}
+.my-team-pts-lbl {
+  font-size: .65rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.squad-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%,200px), 1fr));
+  gap: 10px;
+}
+.squad-player-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  transition: border-color var(--t), background var(--t);
+  overflow: hidden;
+}
+.squad-player-card--captain {
+  border-color: rgba(245,200,66,0.4);
+  background: rgba(245,200,66,0.04);
+}
+.squad-player-card--sylvans { border-left: 3px solid var(--sylvans); }
+.squad-player-card--cpfc    { border-left: 3px solid var(--cpfc); }
+
+.squad-player-card__captain-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: .62rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--fantasy-gold);
+  background: rgba(245,200,66,0.12);
+  border: 1px solid rgba(245,200,66,0.25);
+  padding: 2px 8px; border-radius: 100px;
+}
+.squad-player-card__name {
+  font-weight: 700; font-size: .95rem;
+  margin-bottom: 4px; cursor: pointer;
+  transition: opacity .2s;
+}
+.squad-player-card__name:hover { opacity: .7; }
+.squad-player-card__pos {
+  font-size: .65rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 8px;
+}
+.squad-player-card__pts {
+  font-family: var(--font-d);
+  font-size: 1.6rem; letter-spacing: .04em;
+  color: var(--fantasy-lt);
+}
+.squad-player-card__pts-breakdown {
+  font-size: .7rem; color: var(--text-muted); margin-top: 2px;
+}
+
+/* =====================================================
+   PLAYER PICKER
+===================================================== */
+.picker-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 16px;
+}
+.picker-counter {
+  font-size: .8rem; font-weight: 700;
+  color: var(--text-muted);
+}
+.picker-counter span {
+  font-family: var(--font-d); font-size: 1.3rem;
+  color: var(--fantasy-lt);
+}
+.save-squad-btn {
+  padding: 10px 28px;
+  background: var(--fantasy); color: #fff;
+  border: none; border-radius: 8px;
+  font-family: var(--font-d); font-size: 1rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--t), box-shadow var(--t), opacity var(--t);
+  box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+.save-squad-btn:hover { background: var(--fantasy-lt); }
+.save-squad-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.picker-filters {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.picker-filter {
+  padding: 6px 16px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 100px; font-size: .74rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  transition: all var(--t);
+  -webkit-tap-highlight-color: transparent;
+}
+.picker-filter:hover { border-color: var(--border-md); color: var(--text); }
+.picker-filter.active {
+  background: var(--fantasy-dim);
+  border-color: var(--fantasy);
+  color: var(--fantasy-lt);
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 10px;
+}
+.picker-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--t) var(--ease);
+  position: relative; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.picker-card:hover { border-color: rgba(124,58,237,0.35); background: var(--bg-card-hv); }
+.picker-card.selected {
+  border-color: var(--fantasy);
+  background: rgba(124,58,237,0.08);
+  box-shadow: 0 0 0 1px var(--fantasy);
+}
+.picker-card.selected-captain {
+  border-color: var(--fantasy-gold);
+  background: rgba(245,200,66,0.06);
+  box-shadow: 0 0 0 1px var(--fantasy-gold);
+}
+.picker-card.maxed:not(.selected):not(.selected-captain) {
+  opacity: .4; cursor: not-allowed;
+}
+.picker-card__team-stripe {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+}
+.picker-card__top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px; margin-bottom: 8px;
+}
+.picker-card__name {
+  font-weight: 700; font-size: .95rem; line-height: 1.2;
+}
+.picker-card__number {
+  font-family: var(--font-d); font-size: 1.4rem;
+  letter-spacing: .04em; color: var(--text-dim); line-height: 1;
+  flex-shrink: 0;
+}
+.picker-card__pos-team {
+  font-size: .64rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 10px;
+}
+.picker-card__stats {
+  display: flex; gap: 8px;
+}
+.picker-stat {
+  display: flex; align-items: center; gap: 4px;
+  font-size: .72rem; font-weight: 700; color: var(--text-muted);
+}
+.picker-card__actions {
+  margin-top: 12px;
+  display: flex; gap: 6px;
+}
+.picker-card__btn {
+  flex: 1; padding: 6px 8px; border-radius: 6px;
+  font-size: .65rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer; border: 1px solid;
+  transition: all var(--t);
+  -webkit-tap-highlight-color: transparent;
+}
+.picker-card__btn--add {
+  background: rgba(124,58,237,0.12);
+  border-color: rgba(124,58,237,0.3);
+  color: var(--fantasy-lt);
+}
+.picker-card__btn--add:hover { background: rgba(124,58,237,0.2); }
+.picker-card__btn--remove {
+  background: rgba(255,71,87,0.1);
+  border-color: rgba(255,71,87,0.25);
+  color: var(--red-soft);
+}
+.picker-card__btn--captain {
+  background: rgba(245,200,66,0.1);
+  border-color: rgba(245,200,66,0.25);
+  color: var(--fantasy-gold);
+}
+.picker-card__btn--captain.active {
+  background: rgba(245,200,66,0.2);
+  border-color: var(--fantasy-gold);
+}
+
+/* =====================================================
+   LEADERBOARD
+===================================================== */
+.fantasy-lb { display: flex; flex-direction: column; gap: 8px; }
+.fantasy-lb-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--t), background var(--t);
+  cursor: pointer;
+}
+.fantasy-lb-row:hover { border-color: var(--border-md); background: var(--bg-card-hv); }
+.fantasy-lb-row--me {
+  border-color: rgba(124,58,237,0.35);
+  background: rgba(124,58,237,0.04);
+}
+.fantasy-lb-row--1st {
+  border-color: rgba(245,200,66,0.35);
+  background: rgba(245,200,66,0.04);
+}
+
+.fantasy-lb-main {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+}
+.fantasy-lb-pos {
+  font-family: var(--font-d); font-size: 1.5rem;
+  letter-spacing: .04em; color: var(--text-dim);
+  width: 36px; flex-shrink: 0; text-align: center;
+}
+.fantasy-lb-row--1st .fantasy-lb-pos { color: var(--fantasy-gold); }
+.fantasy-lb-row--2nd .fantasy-lb-pos { color: rgba(192,192,192,0.9); }
+.fantasy-lb-row--3rd .fantasy-lb-pos { color: rgba(205,127,50,0.9); }
+
+.fantasy-lb-info { flex: 1; min-width: 0; }
+.fantasy-lb-name {
+  font-weight: 700; font-size: 1rem; margin-bottom: 3px;
+  display: flex; align-items: center; gap: 8px;
+}
+.fantasy-lb-me-badge {
+  font-size: .6rem; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 100px;
+  background: rgba(124,58,237,0.15);
+  border: 1px solid rgba(124,58,237,0.3);
+  color: var(--fantasy-lt);
+}
+.fantasy-lb-squad-preview {
+  font-size: .74rem; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fantasy-lb-pts {
+  text-align: right; flex-shrink: 0;
+}
+.fantasy-lb-pts-val {
+  font-family: var(--font-d); font-size: 2rem;
+  letter-spacing: .04em; color: var(--fantasy-lt);
+  line-height: 1;
+}
+.fantasy-lb-pts-lbl {
+  font-size: .6rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Expandable breakdown */
+.fantasy-lb-breakdown {
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  display: none;
+  flex-wrap: wrap; gap: 8px;
+}
+.fantasy-lb-breakdown.open { display: flex; }
+.lb-player-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  font-size: .75rem;
+}
+.lb-player-chip--captain {
+  background: rgba(245,200,66,0.07);
+  border-color: rgba(245,200,66,0.2);
+}
+.lb-player-chip__name {
+  font-weight: 700; cursor: pointer; transition: opacity .2s;
+}
+.lb-player-chip__name:hover { opacity: .7; }
+.lb-player-chip__pts {
+  font-family: var(--font-d); font-size: 1rem;
+  color: var(--fantasy-lt);
+}
+.lb-player-chip--captain .lb-player-chip__pts { color: var(--fantasy-gold); }
+
+/* No squad state */
+.no-squad {
+  text-align: center; padding: 28px 20px;
+  color: var(--text-muted); font-size: .88rem;
+  border: 1px dashed rgba(124,58,237,0.25);
+  border-radius: var(--radius-lg);
+  background: rgba(124,58,237,0.03);
+}
+.no-squad p { margin-bottom: 8px; }
+
+/* ── Save success toast ── */
+.save-toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(20,20,20,0.95);
+  border: 1px solid rgba(124,58,237,0.4);
+  border-radius: 100px;
+  padding: 12px 24px;
+  font-size: .82rem; font-weight: 700;
+  color: var(--fantasy-lt);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 200;
+  transition: transform .4s var(--ease-bounce), opacity .3s;
+  opacity: 0; pointer-events: none;
+  white-space: nowrap;
+}
+.save-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ── Section accents ── */
+.section-accent-fantasy { border-left: 3px solid var(--fantasy); padding-left: 18px; }
+
+/* ── Logged-in / out states ── */
+.show-logged-in  { display: none; }
+.show-logged-out { display: block; }
+.logged-in .show-logged-in  { display: block; }
+.logged-in .show-logged-out { display: none; }
+
+/* ── User info bar ── */
+.user-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.user-bar__avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--fantasy-dim);
+  border: 2px solid rgba(124,58,237,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-d); font-size: 1.1rem;
+  color: var(--fantasy-lt); flex-shrink: 0;
+}
+.user-bar__name { font-weight: 700; flex: 1; }
+.user-bar__pts { font-family: var(--font-d); font-size: 1.3rem; color: var(--fantasy-lt); }
+.user-bar__logout {
+  font-size: .72rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-dim); cursor: pointer;
+  background: none; border: none;
+  transition: color var(--t);
+  padding: 4px 0;
+}
+.user-bar__logout:hover { color: var(--red-soft); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .fantasy-hero__inner { flex-direction: column; }
+  .auth-panel { max-width: 100%; }
+  .squad-display { grid-template-columns: 1fr 1fr; }
+  .picker-grid   { grid-template-columns: 1fr 1fr; }
+  .picker-card__actions { flex-direction: column; }
+  .fantasy-lb-main { gap: 10px; padding: 14px; }
+  .fantasy-lb-pts-val { font-size: 1.6rem; }
+}
+@media (max-width: 380px) {
+  .squad-display { grid-template-columns: 1fr; }
+  .picker-grid   { grid-template-columns: 1fr; }
+}
