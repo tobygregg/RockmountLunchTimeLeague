@@ -39,7 +39,7 @@
 <section class="fantasy-hero">
   <div class="fantasy-hero__inner">
     <div class="fantasy-hero__text reveal">
-      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2025</div>
+      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2026</div>
       <h1 class="fantasy-hero__title">Fantasy<br>League</h1>
       <p class="fantasy-hero__sub">Budget of 50 to build your squad of 5. Pick a captain for double points. Sell players up to 3 times. Top the leaderboard.</p>
       <div class="fantasy-hero__chips" id="hero-chips">
@@ -579,7 +579,7 @@ function removePlayer(name) {
 
   // Block if sell limit already exhausted
   if (isRealSell && sellsLeft(name) <= 0) {
-    showToast(\`❌ Can't sell \${name} — sell limit (${F.MAX_SELLS}×) fully used\`);
+    showToast('❌ Sell limit reached for ' + name + ' (' + F.MAX_SELLS + '× max)');
     return;
   }
 
