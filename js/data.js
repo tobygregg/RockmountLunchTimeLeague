@@ -48,11 +48,12 @@ const RLLData = (() => {
     return rows
       .filter(r => r[C.NAME] && r[C.TEAM])
       .map(r => ({
-        name:   r[C.NAME].trim(),
-        team:   r[C.TEAM].trim(),
-        number: (r[C.NUMBER] || "").trim(),
-        bio:    C.BIO   != null ? (r[C.BIO]   || "").trim() : "",
-        image:  C.IMAGE != null ? (r[C.IMAGE] || "").trim() : "",
+        name:     r[C.NAME].trim(),
+        team:     r[C.TEAM].trim(),
+        number:   (r[C.NUMBER] || "").trim(),
+        bio:      C.BIO      != null ? (r[C.BIO]      || "").trim() : "",
+        image:    C.IMAGE    != null ? (r[C.IMAGE]    || "").trim() : "",
+        position: C.POSITION != null ? (r[C.POSITION] || "").trim().toUpperCase() : "",
       }));
   }
 
@@ -165,7 +166,7 @@ const RLLData = (() => {
     const registered = new Set(players.map(p => p.name));
     [...Object.keys(goals), ...Object.keys(motm)].forEach(name => {
       if (!registered.has(name)) {
-        enriched.push({ name, team: "Unknown", number: "?", bio: "", image: "", goals: goals[name] || 0, motmAwards: motm[name] || 0 });
+        enriched.push({ name, team: "Unknown", number: "?", bio: "", image: "", position: "", goals: goals[name] || 0, motmAwards: motm[name] || 0 });
         registered.add(name);
       }
     });
