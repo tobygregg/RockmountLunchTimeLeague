@@ -1,6 +1,5 @@
 /* =====================================================
    ROCKMOUNT LUNCHTIME LEAGUE — config.js
-   ✏️  Edit ONLY this file to update data sources.
 ===================================================== */
 
 const RLL_CONFIG = {
@@ -24,86 +23,96 @@ const RLL_CONFIG = {
     CPFC_GOALS_AGAINST:    "B12",
     SYLVANS_PLAYED:        "I12",
     CPFC_PLAYED:           "I12",
-    /* Leave empty string "" to hide announcement banner */
     ANNOUNCEMENT:          "K11",
   },
 
-  /* ── MATCH HISTORY ─────────────────────────────── */
-  HISTORY_RANGE: "B26:F110",
+  /* ── MATCH HISTORY ─────────────────────────────────
+     Columns: Date | Sylvans | CPFC | MOTM | Scorers | Assists
+     Newest match at the BOTTOM of the range.
+     Assists same format as Scorers: "Tom LT, Evan H"
+  ─────────────────────────────────────────────────── */
+  HISTORY_RANGE: "B26:G110",
   HISTORY_COLS: {
-    DATE: 0, SYLVANS_SCORE: 1, CPFC_SCORE: 2, MOTM: 3, SCORERS: 4,
+    DATE: 0, SYLVANS_SCORE: 1, CPFC_SCORE: 2, MOTM: 3, SCORERS: 4, ASSISTS: 5,
   },
 
   /* ── PLAYERS TABLE ─────────────────────────────────
-     Columns: Name | Team | Number | Bio | Image URL | Position
-     Team values must be exactly "Sylvans" or "CPFC"
-     Position values: GK / DEF / MID / FWD (can change match to match)
-     Image URL can be empty — a placeholder is shown.
+     Columns: Name | Team | Number | Bio | Image URL | Position | Price
+     Team:     "Sylvans" or "CPFC"
+     Position: GK / DEF / MID / FWD
+     Price:    number — total budget is 50
   ─────────────────────────────────────────────────── */
   PLAYERS_RANGE: "K26:P49",
-  PLAYERS_COLS: { NAME: 0, TEAM: 1, NUMBER: 2, BIO: 3, IMAGE: 4, POSITION: 5 },
+  PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6 },
 
   /* ── ANNOUNCEMENTS ─────────────────────────────────
-     Columns: Date | Message  — newest at the BOTTOM
+     Tab name: Announcements  |  Cols: Date | Message
   ─────────────────────────────────────────────────── */
-  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R29",
-  ANNOUNCEMENTS_COLS: { DATE: 0, MESSAGE: 1 },
+  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R29"",
+  ANNOUNCEMENTS_COLS:  { DATE:0, MESSAGE:1 },
 
-  /* ── CHAT (Google Apps Script Web App) ─────────────
-     Paste your deployed Apps Script URL here.
-     See google-apps-script.js for the full setup guide.
-  ─────────────────────────────────────────────────── */
+  /* ── CHAT & FANTASY (Google Apps Script URL) ───── */
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw0yfi1QrJf8Mf8QrJfl1V-qEDp2nT4ui0OVXd9AJkJZiiEXG4vbQ9vDLc-eaeuM1Okvw/exec",
 
-  /* ── TEAM CONFIG ───────────────────────────────── */
+  /* ── FANTASY SCORING ───────────────────────────── */
+  FANTASY: {
+    BUDGET:       50,
+    SQUAD_SIZE:   5,
+    MAX_SELLS:    3,
+    POINTS_MOTM:  6,
+    POINTS_GOAL:  2,
+    POINTS_ASSIST:1,
+    GK_BASE:      12,   // per match, minus goals conceded, min 0
+    CAPTAIN_MULT: 2,
+  },
+
+  /* ── TEAMS ─────────────────────────────────────── */
   TEAMS: {
-    SYLVANS: { name: "Sylvans FC",         shortName: "Sylvans", abbr: "SYL",  color: "#e63030", key: "Sylvans" },
-    CPFC:    { name: "Charlie Prevost FC", shortName: "CP FC",   abbr: "CPFC", color: "#1a6dd4", key: "CPFC"    },
+    SYLVANS: { name:"Sylvans FC",         shortName:"Sylvans", abbr:"SYL",  color:"#e63030", key:"Sylvans" },
+    CPFC:    { name:"Charlie Prevost FC", shortName:"CP FC",   abbr:"CPFC", color:"#1a6dd4", key:"CPFC"    },
   },
 
   /* ── DEMO DATA ─────────────────────────────────── */
   DEMO: {
-    sylvansPoints: 12, cpfcPoints: 9,
-    sylvansWins: 4,    cpfcWins: 3,
-    sylvansDraws: 0,   cpfcDraws: 0,
-    sylvansLosses: 2,  cpfcLosses: 3,
-    sylvansGoalsFor: 18,     cpfcGoalsFor: 14,
-    sylvansGoalsAgainst: 10, cpfcGoalsAgainst: 16,
-    sylvansPlayed: 6,  cpfcPlayed: 6,
+    sylvansPoints:12, cpfcPoints:9,
+    sylvansWins:4,    cpfcWins:3,
+    sylvansDraws:0,   cpfcDraws:0,
+    sylvansLosses:2,  cpfcLosses:3,
+    sylvansGoalsFor:18,     cpfcGoalsFor:14,
+    sylvansGoalsAgainst:10, cpfcGoalsAgainst:16,
+    sylvansPlayed:6, cpfcPlayed:6,
     history: [
-      { date: "12 Jun 2025", sylvans: 3, cpfc: 1, motm: "T. Walsh",     scorers: ["T. Walsh", "J. Rockmount", "M. Smith"] },
-      { date: "5 Jun 2025",  sylvans: 2, cpfc: 2, motm: "C. Prevost",   scorers: ["M. Smith", "T. Walsh", "D. Clarke", "C. Prevost"] },
-      { date: "29 May 2025", sylvans: 1, cpfc: 3, motm: "D. Clarke",    scorers: ["J. Rockmount", "M. Jones", "D. Clarke", "C. Prevost"] },
-      { date: "22 May 2025", sylvans: 4, cpfc: 0, motm: "T. Walsh",     scorers: ["T. Walsh", "J. Rockmount", "M. Smith", "T. Walsh"] },
-      { date: "15 May 2025", sylvans: 2, cpfc: 3, motm: "M. Jones",     scorers: [] },
-      { date: "8 May 2025",  sylvans: 6, cpfc: 5, motm: "J. Rockmount", scorers: [] },
+      { date:"12 Jun 2025", sylvans:3, cpfc:1, motm:"T. Walsh",     scorers:["T. Walsh","J. Rockmount","M. Smith"], assists:["M. Smith","K. Briggs"] },
+      { date:"5 Jun 2025",  sylvans:2, cpfc:2, motm:"C. Prevost",   scorers:["M. Smith","T. Walsh","D. Clarke","C. Prevost"], assists:["R. Hunt","M. Jones"] },
+      { date:"29 May 2025", sylvans:1, cpfc:3, motm:"D. Clarke",    scorers:["J. Rockmount","M. Jones","D. Clarke","C. Prevost"], assists:["C. Prevost","A. Peters"] },
+      { date:"22 May 2025", sylvans:4, cpfc:0, motm:"T. Walsh",     scorers:["T. Walsh","J. Rockmount","M. Smith","T. Walsh"], assists:["M. Smith"] },
+      { date:"15 May 2025", sylvans:2, cpfc:3, motm:"M. Jones",     scorers:[], assists:[] },
+      { date:"8 May 2025",  sylvans:6, cpfc:5, motm:"J. Rockmount", scorers:[], assists:[] },
     ],
     players: [
-      { name: "J. Rockmount", team: "Sylvans", number: "1",  bio: "Commanding keeper with lightning reflexes. The last line of defence.",          image: "", position: "GK"  },
-      { name: "T. Walsh",     team: "Sylvans", number: "7",  bio: "Pacey winger and set-piece specialist. Dangerous from anywhere on the pitch.",   image: "", position: "MID" },
-      { name: "M. Smith",     team: "Sylvans", number: "10", bio: "Creative playmaker and top scorer. The engine of the Sylvans attack.",           image: "", position: "MID" },
-      { name: "K. Briggs",    team: "Sylvans", number: "4",  bio: "Solid defensive midfielder. Wins the ball and keeps things simple.",             image: "", position: "DEF" },
-      { name: "R. Hunt",      team: "Sylvans", number: "8",  bio: "Box-to-box midfielder with an eye for goal.",                                    image: "", position: "FWD" },
-      { name: "C. Prevost",   team: "CPFC",    number: "10", bio: "Club founder and top operator. Leads by example every single game.",             image: "", position: "FWD" },
-      { name: "D. Clarke",    team: "CPFC",    number: "9",  bio: "Clinical finisher. If it falls to D. Clarke, it's probably going in.",           image: "", position: "FWD" },
-      { name: "M. Jones",     team: "CPFC",    number: "7",  bio: "Tricky winger who causes problems for any defence. Multiple MOTM awards.",       image: "", position: "MID" },
-      { name: "A. Peters",    team: "CPFC",    number: "5",  bio: "Rock-solid at the back. Aerial dominance and a cool head under pressure.",       image: "", position: "DEF" },
-      { name: "L. Ford",      team: "CPFC",    number: "11", bio: "Dynamic forward with great movement. A constant thorn in the opposition's side.", image: "", position: "GK"  },
+      { name:"J. Rockmount", team:"Sylvans", number:"1",  bio:"Commanding keeper.",        image:"", position:"GK",  price:8 },
+      { name:"T. Walsh",     team:"Sylvans", number:"7",  bio:"Pacey winger.",             image:"", position:"MID", price:10 },
+      { name:"M. Smith",     team:"Sylvans", number:"10", bio:"Creative playmaker.",       image:"", position:"MID", price:12 },
+      { name:"K. Briggs",    team:"Sylvans", number:"4",  bio:"Solid defensive mid.",      image:"", position:"DEF", price:7 },
+      { name:"R. Hunt",      team:"Sylvans", number:"8",  bio:"Box-to-box midfielder.",    image:"", position:"FWD", price:8 },
+      { name:"C. Prevost",   team:"CPFC",    number:"10", bio:"Club founder, top player.", image:"", position:"FWD", price:12 },
+      { name:"D. Clarke",    team:"CPFC",    number:"9",  bio:"Clinical finisher.",        image:"", position:"FWD", price:10 },
+      { name:"M. Jones",     team:"CPFC",    number:"7",  bio:"Tricky winger.",            image:"", position:"MID", price:9 },
+      { name:"A. Peters",    team:"CPFC",    number:"5",  bio:"Rock-solid at the back.",   image:"", position:"DEF", price:7 },
+      { name:"L. Ford",      team:"CPFC",    number:"11", bio:"Dynamic forward.",          image:"", position:"GK",  price:8 },
     ],
     announcements: [
-      { date: "12 Jun 2025", message: "Well played everyone on a brilliant 3–1 victory! Great performance all round. 🔴" },
-      { date: "5 Jun 2025",  message: "Cracking draw today — both teams gave it absolutely everything. ⚽" },
-      { date: "1 Jun 2025",  message: "Welcome to the Rockmount Lunchtime League hub! 🏆" },
+      { date:"12 Jun 2025", message:"Well played everyone on a brilliant 3–1 victory! 🔴" },
+      { date:"5 Jun 2025",  message:"Cracking draw today — both teams gave it everything. ⚽" },
+      { date:"1 Jun 2025",  message:"Welcome to the Rockmount Lunchtime League hub! 🏆" },
     ],
-    matchChat: [
-      { ts: new Date(Date.now() - 3600000).toISOString(),  name: "T. Walsh",     msg: "Get in!! What a result 🔥" },
-      { ts: new Date(Date.now() - 7200000).toISOString(),  name: "D. Clarke",    msg: "Good game lads, credit where it's due" },
-      { ts: new Date(Date.now() - 10800000).toISOString(), name: "J. Rockmount", msg: "MOTM babyyyy 🏅" },
+    matchChat:   [
+      { ts: new Date(Date.now()-3600000).toISOString(),  name:"T. Walsh",     msg:"Get in!! What a result 🔥" },
+      { ts: new Date(Date.now()-7200000).toISOString(),  name:"D. Clarke",    msg:"Good game lads" },
     ],
     generalChat: [
-      { ts: new Date(Date.now() - 86400000).toISOString(), name: "T. Walsh",    msg: "Who's confirmed for Wednesday?" },
-      { ts: new Date(Date.now() - 43200000).toISOString(), name: "M. Jones",    msg: "I'm in 💪" },
-      { ts: new Date(Date.now() - 21600000).toISOString(), name: "C. Prevost",  msg: "Same, ready for revenge 😤" },
+      { ts: new Date(Date.now()-86400000).toISOString(), name:"T. Walsh",    msg:"Who's confirmed for Wednesday?" },
+      { ts: new Date(Date.now()-43200000).toISOString(), name:"M. Jones",    msg:"I'm in 💪" },
     ],
   },
 };
@@ -120,30 +129,21 @@ function sheetUrlDirect(range) {
 }
 
 function parseCSVRow(row) {
-  const result = [];
-  let current = '', inQuotes = false;
+  const result = []; let current = '', inQ = false;
   for (let i = 0; i < row.length; i++) {
     const ch = row[i];
-    if (ch === '"') {
-      if (inQuotes && row[i + 1] === '"') { current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
-      result.push(current.trim()); current = '';
-    } else { current += ch; }
+    if (ch === '"') { if (inQ && row[i+1]==='"') { current+='"'; i++; } else inQ=!inQ; }
+    else if (ch === ',' && !inQ) { result.push(current.trim()); current=''; }
+    else { current += ch; }
   }
   result.push(current.trim());
   return result;
 }
 
 function parseScorers(raw) {
-  if (!raw || raw.trim() === "" || raw.trim() === "—") return [];
-  return raw.split(",").map(s => s.trim()).filter(Boolean);
+  if (!raw || raw.trim()==="" || raw.trim()==="—") return [];
+  return raw.split(",").map(s=>s.trim()).filter(Boolean);
 }
 
-function isSheetConfigured() {
-  return RLL_CONFIG.SHEET_ID && RLL_CONFIG.SHEET_ID !== "YOUR_SHEET_ID_HERE";
-}
-
-function isAppsScriptConfigured() {
-  return RLL_CONFIG.APPS_SCRIPT_URL && RLL_CONFIG.APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_URL";
-}
+function isSheetConfigured()      { return RLL_CONFIG.SHEET_ID       && RLL_CONFIG.SHEET_ID       !== "YOUR_SHEET_ID_HERE"; }
+function isAppsScriptConfigured() { return RLL_CONFIG.APPS_SCRIPT_URL && RLL_CONFIG.APPS_SCRIPT_URL !== "YOUR_APPS_SCRIPT_URL"; }
