@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/png" href="/assets/FantasyFavicon.png">
   <title>Fantasy League — Rockmount Lunchtime League</title>
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="css/fantasy.css"/>
@@ -566,6 +565,14 @@ function addPlayer(name) {
   if (_mySquad.includes(name)) return;
   if (_mySquad.length >= F.SQUAD_SIZE) return;
   if (!canAdd(name)) return;
+
+  // If they were previously sold this session (real sell undone before save),
+  // reverse the local sell count decrement
+  const wasRealSell = _savedSquad.includes(name) && !_mySquad.includes(name);
+  if (wasRealSell && _sellHistory[name] > 0) {
+    _sellHistory[name] = _sellHistory[name] - 1;
+  }
+
   _mySquad.push(name);
   if (!_myCaptain) _myCaptain = name;
   renderPicker();
@@ -573,11 +580,20 @@ function addPlayer(name) {
 
 function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
-  // Check sell limit only if they were in the saved squad
-  if (_savedSquad.includes(name) && sellsLeft(name) <= 0) {
+
+  const isRealSell = _savedSquad.includes(name);
+
+  // Block if sell limit already reached
+  if (isRealSell && sellsLeft(name) <= 0) {
     showToast(`❌ Can't sell ${name} — sell limit (${F.MAX_SELLS}×) reached`);
     return;
   }
+
+  // Immediately decrement sell count locally so UI updates right away
+  if (isRealSell) {
+    _sellHistory[name] = (_sellHistory[name] || 0) + 1;
+  }
+
   _mySquad = _mySquad.filter(n => n !== name);
   if (_myCaptain === name) _myCaptain = _mySquad[0] || "";
   renderPicker();
