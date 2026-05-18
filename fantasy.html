@@ -39,7 +39,7 @@
 <section class="fantasy-hero">
   <div class="fantasy-hero__inner">
     <div class="fantasy-hero__text reveal">
-      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2026</div>
+      <div class="fantasy-hero__eyebrow">⚡ RLL Fantasy League · Season 2025</div>
       <h1 class="fantasy-hero__title">Fantasy<br>League</h1>
       <p class="fantasy-hero__sub">Budget of 50 to build your squad of 5. Pick a captain for double points. Sell players up to 3 times. Top the leaderboard.</p>
       <div class="fantasy-hero__chips" id="hero-chips">
@@ -684,7 +684,7 @@ function renderLeaderboard(data) {
           <div class="fantasy-lb-breakdown" id="lb-bd-${i}">
             ${m.breakdown.map(bp => {
               const p = _allPlayers.find(pl=>pl.name===bp.name);
-              const col = p?teamColor(p.team):"rgba(255,255,255,.5)";
+              const col = "var(--text-muted)";
               const isGK = p && p.position==="GK";
               const detail = isGK
                 ? `🧤${bp.gkPts||0}pt`
@@ -829,8 +829,16 @@ async function refreshLeaderboard() {
   if (!isAppsScriptConfigured()) return;
   try {
     const data = await apiFetch({ action:"leaderboard" });
+    if (data && data.error) {
+      console.error("[RLL Fantasy] Leaderboard error from server:", data.error);
+      document.getElementById("leaderboard-wrap").innerHTML =
+        `<div class="no-squad"><p>⚠️ Leaderboard error: ${esc(data.error)}</p><p style="font-size:.8rem;margin-top:8px;color:var(--text-dim)">Check Apps Script logs: Extensions → Apps Script → Executions</p></div>`;
+      return;
+    }
     if (Array.isArray(data)) renderLeaderboard(data);
-  } catch(e) { console.warn("Leaderboard error:", e); }
+  } catch(e) {
+    console.error("Leaderboard fetch error:", e);
+  }
 }
 
 /* ─────────────────────────────────────────────────────
