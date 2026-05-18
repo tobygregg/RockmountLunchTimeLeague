@@ -26,26 +26,73 @@ const PageTransition = (() => {
 const Nav = (() => {
   function init() {
     const nav    = document.querySelector(".nav");
-    const toggle = document.querySelector(".nav__toggle");
-    const links  = document.querySelector(".nav__links");
+    const toggle = document.getElementById("nav-toggle") || document.querySelector(".nav__toggle");
+    const links  = document.getElementById("nav-links")  || document.querySelector(".nav__links");
     if (!nav) return;
+
+    // Scroll class
     window.addEventListener("scroll", () => {
       nav.classList.toggle("scrolled", window.scrollY > 40);
     }, { passive: true });
+
+    // Mobile hamburger
     toggle?.addEventListener("click", () => {
       toggle.classList.toggle("open");
       links?.classList.toggle("open");
     });
-    links?.querySelectorAll(".nav__link").forEach(l => {
+
+    // Close mobile menu on link click
+    links?.querySelectorAll(".nav__link, .nav__dropdown-link").forEach(l => {
       l.addEventListener("click", () => {
         toggle?.classList.remove("open");
         links.classList.remove("open");
+        links.querySelectorAll(".nav__item").forEach(i => i.classList.remove("open"));
       });
     });
+
+    // ── Dropdown buttons ──
+    links?.querySelectorAll("[data-dropdown]").forEach(btn => {
+      const item = btn.closest(".nav__item");
+      if (!item) return;
+
+      // Desktop: hover intent
+      let hoverTimer;
+      item.addEventListener("mouseenter", () => {
+        clearTimeout(hoverTimer);
+        if (window.innerWidth > 640) item.classList.add("open");
+      });
+      item.addEventListener("mouseleave", () => {
+        if (window.innerWidth > 640) {
+          hoverTimer = setTimeout(() => item.classList.remove("open"), 120);
+        }
+      });
+
+      // Click: toggle (works on both mobile + desktop)
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = item.classList.contains("open");
+        // Close all other dropdowns
+        links.querySelectorAll(".nav__item").forEach(i => i.classList.remove("open"));
+        if (!isOpen) item.classList.add("open");
+      });
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener("click", () => {
+      links?.querySelectorAll(".nav__item").forEach(i => i.classList.remove("open"));
+    });
+
+    // Active link highlighting — check both direct links and dropdown links
     const current = window.location.pathname.split("/").pop() || "index.html";
-    links?.querySelectorAll(".nav__link").forEach(link => {
+    links?.querySelectorAll(".nav__link, .nav__dropdown-link").forEach(link => {
       const href = link.getAttribute("href");
-      if (href === current || (current === "" && href === "index.html")) link.classList.add("active");
+      if (href === current || (current === "" && href === "index.html")) {
+        link.classList.add("active");
+        // Also mark parent dropdown button as active
+        const parentItem = link.closest(".nav__item");
+        const parentBtn  = parentItem?.querySelector(".nav__item-btn");
+        if (parentBtn) parentBtn.classList.add("active");
+      }
     });
   }
   return { init };
