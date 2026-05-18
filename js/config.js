@@ -28,8 +28,7 @@ const RLL_CONFIG = {
 
   /* ── MATCH HISTORY ─────────────────────────────────
      Columns: Date | Sylvans | CPFC | MOTM | Scorers | Assists
-     Newest match at the BOTTOM of the range.
-     Assists same format as Scorers: "Tom LT, Evan H"
+     Newest match at the BOTTOM. Older rows can have empty Assists — fine.
   ─────────────────────────────────────────────────── */
   HISTORY_RANGE: "B26:G110",
   HISTORY_COLS: {
@@ -38,9 +37,7 @@ const RLL_CONFIG = {
 
   /* ── PLAYERS TABLE ─────────────────────────────────
      Columns: Name | Team | Number | Bio | Image URL | Position | Price
-     Team:     "Sylvans" or "CPFC"
-     Position: GK / DEF / MID / FWD
-     Price:    number — total budget is 50
+     Position and Price can be empty for some players — fine.
   ─────────────────────────────────────────────────── */
   PLAYERS_RANGE: "K26:P49",
   PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6 },
@@ -48,7 +45,7 @@ const RLL_CONFIG = {
   /* ── ANNOUNCEMENTS ─────────────────────────────────
      Tab name: Announcements  |  Cols: Date | Message
   ─────────────────────────────────────────────────── */
-  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R29"",
+  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R29",
   ANNOUNCEMENTS_COLS:  { DATE:0, MESSAGE:1 },
 
   /* ── CHAT & FANTASY (Google Apps Script URL) ───── */
@@ -62,7 +59,7 @@ const RLL_CONFIG = {
     POINTS_MOTM:  6,
     POINTS_GOAL:  2,
     POINTS_ASSIST:1,
-    GK_BASE:      12,   // per match, minus goals conceded, min 0
+    GK_BASE:      10,   // per match, minus goals conceded, min 0
     CAPTAIN_MULT: 2,
   },
 
