@@ -101,22 +101,22 @@ const RLLData = (() => {
           fetchPlayers(),
           fetchAnnouncements().catch(() => []),
         ]);
-    // ── SLUGGER SPECIAL OVERRIDE ──────────────────────────────
-    // Fetched after computePlayerStats since this needs to be async
-    if (isSheetConfigured()) {
-      try {
-        const sluggerUrl = sheetUrlDirect("H28");
-        const res  = await fetch(sluggerUrl);
-        const text = await res.text();
-        const val  = parseFloat(text.replace(/"/g,"").trim()) || 0;
-        const found = players.find(p => p.name === "Slugger");
-        if (found) { found.gkPts = val; found.fantasyPts = val; }
-      } catch(e) { console.warn("Slugger cell fetch failed:", e); }
-    }
-    // ── END SLUGGER OVERRIDE ───────────────────────────────────
 
-    _cache = buildFromSheet(cells, history, rawPlayers, announcements);
-    return _cache;
+        _cache = buildFromSheet(cells, history, rawPlayers, announcements);
+
+        // ── SLUGGER SPECIAL OVERRIDE ─────────────────────────
+        // Must run after buildFromSheet so _cache.players exists.
+        // H28 holds Slugger's manually-set GK fantasy points.
+        try {
+          const res  = await fetch(sheetUrlDirect("H28"));
+          const text = await res.text();
+          const val  = parseFloat(text.replace(/"/g,"").trim()) || 0;
+          const found = _cache.players.find(p => p.name === "Slugger");
+          if (found) { found.gkPts = val; found.fantasyPts = val; }
+        } catch(e) { console.warn("Slugger fetch failed:", e); }
+        // ── END SLUGGER OVERRIDE ──────────────────────────────
+
+        return _cache;
       } catch (err) {
         console.warn("[RLL] Sheet error — using demo data.", err);
         _cache = buildFromDemo();
