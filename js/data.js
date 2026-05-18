@@ -6,12 +6,10 @@ const RLLData = (() => {
 
   let _cache = null, _promise = null;
 
-  /* ── FETCH ───────────────────────────────────────── */
   async function fetchRange(range) {
-    const res  = await fetch(sheetUrlDirect(range));
+    const res = await fetch(sheetUrlDirect(range));
     if (!res.ok) throw new Error(`Sheet fetch failed: ${res.status}`);
-    const text = await res.text();
-    return text.trim().split("\n").map(parseCSVRow);
+    return (await res.text()).trim().split("\n").map(parseCSVRow);
   }
 
   async function fetchCell(ref) {
@@ -21,15 +19,15 @@ const RLLData = (() => {
 
   async function fetchAllCells() {
     const entries = Object.entries(RLL_CONFIG.CELLS);
-    const values  = await Promise.all(entries.map(([, ref]) => fetchCell(ref)));
+    const values  = await Promise.all(entries.map(([,ref]) => fetchCell(ref)));
     const out = {};
-    entries.forEach(([k], i) => { out[k] = values[i]; });
+    entries.forEach(([k],i) => { out[k] = values[i]; });
     return out;
   }
 
   async function fetchHistory() {
     const rows = await fetchRange(RLL_CONFIG.HISTORY_RANGE);
-    const C = RLL_CONFIG.HISTORY_COLS;
+    const C    = RLL_CONFIG.HISTORY_COLS;
     return rows
       .filter(r => r[C.DATE] && r[C.SYLVANS_SCORE] !== "" && r[C.CPFC_SCORE] !== "")
       .map(r => ({
@@ -38,35 +36,37 @@ const RLLData = (() => {
         cpfc:    parseInt(r[C.CPFC_SCORE],    10) || 0,
         motm:    r[C.MOTM] || "—",
         scorers: C.SCORERS != null ? parseScorers(r[C.SCORERS] || "") : [],
+        assists: C.ASSISTS != null ? parseScorers(r[C.ASSISTS] || "") : [],
       }))
       .reverse();
   }
 
   async function fetchPlayers() {
     const rows = await fetchRange(RLL_CONFIG.PLAYERS_RANGE);
-    const C = RLL_CONFIG.PLAYERS_COLS;
+    const C    = RLL_CONFIG.PLAYERS_COLS;
     return rows
       .filter(r => r[C.NAME] && r[C.TEAM])
       .map(r => ({
         name:     r[C.NAME].trim(),
         team:     r[C.TEAM].trim(),
-        number:   (r[C.NUMBER] || "").trim(),
+        number:   (r[C.NUMBER]   || "").trim(),
         bio:      C.BIO      != null ? (r[C.BIO]      || "").trim() : "",
         image:    C.IMAGE    != null ? (r[C.IMAGE]    || "").trim() : "",
         position: C.POSITION != null ? (r[C.POSITION] || "").trim().toUpperCase() : "",
+        price:    C.PRICE    != null ? (parseFloat(r[C.PRICE]) || 0) : 0,
       }));
   }
 
   async function fetchAnnouncements() {
     const rows = await fetchRange(RLL_CONFIG.ANNOUNCEMENTS_RANGE);
-    const C = RLL_CONFIG.ANNOUNCEMENTS_COLS;
+    const C    = RLL_CONFIG.ANNOUNCEMENTS_COLS;
     return rows
       .filter(r => r[C.MESSAGE] && r[C.MESSAGE].trim())
       .map(r => ({ date: r[C.DATE] || "", message: r[C.MESSAGE].trim() }))
       .reverse();
   }
 
-  /* ── CHAT ────────────────────────────────────────── */
+  /* ── CHAT ──────────────────────────────────────── */
   async function fetchChat(type) {
     if (!isAppsScriptConfigured()) return [];
     try {
@@ -87,15 +87,11 @@ const RLLData = (() => {
     return true;
   }
 
-  /* ── MASTER LOAD ─────────────────────────────────── */
+  /* ── MASTER LOAD ───────────────────────────────── */
   async function load() {
     if (_cache)   return _cache;
     if (_promise) return _promise;
-
-    if (!isSheetConfigured()) {
-      _cache = buildFromDemo();
-      return _cache;
-    }
+    if (!isSheetConfigured()) { _cache = buildFromDemo(); return _cache; }
 
     _promise = (async () => {
       try {
@@ -116,10 +112,10 @@ const RLLData = (() => {
     return _promise;
   }
 
-  /* ── BUILD ───────────────────────────────────────── */
+  /* ── BUILD ─────────────────────────────────────── */
   function buildFromSheet(cells, history, rawPlayers, announcements) {
-    const n = v => parseInt(v, 10) || 0;
-    const gf = n(cells.SYLVANS_GOALS_FOR), cf = n(cells.CPFC_GOALS_FOR);
+    const n   = v => parseInt(v,10) || 0;
+    const gf  = n(cells.SYLVANS_GOALS_FOR), cf = n(cells.CPFC_GOALS_FOR);
     const players = computePlayerStats(rawPlayers, history);
     return {
       sylvansPoints: n(cells.SYLVANS_POINTS), cpfcPoints: n(cells.CPFC_POINTS),
@@ -157,35 +153,72 @@ const RLLData = (() => {
   }
 
   function computePlayerStats(players, history) {
-    const goals = {}, motm = {};
-    history.forEach(m => {
-      (m.scorers || []).forEach(n => { if (n) goals[n] = (goals[n] || 0) + 1; });
-      if (m.motm && m.motm !== "—") motm[m.motm] = (motm[m.motm] || 0) + 1;
+    const goals = {}, motm = {}, assists = {}, gkPts = {};
+
+    // GK points per match
+    players.filter(p => p.position === "GK").forEach(gk => {
+      gkPts[gk.name] = 0;
     });
-    const enriched  = players.map(p => ({ ...p, goals: goals[p.name] || 0, motmAwards: motm[p.name] || 0 }));
+
+    history.forEach(m => {
+      (m.scorers || []).forEach(n => { if(n){ goals[n]=(goals[n]||0)+1; }});
+      (m.assists || []).forEach(n => { if(n){ assists[n]=(assists[n]||0)+1; }});
+      if (m.motm && m.motm !== "—") motm[m.motm] = (motm[m.motm]||0) + 1;
+
+      // GK: per-match conceded
+      players.filter(p => p.position === "GK").forEach(gk => {
+        const conceded = gk.team === RLL_CONFIG.TEAMS.SYLVANS.key ? m.cpfc : m.sylvans;
+        gkPts[gk.name] = (gkPts[gk.name] || 0) + Math.max(10 - conceded, 0);
+      });
+    });
+
+    const enriched   = players.map(p => ({
+      ...p,
+      goals:       goals[p.name]   || 0,
+      assists:     assists[p.name] || 0,
+      motmAwards:  motm[p.name]    || 0,
+      gkPts:       gkPts[p.name]   || 0,
+      fantasyPts:  calcPts(p, goals[p.name]||0, assists[p.name]||0, motm[p.name]||0, gkPts[p.name]||0),
+    }));
+
     const registered = new Set(players.map(p => p.name));
-    [...Object.keys(goals), ...Object.keys(motm)].forEach(name => {
+    [...Object.keys(goals), ...Object.keys(assists), ...Object.keys(motm)].forEach(name => {
       if (!registered.has(name)) {
-        enriched.push({ name, team: "Unknown", number: "?", bio: "", image: "", position: "", goals: goals[name] || 0, motmAwards: motm[name] || 0 });
+        enriched.push({ name, team:"Unknown", number:"?", bio:"", image:"", position:"", price:0,
+          goals:goals[name]||0, assists:assists[name]||0, motmAwards:motm[name]||0, gkPts:0,
+          fantasyPts: calcPts({position:""}, goals[name]||0, assists[name]||0, motm[name]||0, 0),
+        });
         registered.add(name);
       }
     });
     return enriched;
   }
 
-  /* ── PUBLIC HELPERS ──────────────────────────────── */
+  function calcPts(player, goals, assists, motmCount, gkPoints) {
+    const F = RLL_CONFIG.FANTASY;
+    if (player.position === "GK") return gkPoints;
+    return (goals * F.POINTS_GOAL) + (assists * F.POINTS_ASSIST) + (motmCount * F.POINTS_MOTM);
+  }
+
+  /* ── PUBLIC HELPERS ────────────────────────────── */
   function winRate(wins, played) { return !played ? "0.0" : ((wins/played)*100).toFixed(1); }
+
   function matchResult(m, team) {
     if (m.sylvans === m.cpfc) return "D";
     if (team === "sylvans") return m.sylvans > m.cpfc ? "W" : "L";
     return m.cpfc > m.sylvans ? "W" : "L";
   }
+
   function recentForm(history, team, n=5) { return history.slice(0,n).map(m => matchResult(m,team)); }
+
   function topScorers(players, n=5) {
-    return [...players].filter(p=>p.goals>0).sort((a,b)=>b.goals-a.goals||b.motmAwards-a.motmAwards).slice(0,n);
+    return [...players].filter(p=>p.goals>0)
+      .sort((a,b)=>b.goals-a.goals||b.motmAwards-a.motmAwards).slice(0,n);
   }
+
   function topMOTM(players, n=5) {
-    return [...players].filter(p=>p.motmAwards>0).sort((a,b)=>b.motmAwards-a.motmAwards||b.goals-a.goals).slice(0,n);
+    return [...players].filter(p=>p.motmAwards>0)
+      .sort((a,b)=>b.motmAwards-a.motmAwards||b.goals-a.goals).slice(0,n);
   }
 
   return { load, fetchChat, postMessage, winRate, matchResult, recentForm, topScorers, topMOTM };
