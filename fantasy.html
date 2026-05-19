@@ -205,7 +205,9 @@ let _savedSquad    = [];      // last saved version
 let _myCaptain     = "";
 let _savedCaptain  = "";
 let _budget        = RLL_CONFIG.FANTASY.BUDGET;
-let _sellHistory   = {};      // { playerName: sellCount } — always from server, persists on refresh
+let _sellHistory   = {};      // { playerName: sellCount } — from server
+let _sellsLeft     = 3;       // sells remaining — from sheet col 9
+let _hasPendingSell = false;  // true after sell click, reset after save
 let _session       = null;    // { username, token }
 let _pickerFilter  = "all";
 let _leaderboard   = [];
@@ -528,8 +530,8 @@ function renderPicker() {
             </button>
             <button class="picker-card__btn picker-card__btn--remove"
                     data-action="remove" data-name="${esc(p.name)}"
-                    ${!canSl?`disabled title="Sell limit reached (${F.MAX_SELLS}×)"`:""}>
-              ${wasSaved?`Sell (${sl} left)`:"Remove"}
+                    ${(!canSl || _hasPendingSell) ? 'disabled title="Save your squad first"' : ""}>
+              ${wasSaved ? (_hasPendingSell ? "Save first ⚠️" : "Sell (" + _sellsLeft + " left)") : "Remove"}
             </button>
           ` : `
             <button class="picker-card__btn picker-card__btn--add"
@@ -572,29 +574,32 @@ function addPlayer(name) {
   renderPicker();
 }
 
-async function removePlayer(name) {
+function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
 
   const isRealSell = _savedSquad.includes(name);
 
-  // Block if sell limit exhausted (uses server data — always accurate)
-  if (isRealSell && sellsLeft(name) <= 0) {
-    showToast('❌ Sell limit reached for ' + name + ' — ' + F.MAX_SELLS + ' sells max');
-    return;
+  if (isRealSell) {
+    // Block if no sells left
+    if (_sellsLeft <= 0) {
+      showToast('❌ No sells remaining this season');
+      return;
+    }
+    // Block if already sold someone since last save
+    if (_hasPendingSell) {
+      showToast('💾 Save your squad before selling another player');
+      return;
+    }
+    // Mark pending sell — greyes out all other sell buttons until save
+    _sellsLeft--;
+    _hasPendingSell = true;
   }
+  // If not a real sell (removing a new pick), no sell slot used
 
   _mySquad = _mySquad.filter(n => n !== name);
   if (_myCaptain === name) _myCaptain = _mySquad[0] || '';
-
-  if (isRealSell) {
-    // Auto-save immediately so sell count persists on refresh
-    renderMySquad();
-    renderPicker();
-    await saveSquad(true); // silent=true suppresses "Squad saved!" toast
-  } else {
-    // Just a new pick being undone — no server call needed
-    renderPicker();
-  }
+  renderMySquad();
+  renderPicker();
 }
 
 function setCaptain(name) {
@@ -613,11 +618,12 @@ async function saveSquad(silent = false) {
 
   try {
     const res = await apiFetch({
-      action:   "savesquad",
-      username: _session.username,
-      token:    _session.token,
-      squad:    JSON.stringify(_mySquad),
-      captain:  _myCaptain,
+      action:    "savesquad",
+      username:  _session.username,
+      token:     _session.token,
+      squad:     JSON.stringify(_mySquad),
+      captain:   _myCaptain,
+      sellsLeft: _sellsLeft,
     });
 
     if (res.error) {
@@ -631,12 +637,14 @@ async function saveSquad(silent = false) {
     }
 
     // Update local state from server response
-    _budget         = res.budget;
-    _sellHistory    = res.sellHistory || {};
-    _savedSquad     = [...res.squad];
-    _savedCaptain   = res.captain;
-    _mySquad        = [..._savedSquad];
-    _myCaptain      = _savedCaptain;
+    _budget          = res.budget;
+    _sellHistory     = res.sellHistory || {};
+    _sellsLeft       = (typeof res.sellsLeft === 'number') ? res.sellsLeft : _sellsLeft;
+    _hasPendingSell  = false;
+    _savedSquad      = [...res.squad];
+    _savedCaptain    = res.captain;
+    _mySquad         = [..._savedSquad];
+    _myCaptain       = _savedCaptain;
 
     renderUserBar();
     renderMySquad();
@@ -779,8 +787,10 @@ async function handleLogin() {
     }
 
     saveSession(res.username, res.token);
-    _budget       = res.budget      ?? F.BUDGET;
-    _sellHistory  = res.sellHistory ?? {};
+    _budget         = res.budget      ?? F.BUDGET;
+    _sellHistory    = res.sellHistory ?? {};
+    _sellsLeft      = (typeof res.sellsLeft === 'number') ? res.sellsLeft : F.MAX_SELLS;
+    _hasPendingSell = false;
     _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
     _savedCaptain   = res.captain || (_savedSquad[0]||"");
     _mySquad        = [..._savedSquad];
@@ -930,12 +940,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await apiFetch({ action:"mysquad", username:_session.username, token:_session.token });
       if (res.ok) {
-        _budget       = res.budget      ?? F.BUDGET;
-        _sellHistory  = res.sellHistory ?? {};
-            _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
-        _savedCaptain = res.captain || (_savedSquad[0]||"");
-        _mySquad     = [..._savedSquad];
-        _myCaptain   = _savedCaptain;
+        _budget         = res.budget      ?? F.BUDGET;
+        _sellHistory    = res.sellHistory ?? {};
+        _sellsLeft      = (typeof res.sellsLeft === 'number') ? res.sellsLeft : F.MAX_SELLS;
+        _hasPendingSell = false;
+        _savedSquad     = Array.isArray(res.squad) ? res.squad : [];
+        _savedCaptain   = res.captain || (_savedSquad[0]||"");
+        _mySquad        = [..._savedSquad];
+        _myCaptain      = _savedCaptain;
         onLoggedIn();
       } else {
         clearSession();
