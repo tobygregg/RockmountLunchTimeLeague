@@ -198,20 +198,21 @@
 ===================================================== */
 
 /* ── State ── */
-let _allPlayers    = [];
-let _mySquad       = [];      // array of player names (pending / saved)
-let _savedSquad    = [];      // last saved version
-let _myCaptain     = "";
-let _savedCaptain  = "";
-let _budget        = RLL_CONFIG.FANTASY.BUDGET;
-let _sellHistory   = {};      // { playerName: sellCount } — always from server, persists on refresh
-let _session       = null;    // { username, token }
-let _pickerFilter  = "all";
-let _leaderboard   = [];
+let _allPlayers   = [];
+let _mySquad      = [];   // pending (unsaved changes)
+let _savedSquad   = [];   // last server-confirmed squad
+let _myCaptain    = "";
+let _savedCaptain = "";
+let _budget       = RLL_CONFIG.FANTASY.BUDGET;
+let _sellHistory  = {};   // { name: count } — committed sells from server
+let _localSells   = {};   // { name: count } — unsaved sells this session, persisted in localStorage
+let _session      = null;
+let _pickerFilter = "all";
+let _leaderboard  = [];
 
 const F = RLL_CONFIG.FANTASY;
 
-/* ── Session ── */
+/* ── Session persistence ── */
 function saveSession(u, t) {
   localStorage.setItem("rll_fx_user",  u);
   localStorage.setItem("rll_fx_token", t);
@@ -229,6 +230,22 @@ function clearSession() {
   _session = null;
 }
 
+/* ── Local sell persistence (survives page refresh) ── */
+function loadLocalSells() {
+  if (!_session) return {};
+  try { return JSON.parse(localStorage.getItem("rll_ls_" + _session.username) || "{}"); }
+  catch { return {}; }
+}
+function saveLocalSells() {
+  if (!_session) return;
+  localStorage.setItem("rll_ls_" + _session.username, JSON.stringify(_localSells));
+}
+function clearLocalSells() {
+  if (!_session) return;
+  localStorage.removeItem("rll_ls_" + _session.username);
+  _localSells = {};
+}
+
 /* ── API ── */
 async function apiFetch(params) {
   const url = RLL_CONFIG.APPS_SCRIPT_URL + "?" + new URLSearchParams(params).toString();
@@ -238,10 +255,9 @@ async function apiFetch(params) {
   let data;
   try { data = JSON.parse(text); }
   catch(e) {
-    console.error("[RLL Fantasy] Non-JSON response:", text.substring(0, 300));
-    throw new Error("Server returned non-JSON — check Apps Script is deployed correctly");
+    console.error("[RLL Fantasy] Non-JSON:", text.substring(0, 300));
+    throw new Error("Server returned non-JSON — check Apps Script is deployed");
   }
-  console.log("[RLL Fantasy] API response for action=" + params.action + ":", data);
   return data;
 }
 
@@ -259,7 +275,7 @@ function posLabel(pos) {
 }
 function getPlayer(name) { return _allPlayers.find(p => p.name === name); }
 
-/* ── Points calculation (client-side mirror of server) ── */
+/* ── Points ── */
 function calcPts(playerName, isCaptain) {
   const p = getPlayer(playerName);
   if (!p) return 0;
@@ -269,38 +285,31 @@ function calcPts(playerName, isCaptain) {
   return isCaptain ? pts * F.CAPTAIN_MULT : pts;
 }
 
-/* ── Budget calculation ── */
+/* ── Budget ── */
 function calcUsedBudget(squad) {
   return squad.reduce((sum, name) => {
-    const p = getPlayer(name);
-    return sum + (p ? p.price : 0);
+    const p = getPlayer(name); return sum + (p ? p.price : 0);
   }, 0);
 }
-
-/* ── Pending budget (saved budget ± current changes) ── */
 function calcPendingBudget() {
-  // Start from saved state
   let b = _budget;
-  // Remove saved squad cost (as if we refunded everything)
-  _savedSquad.forEach(name => {
-    const p = getPlayer(name);
-    if (p) b += p.price;
-  });
-  // Subtract new squad cost
-  _mySquad.forEach(name => {
-    const p = getPlayer(name);
-    if (p) b -= p.price;
-  });
+  _savedSquad.forEach(name => { const p = getPlayer(name); if (p) b += p.price; });
+  _mySquad.forEach(name =>    { const p = getPlayer(name); if (p) b -= p.price; });
   return b;
 }
 
-/* ── Sell count remaining for a player ── */
+/* ── Sell tracking ─────────────────────────────────────
+   sellsLeft = MAX - committed(server) - local(unsaved)
+   _localSells only ever increments; cleared after save.
+   Stored in localStorage so it survives page refresh.
+─────────────────────────────────────────────────────── */
 function sellsLeft(name) {
-  // Always uses server-committed data — persists across refreshes
-  return F.MAX_SELLS - (_sellHistory[name] || 0);
+  const committed = _sellHistory[name]  || 0;
+  const local     = _localSells[name]   || 0;
+  return F.MAX_SELLS - committed - local;
 }
 
-/* ── Can we add a player? ── */
+/* ── Squad helpers ── */
 function canAdd(name) {
   if (_mySquad.includes(name)) return false;
   if (_mySquad.length >= F.SQUAD_SIZE) return false;
@@ -308,25 +317,20 @@ function canAdd(name) {
   if (!p) return false;
   return calcPendingBudget() >= p.price;
 }
-
-/* ── Can we sell/remove a player from pending squad? ── */
 function canSell(name) {
   if (!_mySquad.includes(name)) return false;
+  // Only check sell limit for players in the last saved squad
   if (_savedSquad.includes(name)) return sellsLeft(name) > 0;
-  return true; // un-adding a brand new pick, no sell used
+  return true; // removing a brand-new pick costs no sell slot
 }
 
-/* ── Logged in / out ── */
+/* ── UI helpers ── */
 function setLoggedIn(yes) { document.body.classList.toggle("logged-in", yes); }
-
-/* ── Show toast ── */
 function showToast(msg) {
   const t = document.getElementById("save-toast");
   t.textContent = msg; t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3000);
 }
-
-/* ── Set button loading state ── */
 function setBtnLoading(btn, loading, label) {
   btn.disabled = loading;
   if (loading) { btn.classList.add("loading"); btn.dataset.label = btn.textContent; }
@@ -334,7 +338,7 @@ function setBtnLoading(btn, loading, label) {
 }
 
 /* ─────────────────────────────────────────────────────
-   RENDER: User bar (logged-in state in hero)
+   RENDER: User bar
 ───────────────────────────────────────────────────── */
 function renderUserBar() {
   if (!_session) return;
@@ -358,7 +362,7 @@ function renderUserBar() {
 }
 
 /* ─────────────────────────────────────────────────────
-   RENDER: My current saved squad cards
+   RENDER: My Squad (saved squad with sell counts)
 ───────────────────────────────────────────────────── */
 function renderMySquad() {
   const wrap = document.getElementById("my-squad-wrap");
@@ -368,7 +372,6 @@ function renderMySquad() {
   }
   const totalPts  = _savedSquad.reduce((a,n) => a + calcPts(n, n===_savedCaptain), 0);
   const totalCost = calcUsedBudget(_savedSquad);
-
   wrap.innerHTML = `
     <div class="my-team-header">
       <div>
@@ -382,25 +385,24 @@ function renderMySquad() {
     </div>
     <div class="squad-display">
       ${_savedSquad.map(name => {
-        const p   = getPlayer(name);
-        const cap = name === _savedCaptain;
-        const pts = calcPts(name, cap);
-        const col = p ? teamColor(p.team) : "var(--text-muted)";
-        const sl  = sellsLeft(name);
+        const p    = getPlayer(name);
+        const cap  = name === _savedCaptain;
+        const pts  = calcPts(name, cap);
+        const sl   = sellsLeft(name);
         const isGK = p && p.position === "GK";
-        let breakdown = "";
-        if (p) {
-          if (isGK) breakdown = `🧤 ${p.gkPts||0}pts${cap?" · 2× cap":""}`;
-          else breakdown = `⚽${p.goals||0}g · 🎯${p.assists||0}a · ⭐${p.motmAwards||0}${cap?" · 2× cap":""}`;
-        }
+        let breakdown = p
+          ? (isGK
+              ? `🧤 ${p.gkPts||0}pts${cap?" · 2× cap":""}`
+              : `⚽${p.goals||0}g · 🎯${p.assists||0}a · ⭐${p.motmAwards||0}${cap?" · 2× cap":""}`)
+          : "";
         return `
           <div class="squad-player-card${cap?" squad-player-card--captain":""}">
             ${cap?`<div class="squad-player-card__captain-badge">⭐ Captain</div>`:""}
             <div class="squad-player-card__name player-link" data-player="${esc(name)}">${esc(name)}</div>
-            <div class="squad-player-card__pos">${p?posLabel(p.position):""} · £${p?p.price:0}</div>
+            <div class="squad-player-card__pos">${p?posLabel(p.position):"—"} · £${p?p.price:0}</div>
             <div class="squad-player-card__pts">${pts}</div>
             <div class="squad-player-card__pts-breakdown">${breakdown}</div>
-            <div style="margin-top:6px;font-size:.65rem;color:${sl>0?"var(--text-dim)":"var(--red-soft)"}">
+            <div style="margin-top:6px;font-size:.65rem;font-weight:700;color:${sl>0?"var(--text-dim)":sl===0?"var(--red-soft)":"var(--text-dim)"}">
               ${sl} sell${sl!==1?"s":""} remaining
             </div>
           </div>`;
@@ -410,27 +412,23 @@ function renderMySquad() {
 }
 
 /* ─────────────────────────────────────────────────────
-   RENDER: Budget display + pending squad strip
+   RENDER: Picker header + pending strip
 ───────────────────────────────────────────────────── */
 function renderPickerHeader() {
   const pending = calcPendingBudget();
   const budgetEl = document.getElementById("budget-val");
   const countEl  = document.getElementById("picker-count");
   const saveBtn  = document.getElementById("save-squad-btn");
-  if (budgetEl) budgetEl.textContent = pending;
-  if (countEl)  countEl.textContent  = _mySquad.length;
-  if (budgetEl) budgetEl.style.color = pending < 0 ? "var(--red-soft)" : "var(--fantasy-lt)";
+  if (budgetEl) { budgetEl.textContent = pending; budgetEl.style.color = pending < 0 ? "var(--red-soft)" : "var(--fantasy-lt)"; }
+  if (countEl)  countEl.textContent = _mySquad.length;
 
-  // Dirty check — has anything changed from saved?
   const isDirty = JSON.stringify([..._mySquad].sort()) !== JSON.stringify([..._savedSquad].sort())
                || _myCaptain !== _savedCaptain;
   if (saveBtn) saveBtn.disabled = !isDirty || _mySquad.length === 0;
 
-  // Pending squad strip
   const pendingEl = document.getElementById("pending-squad");
   if (!pendingEl) return;
   if (!_mySquad.length) { pendingEl.innerHTML = ""; return; }
-
   pendingEl.innerHTML = `
     <div class="pending-squad__inner">
       ${_mySquad.map(name => {
@@ -446,12 +444,8 @@ function renderPickerHeader() {
           </div>`;
       }).join("")}
     </div>`;
-
   pendingEl.querySelectorAll("[data-remove]").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.stopPropagation();
-      removePlayer(btn.dataset.remove);
-    });
+    btn.addEventListener("click", e => { e.stopPropagation(); removePlayer(btn.dataset.remove); });
   });
   PlayerPopup.attachAll(pendingEl);
 }
@@ -475,31 +469,27 @@ function renderPicker() {
   }
   players = [...players].sort((a,b) => b.fantasyPts - a.fantasyPts || a.price - b.price);
 
-  const pending  = calcPendingBudget();
-  const maxed    = _mySquad.length >= F.SQUAD_SIZE;
+  const pending = calcPendingBudget();
+  const maxed   = _mySquad.length >= F.SQUAD_SIZE;
 
   grid.innerHTML = players.map(p => {
-    const inSquad  = _mySquad.includes(p.name);
-    const isCap    = _myCaptain === p.name;
-    const col      = teamColor(p.team);
-    const sl       = sellsLeft(p.name);
-    const canBuy   = canAdd(p.name);
-    const canSl    = canSell(p.name);
-    const pts      = p.fantasyPts || 0;
-    const isGK     = p.position === "GK";
+    const inSquad = _mySquad.includes(p.name);
+    const isCap   = _myCaptain === p.name;
+    const sl      = sellsLeft(p.name);
+    const canBuy  = canAdd(p.name);
+    const canSl   = canSell(p.name);
+    const pts     = p.fantasyPts || 0;
+    const isGK    = p.position === "GK";
+    const wasSaved = _savedSquad.includes(p.name);
 
     let cls = "picker-card";
-    if (isCap)           cls += " selected-captain";
-    else if (inSquad)    cls += " selected";
+    if (isCap)                               cls += " selected-captain";
+    else if (inSquad)                        cls += " selected";
     else if (maxed || (!canBuy && !inSquad)) cls += " maxed";
-
-    const wasSaved  = _savedSquad.includes(p.name);
-    const isNew     = inSquad && !wasSaved;
-    const isSelling = !inSquad && wasSaved; // removed from pending
 
     return `
       <div class="${cls}" data-name="${esc(p.name)}">
-        <div class="picker-card__team-stripe" style="background:${col}"></div>
+        <div class="picker-card__team-stripe" style="background:${isCap?"var(--fantasy-gold)":inSquad?"rgba(255,255,255,.2)":"transparent"}"></div>
         <div class="picker-card__top">
           <div style="flex:1;min-width:0">
             <div class="picker-card__name player-link" data-player="${esc(p.name)}">${esc(p.name)}</div>
@@ -527,19 +517,20 @@ function renderPicker() {
             </button>
             <button class="picker-card__btn picker-card__btn--remove"
                     data-action="remove" data-name="${esc(p.name)}"
-                    ${!canSl?`disabled title="Sell limit reached (${F.MAX_SELLS}×)"`:""}>
+                    ${!canSl?`disabled title="Sell limit (${F.MAX_SELLS}×) reached"`:""}> 
               ${wasSaved?`Sell (${sl} left)`:"Remove"}
             </button>
           ` : `
             <button class="picker-card__btn picker-card__btn--add"
                     data-action="add" data-name="${esc(p.name)}"
                     ${(!canBuy||maxed)?"disabled":""}>
-              ${maxed?"Squad full":canBuy?`Buy £${p.price}`:`Need £${p.price - pending} more`}
+              ${maxed?"Squad full":canBuy?`Buy £${p.price}`:`Need £${p.price-pending} more`}
             </button>
+            ${wasSaved ? `<div style="font-size:.62rem;font-weight:700;margin-top:4px;text-align:center;color:${sl>0?"var(--gold)":"var(--red-soft)"}">
+              ${sl>0?sl+" sell"+(sl!==1?"s":"")+" left":"No sells left"}
+            </div>` : ""}
           `}
         </div>
-        ${!inSquad && wasSaved && sl < F.MAX_SELLS ? `<div style="font-size:.62rem;color:var(--gold);margin-top:4px;text-align:center;font-weight:700">${sl} sell${sl!==1?"s":""} left</div>` : ""}
-        ${!inSquad && sl === 0 ? `<div style="font-size:.62rem;color:var(--red-soft);margin-top:6px;text-align:center">Sell limit reached</div>` : ""}
       </div>`;
   }).join("");
 
@@ -564,36 +555,36 @@ function addPlayer(name) {
   if (_mySquad.includes(name)) return;
   if (_mySquad.length >= F.SQUAD_SIZE) return;
   if (!canAdd(name)) return;
-  // Re-adding a sold player does NOT auto-save — only sells trigger auto-save
   _mySquad.push(name);
   if (!_myCaptain) _myCaptain = name;
   renderMySquad();
   renderPicker();
 }
 
-async function removePlayer(name) {
+function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
 
   const isRealSell = _savedSquad.includes(name);
 
-  // Block if sell limit exhausted (uses server data — always accurate)
+  // Hard block — can't sell more than MAX_SELLS times
   if (isRealSell && sellsLeft(name) <= 0) {
-    showToast('❌ Sell limit reached for ' + name + ' — ' + F.MAX_SELLS + ' sells max');
+    showToast("❌ " + name + " — sell limit reached (" + F.MAX_SELLS + "× max)");
     return;
   }
 
-  _mySquad = _mySquad.filter(n => n !== name);
-  if (_myCaptain === name) _myCaptain = _mySquad[0] || '';
-
+  // Track the sell locally (only for saved-squad players)
+  // This increments _localSells and persists to localStorage immediately
   if (isRealSell) {
-    // Auto-save immediately so sell count persists on refresh
-    renderMySquad();
-    renderPicker();
-    await saveSquad(true); // silent=true suppresses "Squad saved!" toast
-  } else {
-    // Just a new pick being undone — no server call needed
-    renderPicker();
+    _localSells[name] = (_localSells[name] || 0) + 1;
+    saveLocalSells(); // write to localStorage so refresh keeps the count
   }
+
+  _mySquad = _mySquad.filter(n => n !== name);
+  if (_myCaptain === name) _myCaptain = _mySquad[0] || "";
+
+  // Re-render: My Squad will now show updated sell count, picker shows Add button
+  renderMySquad();
+  renderPicker();
 }
 
 function setCaptain(name) {
@@ -605,11 +596,10 @@ function setCaptain(name) {
 /* ─────────────────────────────────────────────────────
    SAVE SQUAD
 ───────────────────────────────────────────────────── */
-async function saveSquad(silent = false) {
+async function saveSquad() {
   if (!_session) return;
   const btn = document.getElementById("save-squad-btn");
   setBtnLoading(btn, true);
-
   try {
     const res = await apiFetch({
       action:   "savesquad",
@@ -621,27 +611,26 @@ async function saveSquad(silent = false) {
 
     if (res.error) {
       showToast("❌ " + res.error);
-      // Session expired?
       if (res.error.includes("Session") || res.error.includes("log in")) {
-        clearSession();
-        setLoggedIn(false);
+        clearSession(); setLoggedIn(false);
       }
       return;
     }
 
-    // Update local state from server response
-    _budget         = res.budget;
-    _sellHistory    = res.sellHistory || {};
-    _savedSquad     = [...res.squad];
-    _savedCaptain   = res.captain;
-    _mySquad        = [..._savedSquad];
-    _myCaptain      = _savedCaptain;
+    // Server committed the sells — update from server, clear local sells
+    _budget       = res.budget;
+    _sellHistory  = res.sellHistory || {};
+    clearLocalSells(); // sells now in server _sellHistory, no longer needed locally
+    _savedSquad   = [...res.squad];
+    _savedCaptain = res.captain;
+    _mySquad      = [..._savedSquad];
+    _myCaptain    = _savedCaptain;
 
     renderUserBar();
     renderMySquad();
     renderPicker();
     refreshLeaderboard();
-    if (!silent) showToast("✅ Squad saved!");
+    showToast("✅ Squad saved!");
   } catch(e) {
     showToast("❌ Failed to save — check your connection");
     console.error(e);
@@ -651,7 +640,7 @@ async function saveSquad(silent = false) {
 }
 
 /* ─────────────────────────────────────────────────────
-   RENDER: Leaderboard
+   LEADERBOARD
 ───────────────────────────────────────────────────── */
 function buildLbRow(m, rank) {
   const isMe   = _session && m.username.toLowerCase() === _session.username.toLowerCase();
@@ -674,8 +663,7 @@ function buildLbRow(m, rank) {
       ${m.breakdown&&m.breakdown.length?`
       <div class="fantasy-lb-breakdown" id="lb-bd-${rank}">
         ${m.breakdown.map(bp => {
-          const isGK = bp.isGK;
-          const detail = isGK ? `🧤${bp.gkPts||0}pt` : `⚽${bp.goals||0} 🎯${bp.assists||0} ⭐${bp.motm||0}`;
+          const detail = bp.isGK ? `🧤${bp.gkPts||0}pt` : `⚽${bp.goals||0} 🎯${bp.assists||0} ⭐${bp.motm||0}`;
           return `<div class="lb-player-chip${bp.isCaptain?" lb-player-chip--captain":""}">
             ${bp.isCaptain?"⭐ ":""}
             <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}">${esc(bp.name)}</span>
@@ -691,53 +679,44 @@ function buildLbRow(m, rank) {
 function renderLeaderboard(data) {
   const wrap = document.getElementById("leaderboard-wrap");
   _leaderboard = data;
-
   if (data.length) {
     document.getElementById("chip-managers").textContent = data.length;
     document.getElementById("chip-leader").textContent   = data[0].username;
     document.getElementById("chip-top-pts").textContent  = data[0].total + "p";
   }
-
   if (!data.length) {
     wrap.innerHTML = `<div class="no-squad"><p>No managers yet — be the first to register! 🏆</p></div>`;
     return;
   }
-
-  const top5    = data.slice(0, 5);
-  const rest    = data.slice(5);
-  const hasMore = rest.length > 0;
-
+  const top5 = data.slice(0,5), rest = data.slice(5), hasMore = rest.length > 0;
   wrap.innerHTML = `
-    <div class="fantasy-lb">${top5.map((m,i) => buildLbRow(m, i)).join("")}</div>
-    ${hasMore ? `
+    <div class="fantasy-lb">${top5.map((m,i) => buildLbRow(m,i)).join("")}</div>
+    ${hasMore?`
       <div class="fantasy-lb" id="lb-rest" style="display:none;margin-top:8px">
-        ${rest.map((m,i) => buildLbRow(m, 5+i)).join("")}
+        ${rest.map((m,i) => buildLbRow(m,5+i)).join("")}
       </div>
       <button class="lb-show-more" id="lb-show-more">
         Show all ${data.length} managers
         <svg viewBox="0 0 10 6" fill="none" style="width:10px;height:10px;margin-left:6px;vertical-align:middle;transition:transform .3s"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>` : ""}
+      </button>`:""}
   `;
-
   if (hasMore) {
     let open = false;
     document.getElementById("lb-show-more").addEventListener("click", function() {
       open = !open;
       const restEl = document.getElementById("lb-rest");
-      const svg    = this.querySelector("svg");
       restEl.style.display = open ? "" : "none";
-      svg.style.transform  = open ? "rotate(180deg)" : "";
+      this.querySelector("svg").style.transform = open ? "rotate(180deg)" : "";
       this.childNodes[0].textContent = open ? "Show less " : `Show all ${data.length} managers `;
       if (open) {
-        restEl.querySelectorAll(".fantasy-lb-row").forEach((row, i) => {
+        restEl.querySelectorAll(".fantasy-lb-row").forEach((row,i) => {
           row.style.cssText = "opacity:0;transform:translateY(8px)";
-          setTimeout(() => { row.style.cssText = "transition:opacity .3s,transform .3s;opacity:1;transform:translateY(0)"; }, i * 50);
+          setTimeout(() => { row.style.cssText = "transition:opacity .3s,transform .3s;opacity:1;transform:translateY(0)"; }, i*50);
         });
         PlayerPopup.attachAll(restEl);
       }
     });
   }
-
   wrap.querySelectorAll(".fantasy-lb-row").forEach(row => {
     row.addEventListener("click", e => {
       if (e.target.closest(".player-link")) return;
@@ -745,8 +724,21 @@ function renderLeaderboard(data) {
       if (bd) bd.classList.toggle("open");
     });
   });
-
   PlayerPopup.attachAll(wrap);
+}
+
+async function refreshLeaderboard() {
+  if (!isAppsScriptConfigured()) return;
+  try {
+    const data = await apiFetch({ action:"leaderboard" });
+    if (data && data.error) {
+      console.error("[RLL Fantasy] Leaderboard error:", data.error);
+      document.getElementById("leaderboard-wrap").innerHTML =
+        `<div class="no-squad"><p>⚠️ Leaderboard error: ${esc(data.error)}</p><p style="font-size:.8rem;margin-top:8px;color:var(--text-dim)">Check Apps Script logs: Extensions → Apps Script → Executions</p></div>`;
+      return;
+    }
+    if (Array.isArray(data)) renderLeaderboard(data);
+  } catch(e) { console.error("Leaderboard fetch error:", e); }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -758,40 +750,30 @@ async function handleLogin() {
   const errEl = document.getElementById("login-error");
   const btn   = document.getElementById("login-btn");
   errEl.textContent = "";
-
   if (!user) { errEl.textContent = "Please enter your username"; return; }
   if (!pass) { errEl.textContent = "Please enter your password"; return; }
-  if (!isAppsScriptConfigured()) { errEl.textContent = "Apps Script not configured — see setup instructions"; return; }
-
+  if (!isAppsScriptConfigured()) { errEl.textContent = "Apps Script not configured"; return; }
   setBtnLoading(btn, true);
   try {
     const res = await apiFetch({ action:"login", username:user, password:pass });
     if (res.error) { errEl.textContent = res.error; return; }
     if (!res.ok) {
-      console.error("[RLL Fantasy] Unexpected login response:", res);
-      if (Array.isArray(res)) {
-        errEl.textContent = "Apps Script not updated — please re-deploy your script";
-      } else {
-        errEl.textContent = "Unexpected response — check browser console for details";
-      }
+      errEl.textContent = Array.isArray(res) ? "Apps Script not updated — please re-deploy" : "Unexpected response — check console";
       return;
     }
-
     saveSession(res.username, res.token);
     _budget       = res.budget      ?? F.BUDGET;
     _sellHistory  = res.sellHistory ?? {};
+    _localSells   = loadLocalSells(); // restore unsaved sells from localStorage
     _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
-    _savedCaptain   = res.captain || (_savedSquad[0]||"");
-    _mySquad        = [..._savedSquad];
-    _myCaptain      = _savedCaptain;
-
+    _savedCaptain = res.captain || (_savedSquad[0] || "");
+    _mySquad      = [..._savedSquad];
+    _myCaptain    = _savedCaptain;
     onLoggedIn();
   } catch(e) {
     errEl.textContent = "Connection error — please try again";
     console.error(e);
-  } finally {
-    setBtnLoading(btn, false, "Sign In");
-  }
+  } finally { setBtnLoading(btn, false, "Sign In"); }
 }
 
 async function handleRegister() {
@@ -800,48 +782,37 @@ async function handleRegister() {
   const errEl = document.getElementById("reg-error");
   const btn   = document.getElementById("reg-btn");
   errEl.textContent = "";
-
   if (!user) { errEl.textContent = "Please enter a username"; return; }
   if (!pass) { errEl.textContent = "Please enter a password"; return; }
-  if (!isAppsScriptConfigured()) { errEl.textContent = "Apps Script not configured — see setup instructions"; return; }
-
+  if (!isAppsScriptConfigured()) { errEl.textContent = "Apps Script not configured"; return; }
   setBtnLoading(btn, true);
   try {
     const res = await apiFetch({ action:"register", username:user, password:pass });
     if (res.error) { errEl.textContent = res.error; return; }
     if (!res.ok) {
-      console.error("[RLL Fantasy] Unexpected register response:", res);
-      // If it's an array, the old Apps Script is still deployed
-      if (Array.isArray(res)) {
-        errEl.textContent = "Apps Script not updated — please re-deploy your script (see google-apps-script.js)";
-      } else {
-        errEl.textContent = "Unexpected response from server — check browser console for details";
-      }
+      errEl.textContent = Array.isArray(res) ? "Apps Script not updated — please re-deploy" : "Unexpected response — check console";
       return;
     }
-
     saveSession(res.username, res.token);
-    _budget      = res.budget      ?? F.BUDGET;
-    _sellHistory = {};
-    _savedSquad  = [];
+    _budget       = res.budget ?? F.BUDGET;
+    _sellHistory  = {};
+    _localSells   = {};
+    _savedSquad   = [];
     _savedCaptain = "";
-    _mySquad     = [];
-    _myCaptain   = "";
-
+    _mySquad      = [];
+    _myCaptain    = "";
     onLoggedIn();
     showToast(`🎉 Welcome ${res.username}! Budget: £${_budget}`);
   } catch(e) {
     errEl.textContent = "Connection error — please try again";
     console.error(e);
-  } finally {
-    setBtnLoading(btn, false, "Create Account");
-  }
+  } finally { setBtnLoading(btn, false, "Create Account"); }
 }
 
 function logout() {
   clearSession();
   _savedSquad = []; _mySquad = []; _myCaptain = ""; _savedCaptain = "";
-  _budget = F.BUDGET; _sellHistory = {};
+  _budget = F.BUDGET; _sellHistory = {}; _localSells = {};
   setLoggedIn(false);
   document.getElementById("user-bar-inner").innerHTML = "";
   renderPicker();
@@ -857,39 +828,17 @@ function onLoggedIn() {
 }
 
 /* ─────────────────────────────────────────────────────
-   LEADERBOARD FETCH
-───────────────────────────────────────────────────── */
-async function refreshLeaderboard() {
-  if (!isAppsScriptConfigured()) return;
-  try {
-    const data = await apiFetch({ action:"leaderboard" });
-    if (data && data.error) {
-      console.error("[RLL Fantasy] Leaderboard error from server:", data.error);
-      document.getElementById("leaderboard-wrap").innerHTML =
-        `<div class="no-squad"><p>⚠️ Leaderboard error: ${esc(data.error)}</p><p style="font-size:.8rem;margin-top:8px;color:var(--text-dim)">Check Apps Script logs: Extensions → Apps Script → Executions</p></div>`;
-      return;
-    }
-    if (Array.isArray(data)) renderLeaderboard(data);
-  } catch(e) {
-    console.error("Leaderboard fetch error:", e);
-  }
-}
-
-/* ─────────────────────────────────────────────────────
    INIT
 ───────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
-
   if (!isAppsScriptConfigured()) {
     document.getElementById("setup-notice").style.display = "";
   }
 
-  // Load player data
   const data  = await RLLData.load();
   _allPlayers = data.players || [];
   window.__RLL_PLAYERS__ = _allPlayers;
 
-  // Auth tabs
   document.querySelectorAll(".auth-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
@@ -899,7 +848,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Auth buttons + enter key
   document.getElementById("login-btn").addEventListener("click", handleLogin);
   document.getElementById("reg-btn").addEventListener("click", handleRegister);
   document.getElementById("login-user").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("login-pass").focus(); });
@@ -907,10 +855,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("reg-user").addEventListener("keydown",   e => { if(e.key==="Enter") document.getElementById("reg-pass").focus(); });
   document.getElementById("reg-pass").addEventListener("keydown",   e => { if(e.key==="Enter") handleRegister(); });
 
-  // Save squad
   document.getElementById("save-squad-btn").addEventListener("click", saveSquad);
 
-  // Picker filters
   document.querySelectorAll(".picker-filter").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".picker-filter").forEach(b => b.classList.remove("active"));
@@ -920,39 +866,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // MutationObserver for player popups
   const obs = new MutationObserver(() => PlayerPopup.attachAll(document));
   obs.observe(document.body, { childList:true, subtree:true });
 
-  // Try restore session
   if (isAppsScriptConfigured() && loadSession()) {
     try {
       const res = await apiFetch({ action:"mysquad", username:_session.username, token:_session.token });
       if (res.ok) {
         _budget       = res.budget      ?? F.BUDGET;
         _sellHistory  = res.sellHistory ?? {};
-            _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
-        _savedCaptain = res.captain || (_savedSquad[0]||"");
-        _mySquad     = [..._savedSquad];
-        _myCaptain   = _savedCaptain;
+        _localSells   = loadLocalSells(); // restore unsaved sells
+        _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
+        _savedCaptain = res.captain || (_savedSquad[0] || "");
+        _mySquad      = [..._savedSquad];
+        _myCaptain    = _savedCaptain;
         onLoggedIn();
       } else {
-        clearSession();
-        renderPicker();
-        refreshLeaderboard();
+        clearSession(); renderPicker(); refreshLeaderboard();
       }
     } catch {
-      clearSession();
-      renderPicker();
-      refreshLeaderboard();
+      clearSession(); renderPicker(); refreshLeaderboard();
     }
   } else {
     renderPicker();
     if (isAppsScriptConfigured()) refreshLeaderboard();
-    else {
-      document.getElementById("leaderboard-wrap").innerHTML =
-        `<div class="no-squad"><p>⚙️ Set up Apps Script to see the leaderboard.</p></div>`;
-    }
+    else document.getElementById("leaderboard-wrap").innerHTML =
+      `<div class="no-squad"><p>⚙️ Set up Apps Script to see the leaderboard.</p></div>`;
   }
 
   document.querySelectorAll(".reveal").forEach(el => {
