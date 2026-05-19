@@ -204,8 +204,7 @@ let _savedSquad   = [];   // last server-confirmed squad
 let _myCaptain    = "";
 let _savedCaptain = "";
 let _budget       = RLL_CONFIG.FANTASY.BUDGET;
-let _sellHistory  = {};   // { name: count } — committed sells from server
-let _localSells   = {};   // { name: count } — unsaved sells this session, persisted in localStorage
+let _sellHistory  = {};   // { name: count } — always from server, always accurate
 let _session      = null;
 let _pickerFilter = "all";
 let _leaderboard  = [];
@@ -228,22 +227,6 @@ function clearSession() {
   localStorage.removeItem("rll_fx_user");
   localStorage.removeItem("rll_fx_token");
   _session = null;
-}
-
-/* ── Local sell persistence (survives page refresh) ── */
-function loadLocalSells() {
-  if (!_session) return {};
-  try { return JSON.parse(localStorage.getItem("rll_ls_" + _session.username) || "{}"); }
-  catch { return {}; }
-}
-function saveLocalSells() {
-  if (!_session) return;
-  localStorage.setItem("rll_ls_" + _session.username, JSON.stringify(_localSells));
-}
-function clearLocalSells() {
-  if (!_session) return;
-  localStorage.removeItem("rll_ls_" + _session.username);
-  _localSells = {};
 }
 
 /* ── API ── */
@@ -300,13 +283,11 @@ function calcPendingBudget() {
 
 /* ── Sell tracking ─────────────────────────────────────
    sellsLeft = MAX - committed(server) - local(unsaved)
-   _localSells only ever increments; cleared after save.
+   Sell counts always come from server — accurate on every refresh.
    Stored in localStorage so it survives page refresh.
 ─────────────────────────────────────────────────────── */
 function sellsLeft(name) {
-  const committed = _sellHistory[name]  || 0;
-  const local     = _localSells[name]   || 0;
-  return F.MAX_SELLS - committed - local;
+  return F.MAX_SELLS - (_sellHistory[name] || 0);
 }
 
 /* ── Squad helpers ── */
@@ -561,28 +542,32 @@ function addPlayer(name) {
   renderPicker();
 }
 
-function removePlayer(name) {
+async function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
 
   const isRealSell = _savedSquad.includes(name);
 
-  // Hard block — can't sell more than MAX_SELLS times
+  // Hard block before even calling server
   if (isRealSell && sellsLeft(name) <= 0) {
     showToast("❌ " + name + " — sell limit reached (" + F.MAX_SELLS + "× max)");
     return;
   }
 
-  // Track the sell locally (only for saved-squad players)
-  // This increments _localSells and persists to localStorage immediately
   if (isRealSell) {
-    _localSells[name] = (_localSells[name] || 0) + 1;
-    saveLocalSells(); // write to localStorage so refresh keeps the count
+    // Call server immediately — records sell in sheet, returns updated sellHistory
+    try {
+      const res = await apiFetch({ action:"recordsell", username:_session.username, token:_session.token, player:name });
+      if (res.error) { showToast("❌ " + res.error); return; }
+      // Update _sellHistory from server — now accurate and persists on refresh
+      _sellHistory = res.sellHistory;
+    } catch(e) {
+      showToast("❌ Failed to record sell — check connection");
+      return;
+    }
   }
 
   _mySquad = _mySquad.filter(n => n !== name);
   if (_myCaptain === name) _myCaptain = _mySquad[0] || "";
-
-  // Re-render: My Squad will now show updated sell count, picker shows Add button
   renderMySquad();
   renderPicker();
 }
@@ -620,7 +605,6 @@ async function saveSquad() {
     // Server committed the sells — update from server, clear local sells
     _budget       = res.budget;
     _sellHistory  = res.sellHistory || {};
-    clearLocalSells(); // sells now in server _sellHistory, no longer needed locally
     _savedSquad   = [...res.squad];
     _savedCaptain = res.captain;
     _mySquad      = [..._savedSquad];
@@ -764,7 +748,6 @@ async function handleLogin() {
     saveSession(res.username, res.token);
     _budget       = res.budget      ?? F.BUDGET;
     _sellHistory  = res.sellHistory ?? {};
-    _localSells   = loadLocalSells(); // restore unsaved sells from localStorage
     _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
     _savedCaptain = res.captain || (_savedSquad[0] || "");
     _mySquad      = [..._savedSquad];
@@ -796,7 +779,6 @@ async function handleRegister() {
     saveSession(res.username, res.token);
     _budget       = res.budget ?? F.BUDGET;
     _sellHistory  = {};
-    _localSells   = {};
     _savedSquad   = [];
     _savedCaptain = "";
     _mySquad      = [];
@@ -812,7 +794,7 @@ async function handleRegister() {
 function logout() {
   clearSession();
   _savedSquad = []; _mySquad = []; _myCaptain = ""; _savedCaptain = "";
-  _budget = F.BUDGET; _sellHistory = {}; _localSells = {};
+  _budget = F.BUDGET; _sellHistory = {};
   setLoggedIn(false);
   document.getElementById("user-bar-inner").innerHTML = "";
   renderPicker();
@@ -875,8 +857,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok) {
         _budget       = res.budget      ?? F.BUDGET;
         _sellHistory  = res.sellHistory ?? {};
-        _localSells   = loadLocalSells(); // restore unsaved sells
-        _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
+            _savedSquad   = Array.isArray(res.squad) ? res.squad : [];
         _savedCaptain = res.captain || (_savedSquad[0] || "");
         _mySquad      = [..._savedSquad];
         _myCaptain    = _savedCaptain;
