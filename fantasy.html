@@ -542,27 +542,32 @@ function addPlayer(name) {
   renderPicker();
 }
 
+let _sellInProgress = false; // prevent double-clicks
+
 async function removePlayer(name) {
   if (!_mySquad.includes(name)) return;
+  if (_sellInProgress) return; // ignore clicks while a sell is in progress
 
   const isRealSell = _savedSquad.includes(name);
 
-  // Hard block before even calling server
   if (isRealSell && sellsLeft(name) <= 0) {
     showToast("❌ " + name + " — sell limit reached (" + F.MAX_SELLS + "× max)");
     return;
   }
 
   if (isRealSell) {
-    // Call server immediately — records sell in sheet, returns updated sellHistory
+    _sellInProgress = true;
+    // Disable all sell buttons visually
+    document.querySelectorAll("[data-action='remove']").forEach(b => b.disabled = true);
     try {
       const res = await apiFetch({ action:"recordsell", username:_session.username, token:_session.token, player:name });
       if (res.error) { showToast("❌ " + res.error); return; }
-      // Update _sellHistory from server — now accurate and persists on refresh
-      _sellHistory = res.sellHistory;
+      _sellHistory = res.sellHistory; // server is now source of truth
     } catch(e) {
       showToast("❌ Failed to record sell — check connection");
       return;
+    } finally {
+      _sellInProgress = false;
     }
   }
 
