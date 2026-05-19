@@ -842,7 +842,7 @@ async function handleRegister() {
 function logout() {
   clearSession();
   _savedSquad = []; _mySquad = []; _myCaptain = ""; _savedCaptain = "";
-  _budget = F.BUDGET; _sellHistory = {};
+  _budget = F.BUDGET; _sellHistory = {}; _sellsLeft = F.MAX_SELLS; _hasPendingSell = false;
   setLoggedIn(false);
   document.getElementById("user-bar-inner").innerHTML = "";
   renderPicker();
