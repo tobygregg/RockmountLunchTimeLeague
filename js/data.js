@@ -53,7 +53,8 @@ const RLLData = (() => {
         bio:      C.BIO      != null ? (r[C.BIO]      || "").trim() : "",
         image:    C.IMAGE    != null ? (r[C.IMAGE]    || "").trim() : "",
         position: C.POSITION != null ? (r[C.POSITION] || "").trim().toUpperCase() : "",
-        price:    C.PRICE    != null ? (parseFloat(r[C.PRICE]) || 0) : 0,
+        price:    C.PRICE     != null ? (parseFloat(r[C.PRICE])     || 0) : 0,
+        addedPts: C.ADDED_PTS != null ? (parseFloat(r[C.ADDED_PTS]) || 0) : 0,
       }));
   }
 
@@ -194,6 +195,7 @@ const RLLData = (() => {
       assists:     assists[p.name] || 0,
       motmAwards:  motm[p.name]    || 0,
       gkPts:       gkPts[p.name]   || 0,
+      addedPts:    p.addedPts      || 0,
       fantasyPts:  calcPts(p, goals[p.name]||0, assists[p.name]||0, motm[p.name]||0, gkPts[p.name]||0),
     }));
 
@@ -212,8 +214,9 @@ const RLLData = (() => {
 
   function calcPts(player, goals, assists, motmCount, gkPoints) {
     const F = RLL_CONFIG.FANTASY || { POINTS_GOAL:2, POINTS_ASSIST:1, POINTS_MOTM:6 };
-    if ((player.position || "") === "GK") return gkPoints || 0;
-    return ((goals||0) * F.POINTS_GOAL) + ((assists||0) * F.POINTS_ASSIST) + ((motmCount||0) * F.POINTS_MOTM);
+    const added = player.addedPts || 0;
+    if ((player.position || "") === "GK") return (gkPoints || 0) + added;
+    return ((goals||0) * F.POINTS_GOAL) + ((assists||0) * F.POINTS_ASSIST) + ((motmCount||0) * F.POINTS_MOTM) + added;
   }
 
   /* ── PUBLIC HELPERS ────────────────────────────── */
