@@ -40,7 +40,7 @@ const RLL_CONFIG = {
      Position and Price can be empty for some players — fine.
   ─────────────────────────────────────────────────── */
   PLAYERS_RANGE: "K26:Q49",
-  PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6 },
+  PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6, ADDED_PTS:7 },
 
   /* ── ANNOUNCEMENTS ─────────────────────────────────
      Tab name: Announcements  |  Cols: Date | Message
