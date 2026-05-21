@@ -133,13 +133,13 @@
 
     <!-- ── MAIN TEAM POINTS DISPLAY ── -->
     <div class="hero__teams" id="hero-teams">
-      <!-- Sylvans -->
+      <!-- SBFC -->
       <a class="hero__team hero__team--sylvans" href="sylvans.html" data-transition>
         <img
           class="team-logo team-logo--sylvans"
-          src="assets/sbfc.png"
+          src="assets/SBFC.png"
           onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))"
-          alt="Sam Bader FC"
+          alt="Samuel Bader FC"
         />
         <span class="hero__team-name">Samuel Bader FC</span>
         <div class="hero__team-pts" id="hero-syl-pts">
@@ -242,7 +242,7 @@
 <footer class="footer">
   <p>© 2025 Rockmount Lunchtime League. All rights reserved.</p>
   <nav class="footer__links">
-    <a href="sylvans.html" data-transition>Sam Bader FC</a>
+    <a href="sylvans.html" data-transition>Samuel Bader FC</a>
     <a href="cpfc.html"    data-transition>Charlie Prevost FC</a>
     <a href="history.html" data-transition>History</a>
     <a href="announcements.html"   data-transition>About</a>
@@ -314,14 +314,14 @@
     /* Wins comparison bar */
     document.getElementById("wins-wrap").innerHTML =
       buildComparisonBar(data,
-        "Sylvans", data.sylvansWins,
+        "SBFC", data.sylvansWins,
         "CP FC",   data.cpfcWins
       );
 
     /* Goals comparison bar */
     document.getElementById("goals-wrap").innerHTML =
       buildComparisonBar(data,
-        "Sylvans", data.sylvansGoalsFor,
+        "SBFC", data.sylvansGoalsFor,
         "CP FC",   data.cpfcGoalsFor
       );
 
@@ -336,7 +336,7 @@
         </div>
         ${buildStandingsRow(
           sylLead ? 1 : 2,
-          "Sylvans FC", data.sylvansPlayed, data.sylvansWins, data.sylvansDraws,
+          "Samuel Bader FC", data.sylvansPlayed, data.sylvansWins, data.sylvansDraws,
           data.sylvansLosses, data.sylvansGoalsFor, data.sylvansGoalsAgainst, data.sylvansPoints,
           "sylvans"
         )}
