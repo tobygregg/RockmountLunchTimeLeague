@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
   <title>Charlie Prevost FC — Rockmount Lunchtime League</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
@@ -54,8 +53,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Sylvans FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> CP FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -66,6 +65,7 @@
       </ul>
     </li>
     <li class="nav__item"><a class="nav__link" href="announcements.html" data-transition>About</a></li>
+    <li class="nav__item"><a class="nav__link" href="tv.html" data-transition>📺 RLL TV</a></li>
     <li class="nav__item nav__item--fantasy"><a class="nav__link" href="fantasy.html" data-transition style="color:#a855f7">&#x26A1; Fantasy</a></li>
   </ul>
   <button class="nav__toggle" aria-label="Toggle menu" id="nav-toggle"><span></span><span></span><span></span></button>
@@ -134,7 +134,7 @@
   <p>© 2025 Rockmount Lunchtime League</p>
   <nav class="footer__links">
     <a href="index.html"    data-transition>Home</a>
-    <a href="sylvans.html"  data-transition>Sylvans FC</a>
+    <a href="sylvans.html"  data-transition>Samuel Bader FC</a>
     <a href="players.html"  data-transition>Players</a>
     <a href="history.html"  data-transition>History</a>
   </nav>
@@ -203,10 +203,10 @@
     const pctSyl  = 100 - pctCpfc - pctDraw;
     document.getElementById("h2h-wrap").innerHTML = `
       <div class="head-to-head">
-        <div class="h2h-title">Charlie Prevost FC vs Sylvans FC</div>
+        <div class="h2h-title">Charlie Prevost FC vs Samuel Bader FC</div>
         <div class="h2h-bar-wrap comparison-bar">
           <div class="h2h-row">
-            <span class="h2h-label text-cpfc">CP FC</span>
+            <span class="h2h-label text-cpfc">Charlie Prevost FC</span>
             <div class="h2h-track"><div class="h2h-fill h2h-fill--cpfc comparison-bar__fill" data-pct="${pctCpfc}"></div></div>
             <span class="h2h-val text-cpfc">${data.cpfcWins}</span>
           </div>
@@ -216,7 +216,7 @@
             <span class="h2h-val text-muted">${data.cpfcDraws}</span>
           </div>
           <div class="h2h-row">
-            <span class="h2h-label text-sylvans">Sylvans</span>
+            <span class="h2h-label text-sylvans">SBFC</span>
             <div class="h2h-track"><div class="h2h-fill h2h-fill--syl comparison-bar__fill" data-pct="${pctSyl}"></div></div>
             <span class="h2h-val text-sylvans">${data.sylvansWins}</span>
           </div>
