@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Match History — Rockmount Lunchtime League</title>
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .history-hero {
@@ -116,8 +115,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Sylvans FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> CP FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -128,6 +127,7 @@
       </ul>
     </li>
     <li class="nav__item"><a class="nav__link" href="announcements.html" data-transition>About</a></li>
+    <li class="nav__item"><a class="nav__link" href="tv.html" data-transition>📺 RLL TV</a></li>
     <li class="nav__item nav__item--fantasy"><a class="nav__link" href="fantasy.html" data-transition style="color:#a855f7">&#x26A1; Fantasy</a></li>
   </ul>
   <button class="nav__toggle" aria-label="Toggle menu" id="nav-toggle"><span></span><span></span><span></span></button>
@@ -149,7 +149,7 @@
       </div>
       <div class="summary-chip">
         <div class="summary-chip__val text-sylvans" id="syl-wins-chip">—</div>
-        <div class="summary-chip__lbl">Sylvans Wins</div>
+        <div class="summary-chip__lbl">SBFC Wins</div>
       </div>
       <div class="summary-chip">
         <div class="summary-chip__val" id="draws-chip">—</div>
@@ -157,7 +157,7 @@
       </div>
       <div class="summary-chip">
         <div class="summary-chip__val text-cpfc" id="cpfc-wins-chip">—</div>
-        <div class="summary-chip__lbl">CP FC Wins</div>
+        <div class="summary-chip__lbl">Charlie Prevost FC Wins</div>
       </div>
       <div class="summary-chip">
         <div class="summary-chip__val text-gold" id="total-goals-chip">—</div>
@@ -174,8 +174,8 @@
     <!-- Filters -->
     <div class="filters">
       <button class="filter-btn active"     data-filter="all">All Games</button>
-      <button class="filter-btn filter-btn--syl"  data-filter="sylvans">Sylvans Wins</button>
-      <button class="filter-btn filter-btn--cpfc" data-filter="cpfc">CP FC Wins</button>
+      <button class="filter-btn filter-btn--syl"  data-filter="sbfc">SBFC Wins</button>
+      <button class="filter-btn filter-btn--cpfc" data-filter="cpfc">Charlie Prevost FC Wins</button>
       <button class="filter-btn filter-btn--draw" data-filter="draw">Draws</button>
     </div>
 
@@ -207,8 +207,8 @@
   <p>© 2025 Rockmount Lunchtime League</p>
   <nav class="footer__links">
     <a href="index.html"   data-transition>Home</a>
-    <a href="sylvans.html" data-transition>Sylvans FC</a>
-    <a href="cpfc.html"    data-transition>CP FC</a>
+    <a href="sylvans.html" data-transition>Samuel Bader FC</a>
+    <a href="cpfc.html"    data-transition>Charlie Prevost FC</a>
   </nav>
 </footer>
 
@@ -221,7 +221,7 @@
   function renderList(filter) {
     const filtered = allHistory.filter(m => {
       if (filter === "all")    return true;
-      if (filter === "sylvans") return m.sylvans > m.cpfc;
+      if (filter === "sbfc") return m.sylvans > m.cpfc;
       if (filter === "cpfc")   return m.cpfc > m.sylvans;
       if (filter === "draw")   return m.sylvans === m.cpfc;
     });
@@ -286,7 +286,7 @@
           <span style="color:var(--text-dim)"> — </span>
           <span class="${biggestWin.cpfc > biggestWin.sylvans ? 'text-cpfc' : 'text-sylvans'}">${biggestWin.cpfc}</span>
         </div>
-        <div class="bw-teams">Sylvans FC vs CP FC</div>
+        <div class="bw-teams">Samuel Bader FC vs Charlie Prevost FC</div>
         <div class="bw-date">${biggestWin.date}</div>
       </div>` : ""}
       ${highScoring ? `
@@ -300,11 +300,11 @@
         <div class="history-stat-card__title">Goals Breakdown</div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.82rem;color:var(--text-muted)">Sylvans FC</span>
+            <span style="font-size:0.82rem;color:var(--text-muted)">Samuel Bader FC</span>
             <span style="font-family:var(--font-d);font-size:1.5rem;color:var(--sylvans)">${data.sylvansGoalsFor}</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:0.82rem;color:var(--text-muted)">CP FC</span>
+            <span style="font-size:0.82rem;color:var(--text-muted)">Charlie Prevost FC</span>
             <span style="font-family:var(--font-d);font-size:1.5rem;color:var(--cpfc)">${data.cpfcGoalsFor}</span>
           </div>
         </div>
