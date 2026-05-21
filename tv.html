@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RLL TV — Rockmount Lunchtime League</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    /* ── TV Hero ── */
+    .tv-hero {
+      padding: calc(var(--nav-h) + clamp(70px,10vw,110px)) var(--pad-x) clamp(48px,7vw,80px);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .tv-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .tv-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 55% at 50% 120%, rgba(0,0,0,.9) 0%, transparent 65%),
+                  radial-gradient(ellipse 50% 50% at 20% 50%, rgba(230,48,48,.05) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 50% at 80% 50%, rgba(26,109,212,.05) 0%, transparent 60%);
+    }
+    .tv-hero__inner { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+    .tv-hero__eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .7rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--text-muted); border: 1px solid var(--border-md);
+      padding: 6px 16px; border-radius: 100px; margin-bottom: 18px;
+    }
+    .tv-hero__title {
+      font-family: var(--font-d);
+      font-size: clamp(3rem,10vw,8rem);
+      line-height: .88; letter-spacing: .04em;
+      background: linear-gradient(170deg, #fff 0%, rgba(255,255,255,.5) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 14px;
+    }
+    .tv-hero__sub {
+      font-size: clamp(.88rem,2.2vw,1rem);
+      color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* ── Featured (latest) video ── */
+    .tv-featured {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: clamp(32px,5vw,56px);
+    }
+    .tv-featured__embed {
+      position: relative; width: 100%; padding-top: 56.25%;
+      background: #000;
+    }
+    .tv-featured__embed iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    .tv-featured__info {
+      padding: clamp(22px,3vw,36px);
+    }
+    .tv-featured__badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .68rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--red-soft);
+      background: rgba(255,71,87,.1); border: 1px solid rgba(255,71,87,.25);
+      padding: 4px 12px; border-radius: 100px; margin-bottom: 14px;
+    }
+    .tv-featured__title {
+      font-family: var(--font-d);
+      font-size: clamp(1.6rem,4vw,3rem);
+      letter-spacing: .04em; line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .tv-featured__date {
+      font-size: .75rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 14px;
+    }
+    .tv-featured__desc {
+      font-size: clamp(.88rem,2vw,1rem);
+      line-height: 1.75; color: var(--text-muted);
+      max-width: 700px;
+    }
+
+    /* ── Video grid ── */
+    .tv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      gap: clamp(14px,2vw,20px);
+    }
+    .tv-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color var(--t), transform var(--t) var(--ease);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tv-card:hover { border-color: var(--border-md); transform: translateY(-3px); }
+    .tv-card__embed {
+      position: relative; width: 100%; padding-top: 56.25%;
+      background: #000;
+    }
+    .tv-card__embed iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    .tv-card__info { padding: 16px 18px 18px; }
+    .tv-card__date {
+      font-size: .65rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    .tv-card__title {
+      font-family: var(--font-d);
+      font-size: 1.25rem; letter-spacing: .04em;
+      line-height: 1.2; margin-bottom: 8px;
+    }
+    .tv-card__desc {
+      font-size: .82rem; line-height: 1.6;
+      color: var(--text-muted);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tv-empty {
+      text-align: center; padding: 64px 20px;
+      color: var(--text-muted); font-size: .88rem;
+    }
+    .tv-empty__icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+    @media (max-width: 640px) {
+      .tv-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-transition"></div>
+
+<nav class="nav" id="main-nav">
+  <a class="nav__logo" href="index.html" data-transition>RLL</a>
+  <ul class="nav__links" id="nav-links">
+    <li class="nav__item"><a class="nav__link" href="index.html" data-transition>Home</a></li>
+    <li class="nav__item" id="dd-teams">
+      <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <ul class="nav__dropdown">
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
+      </ul>
+    </li>
+    <li class="nav__item" id="dd-stats">
+      <button class="nav__item-btn" data-dropdown="stats">Stats<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <ul class="nav__dropdown">
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="players.html" data-transition><span class="nav__dropdown-link__icon">👤</span> Players</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="history.html" data-transition><span class="nav__dropdown-link__icon">📋</span> History</a></li>
+      </ul>
+    </li>
+    <li class="nav__item"><a class="nav__link" href="announcements.html" data-transition>About</a></li>
+    <li class="nav__item"><a class="nav__link active" href="tv.html" data-transition>📺 RLL TV</a></li>
+    <li class="nav__item nav__item--fantasy"><a class="nav__link" href="fantasy.html" data-transition style="color:#a855f7">&#x26A1; Fantasy</a></li>
+  </ul>
+  <button class="nav__toggle" aria-label="Toggle menu" id="nav-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="tv-hero">
+  <div class="tv-hero__inner">
+    <div class="tv-hero__eyebrow">📺 Official Channel</div>
+    <h1 class="tv-hero__title">RLL TV</h1>
+    <p class="tv-hero__sub">The home of Rockmount Lunchtime League video content. Match highlights, goals, and more.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div id="tv-content">
+      <div class="loading">Loading videos</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>© 2025 Rockmount Lunchtime League</p>
+  <nav class="footer__links">
+    <a href="index.html" data-transition>Home</a>
+    <a href="players.html" data-transition>Players</a>
+    <a href="history.html" data-transition>History</a>
+  </nav>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ── Extract YouTube video ID from any YouTube URL ── */
+function getYouTubeId(url) {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+function embedUrl(videoId) {
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+}
+
+function fmtDate(raw) {
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (!isNaN(d)) return d.toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  return String(raw);
+}
+
+async function fetchVideos() {
+  try {
+    const C = RLL_CONFIG.TV_COLS;
+    const url = sheetUrlDirect(RLL_CONFIG.TV_RANGE);
+    const res  = await fetch(url);
+    const text = await res.text();
+    const rows = text.trim().split("\n").map(parseCSVRow);
+    return rows
+      .filter(r => r[C.TITLE] && r[C.URL])
+      .map(r => ({
+        title:  r[C.TITLE].trim(),
+        desc:   (r[C.DESCRIPTION] || "").trim(),
+        date:   (r[C.DATE] || "").trim(),
+        url:    r[C.URL].trim(),
+      }))
+      .reverse(); // furthest down = newest = first
+  } catch(e) {
+    console.error("TV fetch error:", e);
+    return [];
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const videos = isSheetConfigured() ? await fetchVideos() : [];
+  const wrap   = document.getElementById("tv-content");
+
+  if (!videos.length) {
+    wrap.innerHTML = `
+      <div class="tv-empty">
+        <div class="tv-empty__icon">📺</div>
+        <p>${isSheetConfigured() ? "No videos yet — add some to the RLL TV tab in your sheet!" : "Add your Sheet ID to config.js to load videos."}</p>
+      </div>`;
+    return;
+  }
+
+  const [latest, ...rest] = videos;
+  const latestId = getYouTubeId(latest.url);
+
+  let html = "";
+
+  // ── Featured latest video ─────────────────────────────────
+  if (latestId) {
+    html += `
+      <div class="tv-featured reveal">
+        <div class="tv-featured__embed">
+          <iframe src="${embedUrl(latestId)}" title="${latest.title}"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen loading="lazy"></iframe>
+        </div>
+        <div class="tv-featured__info">
+          <div class="tv-featured__badge">🔴 Latest</div>
+          <h2 class="tv-featured__title">${latest.title}</h2>
+          ${latest.date ? `<div class="tv-featured__date">📅 ${fmtDate(latest.date)}</div>` : ""}
+          ${latest.desc ? `<p class="tv-featured__desc">${latest.desc}</p>` : ""}
+        </div>
+      </div>`;
+  }
+
+  // ── Rest of videos ────────────────────────────────────────
+  if (rest.length) {
+    html += `<h2 class="section-title reveal" style="margin-bottom:clamp(18px,3vw,28px)"><span>More</span> Videos</h2>`;
+    html += `<div class="tv-grid">`;
+    html += rest.map((v, i) => {
+      const vid = getYouTubeId(v.url);
+      if (!vid) return "";
+      return `
+        <div class="tv-card reveal" style="transition-delay:${i*50}ms">
+          <div class="tv-card__embed">
+            <iframe src="${embedUrl(vid)}" title="${v.title}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="tv-card__info">
+            ${v.date ? `<div class="tv-card__date">📅 ${fmtDate(v.date)}</div>` : ""}
+            <div class="tv-card__title">${v.title}</div>
+            ${v.desc ? `<div class="tv-card__desc">${v.desc}</div>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+    html += `</div>`;
+  }
+
+  wrap.innerHTML = html;
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (!el.classList.contains("visible")) Reveal.observe(el);
+  });
+});
+</script>
+</body>
+</html>
