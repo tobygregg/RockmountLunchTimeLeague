@@ -9,7 +9,7 @@ const RLL_CONFIG = {
 
   /* ── LEAGUE TABLE CELLS ────────────────────────── */
   CELLS: {
-    SYLVANS_POINTS:        "E6",
+   SYLVANS_POINTS:        "E6",
     CPFC_POINTS:           "G6",
     SYLVANS_WINS:          "F12",
     CPFC_WINS:             "G12",
@@ -27,7 +27,7 @@ const RLL_CONFIG = {
   },
 
   /* ── MATCH HISTORY ─────────────────────────────────
-     Columns: Date | Sylvans | CPFC | MOTM | Scorers | Assists
+     Columns: Date | SBFC | CPFC | MOTM | Scorers | Assists
      Newest match at the BOTTOM. Older rows can have empty Assists — fine.
   ─────────────────────────────────────────────────── */
   HISTORY_RANGE: "B26:G110",
@@ -41,6 +41,13 @@ const RLL_CONFIG = {
   ─────────────────────────────────────────────────── */
   PLAYERS_RANGE: "K26:R49",
   PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6, ADDED_PTS:7 },
+
+  /* ── RLL TV ────────────────────────────────────────
+     Columns: Title | Description | Date | YouTube URL
+     Newest video = furthest DOWN the table (highest row)
+  ─────────────────────────────────────────────────── */
+  TV_RANGE: "RLL TV!H52:K67",
+  TV_COLS: { TITLE:0, DESCRIPTION:1, DATE:2, URL:3 },
 
   /* ── ANNOUNCEMENTS ─────────────────────────────────
      Tab name: Announcements  |  Cols: Date | Message
@@ -65,8 +72,8 @@ const RLL_CONFIG = {
 
   /* ── TEAMS ─────────────────────────────────────── */
   TEAMS: {
-    SYLVANS: { name:"Sylvans FC",         shortName:"Sylvans", abbr:"SYL",  color:"#e63030", key:"Sylvans" },
-    CPFC:    { name:"Charlie Prevost FC", shortName:"CP FC",   abbr:"CPFC", color:"#1a6dd4", key:"CPFC"    },
+    SYLVANS: { name:"Samuel Bader FC", shortName:"SBFC", abbr:"SBFC", color:"#e63030", key:"SBFC" },
+    CPFC:    { name:"Charlie Prevost FC", shortName:"CPFC", abbr:"CPFC", color:"#1a6dd4", key:"CPFC"    },
   },
 
   /* ── DEMO DATA ─────────────────────────────────── */
@@ -87,11 +94,11 @@ const RLL_CONFIG = {
       { date:"8 May 2025",  sylvans:6, cpfc:5, motm:"J. Rockmount", scorers:[], assists:[] },
     ],
     players: [
-      { name:"J. Rockmount", team:"Sylvans", number:"1",  bio:"Commanding keeper.",        image:"", position:"GK",  price:8 },
-      { name:"T. Walsh",     team:"Sylvans", number:"7",  bio:"Pacey winger.",             image:"", position:"MID", price:10 },
-      { name:"M. Smith",     team:"Sylvans", number:"10", bio:"Creative playmaker.",       image:"", position:"MID", price:12 },
-      { name:"K. Briggs",    team:"Sylvans", number:"4",  bio:"Solid defensive mid.",      image:"", position:"DEF", price:7 },
-      { name:"R. Hunt",      team:"Sylvans", number:"8",  bio:"Box-to-box midfielder.",    image:"", position:"FWD", price:8 },
+      { name:"J. Rockmount", team:"SBFC", number:"1",  bio:"Commanding keeper.",        image:"", position:"GK",  price:8 },
+      { name:"T. Walsh",     team:"SBFC", number:"7",  bio:"Pacey winger.",             image:"", position:"MID", price:10 },
+      { name:"M. Smith",     team:"SBFC", number:"10", bio:"Creative playmaker.",       image:"", position:"MID", price:12 },
+      { name:"K. Briggs",    team:"SBFC", number:"4",  bio:"Solid defensive mid.",      image:"", position:"DEF", price:7 },
+      { name:"R. Hunt",      team:"SBFC", number:"8",  bio:"Box-to-box midfielder.",    image:"", position:"FWD", price:8 },
       { name:"C. Prevost",   team:"CPFC",    number:"10", bio:"Club founder, top player.", image:"", position:"FWD", price:12 },
       { name:"D. Clarke",    team:"CPFC",    number:"9",  bio:"Clinical finisher.",        image:"", position:"FWD", price:10 },
       { name:"M. Jones",     team:"CPFC",    number:"7",  bio:"Tricky winger.",            image:"", position:"MID", price:9 },
