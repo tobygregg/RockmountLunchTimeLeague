@@ -97,8 +97,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Sylvans FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> CP FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -109,6 +109,7 @@
       </ul>
     </li>
     <li class="nav__item"><a class="nav__link" href="announcements.html" data-transition>About</a></li>
+    <li class="nav__item"><a class="nav__link" href="tv.html" data-transition>📺 RLL TV</a></li>
     <li class="nav__item nav__item--fantasy"><a class="nav__link" href="fantasy.html" data-transition style="color:#a855f7">&#x26A1; Fantasy</a></li>
   </ul>
   <button class="nav__toggle" aria-label="Toggle menu" id="nav-toggle"><span></span><span></span><span></span></button>
@@ -168,8 +169,8 @@
     <div class="table-controls">
       <div class="team-filter-tabs">
         <button class="team-tab active--all" data-team="all">All Players</button>
-        <button class="team-tab" data-team="Sylvans">Sylvans FC</button>
-        <button class="team-tab" data-team="CPFC">CP FC</button>
+        <button class="team-tab" data-team="SBFC">Samuel Bader FC</button>
+        <button class="team-tab" data-team="CPFC">Charlie Prevost FC</button>
       </div>
       <span class="table-count" id="table-count"></span>
     </div>
@@ -181,12 +182,22 @@
 </section>
 
 <!-- ── FOOTER ── -->
+
+<!-- ── FANTASY POINTS LEADERBOARD ── -->
+<section class="section" id="fantasy-lb-section">
+  <div class="container">
+    <h2 class="section-title reveal"><span>Fantasy</span> Points Leaderboard</h2>
+    <p class="text-muted reveal" style="margin-bottom:24px;font-size:.88rem">Total fantasy points accumulated by each player based on goals, assists, MOTM awards and bonus points.</p>
+    <div id="fantasy-lb-wrap" class="reveal"><div class="loading">Loading</div></div>
+  </div>
+</section>
+
 <footer class="footer">
   <p>© 2025 Rockmount Lunchtime League</p>
   <nav class="footer__links">
     <a href="index.html"   data-transition>Home</a>
-    <a href="sylvans.html" data-transition>Sylvans FC</a>
-    <a href="cpfc.html"    data-transition>CP FC</a>
+    <a href="sylvans.html" data-transition>Samuel Bader FC</a>
+    <a href="cpfc.html"    data-transition>Charlie Prevost FC</a>
     <a href="history.html" data-transition>History</a>
   </nav>
 </footer>
@@ -293,8 +304,9 @@
 
     if (!rows.length) return `<div class="empty-state">No players match this filter.</div>`;
 
-    const maxGoals = Math.max(...rows.map(p => p.goals), 1);
-    const maxMOTM  = Math.max(...rows.map(p => p.motmAwards), 1);
+    const maxGoals   = Math.max(...rows.map(p => p.goals), 1);
+    const maxAssists = Math.max(...rows.map(p => p.assists || 0), 1);
+    const maxMOTM    = Math.max(...rows.map(p => p.motmAwards), 1);
 
     const th = (col, label, cls = "") => {
       const active = sortCol === col;
@@ -309,8 +321,9 @@
             ${th("number", "#")}
             ${th("name",   "Player")}
             ${th("team",   "Team")}
-            ${th("goals",  "Goals")}
+            ${th("goals",  "Goals ⚽")}
             <th class="col-bar">Goals (visual)</th>
+            ${th("assists", "Assists 🎯")}
             ${th("motmAwards", "MOTM ⭐")}
           </tr>
         </thead>
@@ -343,6 +356,7 @@
                     </div>
                   </div>
                 </td>
+                <td class="stats-table__val">${p.assists > 0 ? p.assists : "—"}</td>
                 <td class="stats-table__val stats-table__val--motm">${p.motmAwards > 0 ? p.motmAwards + "×" : "—"}</td>
               </tr>
             `;
@@ -352,6 +366,45 @@
     `;
   }
 
+
+  /* ── Fantasy points leaderboard ── */
+  function renderFantasyLb(players) {
+    const sorted = [...players]
+      .filter(p => (p.fantasyPts || 0) > 0 || (p.goals || 0) > 0 || (p.assists || 0) > 0 || (p.motmAwards || 0) > 0)
+      .sort((a,b) => (b.fantasyPts || 0) - (a.fantasyPts || 0))
+      .slice(0, 15);
+
+    if (!sorted.length) {
+      document.getElementById("fantasy-lb-wrap").innerHTML = '<div class="empty-state" style="padding:20px;font-size:.85rem;color:var(--text-muted)">No fantasy data yet</div>';
+      return;
+    }
+
+    const max = sorted[0].fantasyPts || 1;
+    document.getElementById("fantasy-lb-wrap").innerHTML = sorted.map((p, i) => {
+      const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
+                 : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc" : "unknown";
+      const col  = team === "sylvans" ? "var(--sylvans)" : team === "cpfc" ? "var(--cpfc)" : "var(--text-muted)";
+      const pct  = Math.round(((p.fantasyPts || 0) / max) * 100);
+      const medals = ["🏆","🥈","🥉"];
+      return `
+        <div class="scorer-lb-item${i === 0 ? " scorer-lb-item--1st" : ""} reveal" style="transition-delay:${i*30}ms">
+          <div class="scorer-lb-pos" style="${i<3?"color:var(--gold)":""}">${medals[i] || (i+1)}</div>
+          <div>
+            <div class="scorer-lb-name player-link" data-player="${p.name}" style="color:${col}">${p.name}</div>
+            <div class="scorer-lb-team" style="color:${col};font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${p.team}</div>
+          </div>
+          <div style="flex:1;margin:0 16px">
+            <div style="height:6px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden">
+              <div class="stats-bar-animate" data-pct="${pct}" style="height:100%;border-radius:100px;background:${col};width:0%;transition:width 1.2s var(--ease)"></div>
+            </div>
+          </div>
+          <div class="scorer-lb-stat" style="color:var(--fantasy-lt,#a855f7)">${p.fantasyPts || 0}<span style="font-size:.65rem;color:var(--text-muted);margin-left:3px">pts</span></div>
+        </div>`;
+    }).join("");
+    animateStatBars();
+    PlayerPopup.attachAll(document.getElementById("fantasy-lb-wrap"));
+    document.querySelectorAll("#fantasy-lb-wrap .reveal").forEach(el => Reveal.observe(el));
+  }
   /* ── animate stat bars ── */
   function animateStatBars() {
     document.querySelectorAll(".stats-bar-animate").forEach(bar => {
@@ -422,14 +475,14 @@
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
-          <span class="team-lb-header__name text-sylvans">Sylvans FC</span>
+          <span class="team-lb-header__name text-sylvans">Samuel Bader FC</span>
         </div>
         ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
       </div>
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
-          <span class="team-lb-header__name text-cpfc">CP FC</span>
+          <span class="team-lb-header__name text-cpfc">Charlie Prevost FC</span>
         </div>
         ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
@@ -440,14 +493,14 @@
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
-          <span class="team-lb-header__name text-sylvans">Sylvans FC</span>
+          <span class="team-lb-header__name text-sylvans">Samuel Bader FC</span>
         </div>
         ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
       </div>
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
-          <span class="team-lb-header__name text-cpfc">CP FC</span>
+          <span class="team-lb-header__name text-cpfc">Charlie Prevost FC</span>
         </div>
         ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
@@ -461,7 +514,7 @@
         document.querySelectorAll(".team-tab").forEach(b => {
           b.className = "team-tab";
         });
-        btn.classList.add(t === "all" ? "active--all" : t === "Sylvans" ? "active--sylvans" : "active--cpfc");
+        btn.classList.add(t === "all" ? "active--all" : t === "SBFC" ? "active--sylvans" : "active--cpfc");
         renderTable();
       });
     });
