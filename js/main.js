@@ -511,7 +511,7 @@ function buildHistoryRows(history) {
     const cpStyle  = result === "cpfc"    ? `color:var(--cpfc)` : "";
     const isLatest = i === 0;
     const resultLabel = result === "sylvans"
-      ? `<span class="history-match__result text-sylvans">Sylvans Win</span>`
+      ? `<span class="history-match__result text-sylvans">SBFC Win</span>`
       : result === "cpfc"
       ? `<span class="history-match__result text-cpfc">CP FC Win</span>`
       : `<span class="history-match__result text-muted">Draw</span>`;
