@@ -52,7 +52,7 @@ const RLL_CONFIG = {
   /* ── ANNOUNCEMENTS ─────────────────────────────────
      Tab name: Announcements  |  Cols: Date | Message
   ─────────────────────────────────────────────────── */
-  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R29",
+  ANNOUNCEMENTS_RANGE: "Announcements!Q12:R24",
   ANNOUNCEMENTS_COLS:  { DATE:0, MESSAGE:1 },
 
   /* ── CHAT & FANTASY (Google Apps Script URL) ───── */
