@@ -172,10 +172,6 @@
         <button class="team-tab" data-team="SBFC">Samuel Bader FC</button>
         <button class="team-tab" data-team="CPFC">Charlie Prevost FC</button>
       </div>
-      <div class="team-filter-tabs" style="margin-top:8px">
-        <button class="team-tab active--all" data-sort-mode="ranking" id="sort-mode-ranking">⚖️ Ranking</button>
-        <button class="team-tab" data-sort-mode="goals" id="sort-mode-goals">⚽ Goals only</button>
-      </div>
       <span class="table-count" id="table-count"></span>
     </div>
 
@@ -212,9 +208,8 @@
 <script>
   /* ── state ── */
   let allPlayers = [];
-  let sortCol    = "goals";
+  let sortCol    = "rank";
   let sortDir    = "desc";
-  let sortMode   = "ranking"; // "ranking" = goals + assists/3 weighted, "goals" = goals only
   let teamFilter = "all";
 
   /* ── top scorer bars ── */
@@ -295,18 +290,15 @@
   function buildStatsTable(players, filter, sortBy, dir) {
     let rows = filter === "all" ? players : players.filter(p => p.team === filter);
 
-    // Sort — when sorting by goals, weighted mode adds assists/3 to rank higher-assist players
+    // Pre-compute rank value for each row: goals + floor(assists/3)
+    rows.forEach(p => { p._rank = (p.goals || 0) + Math.floor((p.assists || 0) / 3); });
+
+    // Sort
     rows = [...rows].sort((a, b) => {
-      let av, bv;
-      if (sortBy === "goals" && sortMode === "ranking") {
-        // Hidden weighted value: goals + (assists / 3) — 3 assists = 1 goal
-        av = (a.goals || 0) + ((a.assists || 0) / 3);
-        bv = (b.goals || 0) + ((b.assists || 0) / 3);
-      } else {
-        av = a[sortBy]; bv = b[sortBy];
-        if (typeof av === "string") av = av.toLowerCase();
-        if (typeof bv === "string") bv = bv.toLowerCase();
-      }
+      let av = sortBy === "rank" ? a._rank : a[sortBy];
+      let bv = sortBy === "rank" ? b._rank : b[sortBy];
+      if (typeof av === "string") av = av.toLowerCase();
+      if (typeof bv === "string") bv = bv.toLowerCase();
       if (av < bv) return dir === "asc" ? -1 : 1;
       if (av > bv) return dir === "asc" ? 1 : -1;
       return 0;
@@ -330,6 +322,7 @@
       <table class="stats-table" id="the-stats-table">
         <thead>
           <tr>
+            ${th("rank",  "Rank")}
             ${th("number", "#")}
             ${th("name",   "Player")}
             ${th("team",   "Team")}
@@ -355,6 +348,7 @@
 
             return `
               <tr>
+                <td class="stats-table__num" style="font-weight:700;color:var(--text-muted)">${i + 1}</td>
                 <td class="stats-table__num">${p.number || "—"}</td>
                 <td class="stats-table__name"><span class="player-link" data-player="${p.name}">${p.name}</span></td>
                 <td>
@@ -517,17 +511,6 @@
         ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
     `;
-
-    /* Sort mode buttons */
-    document.querySelectorAll("[data-sort-mode]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        sortMode = btn.dataset.sortMode;
-        document.querySelectorAll("[data-sort-mode]").forEach(b => b.className = "team-tab");
-        btn.classList.add("active--all");
-        sortCol = "goals"; sortDir = "desc"; // reset to goals when switching mode
-        renderTable();
-      });
-    });
 
     /* Team filter buttons */
     document.querySelectorAll(".team-tab").forEach(btn => {
