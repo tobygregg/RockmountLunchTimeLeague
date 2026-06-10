@@ -172,6 +172,10 @@
         <button class="team-tab" data-team="SBFC">Samuel Bader FC</button>
         <button class="team-tab" data-team="CPFC">Charlie Prevost FC</button>
       </div>
+      <div class="team-filter-tabs" style="margin-top:8px">
+        <button class="team-tab active--all" data-sort-mode="ranking" id="sort-mode-ranking">⚖️ Ranking</button>
+        <button class="team-tab" data-sort-mode="goals" id="sort-mode-goals">⚽ Goals only</button>
+      </div>
       <span class="table-count" id="table-count"></span>
     </div>
 
@@ -210,6 +214,7 @@
   let allPlayers = [];
   let sortCol    = "goals";
   let sortDir    = "desc";
+  let sortMode   = "ranking"; // "ranking" = goals + assists/3 weighted, "goals" = goals only
   let teamFilter = "all";
 
   /* ── top scorer bars ── */
@@ -290,12 +295,11 @@
   function buildStatsTable(players, filter, sortBy, dir) {
     let rows = filter === "all" ? players : players.filter(p => p.team === filter);
 
-    // Sort — when sorting by goals, use a weighted total where 3 assists = 1 goal
-    // so assists break ties and push high-assist players above low-assist ones
+    // Sort — when sorting by goals, weighted mode adds assists/3 to rank higher-assist players
     rows = [...rows].sort((a, b) => {
       let av, bv;
-      if (sortBy === "goals") {
-        // Hidden weighted value: goals + (assists / 3)
+      if (sortBy === "goals" && sortMode === "ranking") {
+        // Hidden weighted value: goals + (assists / 3) — 3 assists = 1 goal
         av = (a.goals || 0) + ((a.assists || 0) / 3);
         bv = (b.goals || 0) + ((b.assists || 0) / 3);
       } else {
@@ -513,6 +517,17 @@
         ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
     `;
+
+    /* Sort mode buttons */
+    document.querySelectorAll("[data-sort-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        sortMode = btn.dataset.sortMode;
+        document.querySelectorAll("[data-sort-mode]").forEach(b => b.className = "team-tab");
+        btn.classList.add("active--all");
+        sortCol = "goals"; sortDir = "desc"; // reset to goals when switching mode
+        renderTable();
+      });
+    });
 
     /* Team filter buttons */
     document.querySelectorAll(".team-tab").forEach(btn => {
