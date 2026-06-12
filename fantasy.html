@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="/assets/FantasyFavicon.png">
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="css/fantasy.css"/>
+  <link rel="stylesheet" href="css/v2.css"/>
 </head>
 <body>
 
@@ -400,7 +401,7 @@ function renderMySquad() {
         return `
           <div class="squad-player-card${cap?" squad-player-card--captain":""}">
             ${cap?`<div class="squad-player-card__captain-badge">⭐ Captain</div>`:""}
-            <div class="squad-player-card__name player-link" data-player="${esc(name)}">${esc(name)}</div>
+            <div class="squad-player-card__name player-link pa" data-player="${esc(name)}">${playerAvatarHTML(p)}<span>${esc(name)}</span></div>
             <div class="squad-player-card__pos">${p?posLabel(p.position):""} · £${p?p.price:0}</div>
             <div class="squad-player-card__pts">${pts}</div>
             <div class="squad-player-card__pts-breakdown">${breakdown}</div>
@@ -444,7 +445,7 @@ function renderPickerHeader() {
         return `
           <div class="pending-chip${cap?" pending-chip--captain":""}" data-name="${esc(name)}">
             ${cap?`<span class="pending-chip__star">⭐</span>`:""}
-            <span class="pending-chip__name player-link" data-player="${esc(name)}" style="color:${col}">${esc(name)}</span>
+            <span class="pending-chip__name player-link pa" data-player="${esc(name)}" style="color:${col}">${playerAvatarHTML(p)}<span>${esc(name)}</span></span>
             <span class="pending-chip__price">£${p?p.price:0}</span>
             <button class="pending-chip__remove" data-remove="${esc(name)}" aria-label="Remove">✕</button>
           </div>`;
@@ -506,7 +507,7 @@ function renderPicker() {
         <div class="picker-card__team-stripe" style="background:${col}"></div>
         <div class="picker-card__top">
           <div style="flex:1;min-width:0">
-            <div class="picker-card__name player-link" data-player="${esc(p.name)}">${esc(p.name)}</div>
+            <div class="picker-card__name player-link pa" data-player="${esc(p.name)}">${playerAvatarHTML(p)}<span>${esc(p.name)}</span></div>
             <div class="picker-card__pos-team">${posLabel(p.position)}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
@@ -688,7 +689,7 @@ function buildLbRow(m, rank) {
           const detail = isGK ? `🧤${bp.gkPts||0}pt` : `⚽${bp.goals||0} 🎯${bp.assists||0} ⭐${bp.motm||0}`;
           return `<div class="lb-player-chip${bp.isCaptain?" lb-player-chip--captain":""}">
             ${bp.isCaptain?"⭐ ":""}
-            <span class="lb-player-chip__name player-link" data-player="${esc(bp.name)}">${esc(bp.name)}</span>
+            <span class="lb-player-chip__name player-link pa" data-player="${esc(bp.name)}">${playerAvatarHTML(getPlayer(bp.name))}<span>${esc(bp.name)}</span></span>
             <span style="font-size:.65rem;color:var(--text-dim)">${detail}</span>
             <span class="lb-player-chip__pts">${bp.pts}p</span>
           </div>`;

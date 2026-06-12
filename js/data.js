@@ -55,6 +55,7 @@ const RLLData = (() => {
         position: C.POSITION != null ? (r[C.POSITION] || "").trim().toUpperCase() : "",
         price:    C.PRICE     != null ? (parseFloat(r[C.PRICE])     || 0) : 0,
         addedPts: C.ADDED_PTS != null ? (parseFloat(r[C.ADDED_PTS]) || 0) : 0,
+        photo:    C.PHOTO    != null ? (r[C.PHOTO]    || "").trim() : "",
       }));
   }
 
@@ -240,5 +241,43 @@ const RLLData = (() => {
       .sort((a,b)=>b.motmAwards-a.motmAwards||b.goals-a.goals).slice(0,n);
   }
 
-  return { load, fetchChat, postMessage, winRate, matchResult, recentForm, topScorers, topMOTM };
+  /* ── PER-MATCH PERFORMANCE ENGINE ──────────────────
+     Computes a rating for every contributor in a single
+     match (goals/assists/MOTM weighted) and identifies
+     the Best Performer. Used by the match detail modal.
+  ─────────────────────────────────────────────────── */
+  function matchPerformance(match) {
+    const R = RLL_CONFIG.RATING || { GOAL:2, ASSIST:1, MOTM:6 };
+    const perf = {};
+    const touch = (name) => {
+      if (!perf[name]) perf[name] = { name, goals:0, assists:0, motm:false, rating:0 };
+      return perf[name];
+    };
+    (match.scorers || []).forEach(n => { if (n) touch(n).goals++; });
+    (match.assists || []).forEach(n => { if (n) touch(n).assists++; });
+    if (match.motm && match.motm !== "—") touch(match.motm).motm = true;
+
+    const rows = Object.values(perf).map(p => ({
+      ...p,
+      rating: p.goals * R.GOAL + p.assists * R.ASSIST + (p.motm ? R.MOTM : 0),
+    })).sort((a,b) => b.rating - a.rating || b.goals - a.goals);
+
+    return {
+      rows,
+      best: rows[0] || null,
+      totalGoals: (match.sylvans||0) + (match.cpfc||0),
+    };
+  }
+
+  /* Season-best single performance across all matches */
+  function bestPerformanceOfSeason(history) {
+    let best = null;
+    (history || []).forEach((m, idx) => {
+      const { best: b } = matchPerformance(m);
+      if (b && (!best || b.rating > best.rating)) best = { ...b, match: m, matchIndex: idx };
+    });
+    return best;
+  }
+
+  return { load, fetchChat, postMessage, winRate, matchResult, recentForm, topScorers, topMOTM, matchPerformance, bestPerformanceOfSeason };
 })();

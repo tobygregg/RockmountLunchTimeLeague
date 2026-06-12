@@ -2,6 +2,36 @@
    ROCKMOUNT LUNCHTIME LEAGUE — main.js
 ===================================================== */
 
+/* ── AURORA AMBIENT BACKGROUND ───────────────────── */
+const Aurora = (() => {
+  function init() {
+    if (document.querySelector(".aurora")) return;
+    const a = document.createElement("div");
+    a.className = "aurora";
+    a.setAttribute("aria-hidden", "true");
+    a.innerHTML = `
+      <div class="aurora__blob aurora__blob--r"></div>
+      <div class="aurora__blob aurora__blob--b"></div>
+      <div class="aurora__blob aurora__blob--g"></div>`;
+    document.body.prepend(a);
+  }
+  return { init };
+})();
+
+/* ── PLAYER AVATAR (new photo column) ─────────────── */
+function playerAvatarHTML(player, size = "") {
+  const col  = player ? PlayerPopup.teamColor(player.team) : "rgba(255,255,255,0.25)";
+  const glow = player ? PlayerPopup.teamGlow?.(player.team) : "transparent";
+  const src  = player && (player.photo || "").trim();
+  const init = ((player && player.name) || "?")[0].toUpperCase();
+  const style = `--pa-col:${col};--pa-glow:${glow || "transparent"}`;
+  if (src) {
+    return `<img class="pa__img ${size}" src="${src}" alt="" loading="lazy" style="${style}"
+              onerror="this.outerHTML='<span class=&quot;pa__fb&quot; style=&quot;${style}&quot;>${init}</span>'">`;
+  }
+  return `<span class="pa__fb ${size}" style="${style}">${init}</span>`;
+}
+
 /* ── PAGE TRANSITION ─────────────────────────────── */
 const PageTransition = (() => {
   const overlay = document.querySelector(".page-transition");
@@ -270,10 +300,6 @@ const PlayerPopup = (() => {
     const glow = teamGlow(player.team);
     const tn   = teamName(player.team);
 
-    const stats = [];
-    if (player.goals      > 0) stats.push({ label: `⚽ ${player.goals} goal${player.goals !== 1 ? "s" : ""}`, cls: "pp__stat--goals" });
-    if (player.motmAwards > 0) stats.push({ label: `⭐ ${player.motmAwards} MOTM`, cls: "pp__stat--motm" });
-
     const wrapper = document.createElement("div");
     wrapper.className = "pp__inner";
 
@@ -295,16 +321,22 @@ const PlayerPopup = (() => {
     const body = document.createElement("div");
     body.className = "pp__body";
 
-    // Left — avatar + number
+    // Left — avatar + number  (prefers new PHOTO, falls back to gif IMAGE)
     const left = document.createElement("div");
     left.className = "pp__left";
 
-    if (player.image) {
+    const mediaSrc = (player.image || "").trim() || (player.photo || "").trim();
+    if (mediaSrc) {
       const img = document.createElement("img");
       img.className = "pp__img";
-      img.src = player.image;
+      img.src = mediaSrc;
       img.alt = player.name;
-      img.onerror = () => img.replaceWith(buildAvatarEl(player));
+      img.onerror = () => {
+        // gif failed? try the photo before falling back to initials
+        const fallbackPhoto = (player.photo || "").trim();
+        if (fallbackPhoto && img.src !== fallbackPhoto) { img.src = fallbackPhoto; return; }
+        img.replaceWith(buildAvatarEl(player));
+      };
       left.appendChild(img);
     } else {
       left.appendChild(buildAvatarEl(player));
@@ -330,6 +362,12 @@ const PlayerPopup = (() => {
     const nameEl = document.createElement("div");
     nameEl.className = "pp__name";
     nameEl.textContent = player.name;
+    if (player.position) {
+      const pos = document.createElement("span");
+      pos.className = "pp__pos-chip";
+      pos.textContent = player.position;
+      nameEl.appendChild(pos);
+    }
     right.appendChild(nameEl);
 
     if (player.bio) {
@@ -339,17 +377,29 @@ const PlayerPopup = (() => {
       right.appendChild(bio);
     }
 
-    if (stats.length) {
-      const statsEl = document.createElement("div");
-      statsEl.className = "pp__stats";
-      stats.forEach(s => {
-        const span = document.createElement("span");
-        span.className = `pp__stat ${s.cls}`;
-        span.textContent = s.label;
-        statsEl.appendChild(span);
-      });
-      right.appendChild(statsEl);
-    }
+    // Stat grid — goals / assists / MOTM / fantasy pts
+    const isGK = (player.position || "") === "GK";
+    const grid = document.createElement("div");
+    grid.className = "pp__statgrid";
+    const boxes = isGK
+      ? [
+          { v: player.gkPts || 0,      l: "GK Pts",  c: "" },
+          { v: player.motmAwards || 0, l: "MOTM",    c: "color:var(--gold)" },
+          { v: player.price ? "£" + player.price : "—", l: "Price", c: "" },
+          { v: player.fantasyPts || 0, l: "Fantasy", c: "color:var(--fantasy-lt,#c084fc)" },
+        ]
+      : [
+          { v: player.goals || 0,      l: "Goals",   c: "" },
+          { v: player.assists || 0,    l: "Assists", c: "" },
+          { v: player.motmAwards || 0, l: "MOTM",    c: "color:var(--gold)" },
+          { v: player.fantasyPts || 0, l: "Fantasy", c: "color:var(--fantasy-lt,#c084fc)" },
+        ];
+    grid.innerHTML = boxes.map(b => `
+      <div class="pp__statbox">
+        <div class="pp__statbox-val" style="${b.c}">${b.v}</div>
+        <div class="pp__statbox-lbl">${b.l}</div>
+      </div>`).join("");
+    right.appendChild(grid);
 
     body.appendChild(left);
     body.appendChild(right);
@@ -454,21 +504,167 @@ const PlayerPopup = (() => {
     });
   }
 
-  return { show, hide, attachAll, findPlayer, teamColor };
+  return { show, hide, attachAll, findPlayer, teamColor, teamGlow };
 })();
 
 /* =====================================================
    HTML BUILDERS (shared across all pages)
 ===================================================== */
 
-/* ── Wrap player names as clickable spans ── */
-function linkPlayerName(name) {
+/* ── Wrap player names as clickable spans (with photo avatar) ── */
+function linkPlayerName(name, opts = {}) {
   if (!name || name === "—") return name;
   const player = PlayerPopup.findPlayer(name);
   const col    = player ? PlayerPopup.teamColor(player.team) : null;
   const style  = col ? `color:${col};font-weight:700` : "";
-  return `<span class="player-link" data-player="${name}" style="${style}">${name}</span>`;
+  const avatar = opts.noAvatar ? "" : playerAvatarHTML(player);
+  return `<span class="player-link pa" data-player="${name}" style="${style}">${avatar}<span>${name}</span></span>`;
 }
+
+/* =====================================================
+   MATCH DETAIL MODAL
+   Click any match → full per-match stat breakdown with
+   computed Best Performer ratings.
+===================================================== */
+const MatchModal = (() => {
+  let overlay = null;
+
+  function escTxt(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function show(match, matchNumber) {
+    hide(true);
+    const S = RLL_CONFIG.TEAMS.SYLVANS, C = RLL_CONFIG.TEAMS.CPFC;
+    const perf = RLLData.matchPerformance(match);
+    const sWin = match.sylvans > match.cpfc, cWin = match.cpfc > match.sylvans;
+    const total = perf.totalGoals || 0;
+    const sPct = total ? Math.round((match.sylvans / total) * 100) : 50;
+
+    const resultChip = sWin
+      ? `<span class="mm__chip mm__chip--win-s">🏆 ${S.shortName} Win</span>`
+      : cWin
+      ? `<span class="mm__chip mm__chip--win-c">🏆 ${C.shortName} Win</span>`
+      : `<span class="mm__chip">🤝 Draw</span>`;
+
+    const bestHTML = perf.best ? `
+      <div class="mm__section">
+        <div class="mm__section-title">⭐ Best Performer</div>
+        <div class="mm__best">
+          <div class="mm__best-rating">${perf.best.rating}<small>rating</small></div>
+          <div style="display:flex;align-items:center;gap:12px;min-width:0">
+            ${playerAvatarHTML(PlayerPopup.findPlayer(perf.best.name), "pa--lg")}
+            <div style="min-width:0">
+              <div class="mm__best-name">${linkPlayerName(perf.best.name, { noAvatar:true })}</div>
+              <div class="mm__best-sub">
+                ${perf.best.goals ? `⚽ ${perf.best.goals} goal${perf.best.goals!==1?"s":""}` : ""}
+                ${perf.best.assists ? ` · 🎯 ${perf.best.assists} assist${perf.best.assists!==1?"s":""}` : ""}
+                ${perf.best.motm ? " · ⭐ Man of the Match" : ""}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>` : "";
+
+    const perfRows = perf.rows.length ? `
+      <div class="mm__section">
+        <div class="mm__section-title">📊 Match Performances</div>
+        ${perf.rows.map((p, i) => `
+          <div class="mm__perf-row" style="animation-delay:${i*55}ms">
+            <div class="mm__perf-name">${linkPlayerName(p.name)}</div>
+            <div class="mm__perf-stats">
+              ${p.goals ? `<span class="mm__perf-pill">⚽ ${p.goals}</span>` : ""}
+              ${p.assists ? `<span class="mm__perf-pill">🎯 ${p.assists}</span>` : ""}
+              ${p.motm ? `<span class="mm__perf-pill" style="color:var(--gold)">⭐ MOTM</span>` : ""}
+            </div>
+            <div class="mm__perf-rating">${p.rating}</div>
+          </div>`).join("")}
+      </div>` : `
+      <div class="mm__section">
+        <div class="mm__section-title">📊 Match Performances</div>
+        <p class="text-muted" style="font-size:.84rem">No scorer data was recorded for this match.</p>
+      </div>`;
+
+    const shareHTML = total > 0 ? `
+      <div class="mm__section">
+        <div class="mm__section-title">⚽ Goal Share</div>
+        <div class="mm__share-track">
+          <div class="mm__share-s" data-w="${sPct}"></div>
+          <div class="mm__share-c" data-w="${100 - sPct}"></div>
+        </div>
+        <div class="mm__share-lbls">
+          <span style="color:var(--sylvans)">${S.shortName} · ${match.sylvans}</span>
+          <span style="color:var(--cpfc)">${match.cpfc} · ${C.shortName}</span>
+        </div>
+      </div>` : "";
+
+    overlay = document.createElement("div");
+    overlay.className = "mm-overlay";
+    overlay.innerHTML = `
+      <div class="mm" role="dialog" aria-modal="true" aria-label="Match details">
+        <div class="mm__head">
+          <span class="mm__head-lbl">${matchNumber ? `Match ${matchNumber} · ` : ""}${escTxt(match.date || "Match Details")}</span>
+          <button class="mm__close" aria-label="Close">✕</button>
+        </div>
+        <div class="mm__score">
+          <div class="mm__score-team">
+            <span class="mm__score-name" style="${sWin ? "color:var(--sylvans)" : ""}">${S.name}</span>
+            <span class="mm__score-num" style="${sWin ? "color:var(--sylvans);text-shadow:0 0 40px var(--sylvans-glow)" : ""}">${match.sylvans}</span>
+          </div>
+          <span class="mm__score-sep">—</span>
+          <div class="mm__score-team">
+            <span class="mm__score-name" style="${cWin ? "color:var(--cpfc)" : ""}">${C.name}</span>
+            <span class="mm__score-num" style="animation-delay:.08s;${cWin ? "color:var(--cpfc);text-shadow:0 0 40px var(--cpfc-glow)" : ""}">${match.cpfc}</span>
+          </div>
+        </div>
+        <div class="mm__meta">
+          ${resultChip}
+          <span class="mm__chip">🥅 ${total} goal${total!==1?"s":""}</span>
+          ${match.motm && match.motm !== "—" ? `<span class="mm__chip mm__chip--gold">⭐ MOTM · ${escTxt(match.motm)}</span>` : ""}
+        </div>
+        ${bestHTML}
+        ${shareHTML}
+        ${perfRows}
+      </div>`;
+
+    document.body.appendChild(overlay);
+    document.body.classList.add("mm-open");
+    PlayerPopup.attachAll(overlay);
+
+    overlay.querySelector(".mm__close").addEventListener("click", () => hide());
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) hide(); });
+    document.addEventListener("keydown", escKey);
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add("open");
+      overlay.querySelectorAll("[data-w]").forEach(el => el.style.width = el.dataset.w + "%");
+    }));
+  }
+
+  function escKey(e) { if (e.key === "Escape") hide(); }
+
+  function hide(instant = false) {
+    document.removeEventListener("keydown", escKey);
+    document.body.classList.remove("mm-open");
+    if (!overlay) return;
+    const o = overlay; overlay = null;
+    if (instant) { o.remove(); return; }
+    o.classList.remove("open");
+    setTimeout(() => o.remove(), 360);
+  }
+
+  /* Global click delegation — any .history-match with data-match-idx */
+  function wire() {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".player-link") || e.target.closest("a")) return;
+      const row = e.target.closest(".history-match[data-match-idx]");
+      if (!row) return;
+      const idx = parseInt(row.dataset.matchIdx, 10);
+      const hist = (window.__RLL_HISTORY__ || []);
+      if (hist[idx]) show(hist[idx], hist.length - idx);
+    });
+  }
+
+  return { show, hide, wire };
+})();
 
 /* ── Match card ── */
 function buildMatchCard(match) {
@@ -506,6 +702,7 @@ function buildHistoryRows(history) {
     return `<div class="loading" style="border:1px solid var(--border);border-radius:8px">No matches played yet</div>`;
 
   return history.map((match, i) => {
+    const globalIdx = (window.__RLL_HISTORY__ || []).indexOf(match);
     const result   = match.sylvans > match.cpfc ? "sylvans" : match.cpfc > match.sylvans ? "cpfc" : "draw";
     const sylStyle = result === "sylvans" ? `color:var(--sylvans)` : "";
     const cpStyle  = result === "cpfc"    ? `color:var(--cpfc)` : "";
@@ -528,7 +725,7 @@ function buildHistoryRows(history) {
     }
 
     return `
-      <div class="history-match reveal" style="transition-delay:${i*40}ms">
+      <div class="history-match reveal" ${globalIdx >= 0 ? `data-match-idx="${globalIdx}"` : ""} style="transition-delay:${i*40}ms">
         <div class="history-match__team history-match__team--home" style="${sylStyle}">
           ${RLL_CONFIG.TEAMS.SYLVANS.shortName}
           ${isLatest ? `<span class="latest-badge">Latest</span>` : ""}
@@ -543,6 +740,7 @@ function buildHistoryRows(history) {
           <span class="history-match__date">📅 ${match.date}</span>
           ${match.motm && match.motm!=="—" ? `<span class="history-match__motm">⭐ ${linkPlayerName(match.motm)}</span>` : ""}
           ${resultLabel}
+          ${globalIdx >= 0 ? `<span class="mm-hint">Tap for stats ↗</span>` : ""}
         </div>
         ${scorerHtml}
       </div>`;
@@ -614,7 +812,7 @@ function buildTeamSheet(players, teamKey, accentColor, glowColor) {
       <div class="squad-card reveal" style="transition-delay:${i*40}ms">
         <div class="squad-card__number" style="color:${accentColor};text-shadow:0 0 30px ${glowColor}">${p.number||"—"}</div>
         <div class="squad-card__info">
-          <div class="squad-card__name player-link" data-player="${p.name}" style="color:${accentColor}">${p.name}</div>
+          <div class="squad-card__name player-link pa" data-player="${p.name}" style="color:${accentColor}">${playerAvatarHTML(p)}<span>${p.name}</span></div>
           <div class="squad-card__badges">
             ${p.goals>0?`<span class="squad-badge squad-badge--goals">⚽ ${p.goals} goal${p.goals!==1?"s":""}</span>`:""}
             ${p.motmAwards>0?`<span class="squad-badge squad-badge--motm">⭐ ${p.motmAwards} MOTM</span>`:""}
@@ -680,11 +878,13 @@ function buildTopMOTMCard(players, accentColor, glowColor) {
 
 /* ── INIT ────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
+  Aurora.init();
   PageTransition.init();
   Nav.init();
   Reveal.init();
   Counter.initAll();
   Bars.init();
+  MatchModal.wire();
 
   /* ── Auto-wire player popups on every page ──────────
      Load players once, store globally, then use a
@@ -693,6 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ─────────────────────────────────────────────────── */
   RLLData.load().then(data => {
     window.__RLL_PLAYERS__ = data.players || [];
+    window.__RLL_HISTORY__ = data.history || [];
 
     // Attach to anything already in the DOM
     PlayerPopup.attachAll(document);

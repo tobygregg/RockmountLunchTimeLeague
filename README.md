@@ -4,6 +4,20 @@ A full multi-page website for the RLL, pulling live data from your Google Sheet.
 
 ---
 
+## ✨ v2 "Liquid Glass" Upgrade
+
+- **css/v2.css** — iOS-26-style liquid glass design layer (loads after style.css on every page). Aurora ambient background, floating glass nav, glass cards with specular edges, spring animations, reduced-motion support.
+- **Player photos** — NEW column **S** in the players range (`K26:S49`): a still photo URL shown as an avatar everywhere a player's name appears (tables, chips, fantasy cards, popups, leaderboards). The existing IMAGE column (O, your gif) is still used as the big media in the player popup.
+- **Match detail modal** — click/tap any match in History or Recent Games for a full breakdown: result chips, computed **Best Performer rating** (goals×2 + assists×1 + MOTM×6), goal share bar, per-player match performances.
+- **Season in Numbers** — animated stat scroll section on the home page (total goals, golden boot, MOTM king, best single performance of the season, biggest win, goal battle bar).
+- **Live ticker** — marquee of recent results, MOTMs and scorers under the hero.
+- **Head-to-Head** — compare any two players side-by-side on the Players page.
+- **Player popup v2** — glass sheet with photo, position chip and a 4-stat grid (goals / assists / MOTM / fantasy pts; GK gets GK pts + price).
+
+> 📸 **To add player photos:** put a direct image URL in column **S** of each player's row (same rows as K26:R49). Leave blank for the initials fallback.
+
+---
+
 ## 📁 File Structure
 
 ```

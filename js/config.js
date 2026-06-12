@@ -36,11 +36,19 @@ const RLL_CONFIG = {
   },
 
   /* ── PLAYERS TABLE ─────────────────────────────────
-     Columns: Name | Team | Number | Bio | Image URL | Position | Price
+     Columns: Name | Team | Number | Bio | Image (gif) URL | Position | Price | Added Pts | Photo URL
      Position and Price can be empty for some players — fine.
+     PHOTO (col S) is the NEW still-photo column, shown as an
+     avatar wherever a player's name appears across the site.
   ─────────────────────────────────────────────────── */
-  PLAYERS_RANGE: "K26:R49",
-  PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6, ADDED_PTS:7 },
+  PLAYERS_RANGE: "K26:S49",
+  PLAYERS_COLS: { NAME:0, TEAM:1, NUMBER:2, BIO:3, IMAGE:4, POSITION:5, PRICE:6, ADDED_PTS:7, PHOTO:8 },
+
+  /* ── MATCH RATING ENGINE ───────────────────────────
+     Per-match performance score used for "Best Performer"
+     and the match detail modal. Mirrors fantasy weights.
+  ─────────────────────────────────────────────────── */
+  RATING: { GOAL:2, ASSIST:1, MOTM:6 },
 
   /* ── RLL TV ────────────────────────────────────────
      Columns: Title | Description | Date | YouTube URL

@@ -6,6 +6,7 @@
   <title>Rockmount Lunchtime League</title>
   <meta name="description" content="The official home of the Rockmount Lunchtime League — Samuel Bader FC vs Charlie Prevost FC." />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/v2.css"/>
   <style>
     /* ---- Hero Points section ---- */
     .hero__points-area {
@@ -179,12 +180,27 @@
   </div>
 </section>
 
+<!-- ── LIVE TICKER ───────────────────────────────── -->
+<div class="ticker" id="rll-ticker" aria-hidden="true" style="display:none">
+  <div class="ticker__track" id="ticker-track"></div>
+</div>
+
 <!-- ── LATEST MATCH ──────────────────────────────── -->
 <section class="section" id="latest-match-section">
   <div class="container">
     <h2 class="section-title reveal"><span>Latest</span> Match</h2>
     <div id="latest-match-wrap" class="reveal">
       <div class="loading">Loading match data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SEASON IN NUMBERS — animated stat scroll ──── -->
+<section class="section scrolly" id="season-numbers">
+  <div class="container">
+    <h2 class="section-title reveal"><span>Season in</span> Numbers</h2>
+    <div class="scrolly__grid" id="scrolly-grid">
+      <div class="loading">Crunching the numbers</div>
     </div>
   </div>
 </section>
@@ -353,6 +369,12 @@
     document.getElementById("quick-history-wrap").innerHTML =
       buildHistoryRows(data.history.slice(0, 3));
 
+    /* ── SEASON IN NUMBERS — animated stat scrolly ── */
+    renderSeasonNumbers(data);
+
+    /* ── LIVE TICKER ── */
+    renderTicker(data);
+
     /* Re-init reveals for injected content */
     document.querySelectorAll(".reveal").forEach(el => {
       if (!el.classList.contains("visible")) Reveal.observe(el);
@@ -360,6 +382,124 @@
     Bars.init();
     Counter.initAll();
   });
+
+  /* ── SEASON IN NUMBERS — each stat gets its own animated card ── */
+  function renderSeasonNumbers(data) {
+    const grid = document.getElementById("scrolly-grid");
+    if (!grid) return;
+
+    const games      = data.history.length;
+    const totalGoals = data.history.reduce((a,m) => a + m.sylvans + m.cpfc, 0);
+    const avgGoals   = games ? (totalGoals / games).toFixed(1) : "0";
+    const topScorer  = RLLData.topScorers(data.players, 1)[0];
+    const topMotm    = RLLData.topMOTM(data.players, 1)[0];
+    const bestPerf   = RLLData.bestPerformanceOfSeason(data.history);
+    const biggest    = [...data.history].sort((a,b) =>
+      Math.abs(b.sylvans-b.cpfc) - Math.abs(a.sylvans-a.cpfc))[0];
+    const sGoals = data.sylvansGoalsFor, cGoals = data.cpfcGoalsFor;
+    const gTot = sGoals + cGoals;
+    const sPct = gTot ? Math.round((sGoals/gTot)*100) : 50;
+
+    grid.innerHTML = `
+      <div class="scrolly-card scrolly-card--gold">
+        <div class="scrolly-ball">⚽</div>
+        <div class="scrolly-card__icon">🥅</div>
+        <div class="scrolly-card__val" data-count="${totalGoals}">0</div>
+        <div class="scrolly-card__lbl">Goals This Season</div>
+        <div class="scrolly-card__sub">${avgGoals} per game across ${games} match${games!==1?"es":""}</div>
+      </div>
+
+      ${topScorer ? `
+      <div class="scrolly-card scrolly-card--${topScorer.team===RLL_CONFIG.TEAMS.SYLVANS.key?"syl":topScorer.team===RLL_CONFIG.TEAMS.CPFC.key?"cpfc":"gold"}">
+        <div class="scrolly-card__icon">👑</div>
+        <div class="scrolly-card__val" data-count="${topScorer.goals}">0</div>
+        <div class="scrolly-card__lbl">Golden Boot</div>
+        <div class="scrolly-card__sub">${linkPlayerName(topScorer.name)} leads the scoring charts</div>
+      </div>` : ""}
+
+      ${topMotm ? `
+      <div class="scrolly-card scrolly-card--gold">
+        <div class="scrolly-card__icon">⭐</div>
+        <div class="scrolly-card__val" data-count="${topMotm.motmAwards}" data-suffix="×">0</div>
+        <div class="scrolly-card__lbl">Most MOTM Awards</div>
+        <div class="scrolly-card__sub">${linkPlayerName(topMotm.name)} keeps stealing the show</div>
+      </div>` : ""}
+
+      ${bestPerf ? `
+      <div class="scrolly-card scrolly-card--gold">
+        <div class="scrolly-card__icon">🔥</div>
+        <div class="scrolly-card__val" data-count="${bestPerf.rating}">0</div>
+        <div class="scrolly-card__lbl">Best Single Performance</div>
+        <div class="scrolly-card__sub">${linkPlayerName(bestPerf.name)} on ${bestPerf.match.date} — ${bestPerf.goals?`⚽${bestPerf.goals} `:""}${bestPerf.assists?`🎯${bestPerf.assists} `:""}${bestPerf.motm?"⭐MOTM":""}</div>
+      </div>` : ""}
+
+      ${biggest ? `
+      <div class="scrolly-card scrolly-card--${biggest.sylvans>biggest.cpfc?"syl":"cpfc"}">
+        <div class="scrolly-card__icon">💥</div>
+        <div class="scrolly-card__val">${biggest.sylvans}–${biggest.cpfc}</div>
+        <div class="scrolly-card__lbl">Biggest Win</div>
+        <div class="scrolly-card__sub">${biggest.date}</div>
+      </div>` : ""}
+
+      <div class="scrolly-card scrolly-card--wide">
+        <div class="scrolly-card__icon">⚔️</div>
+        <div class="scrolly-card__lbl" style="margin-top:0">The Goal Battle</div>
+        <div class="scrolly-vs">
+          <span class="scrolly-vs__n" style="color:var(--sylvans)" data-count="${sGoals}">0</span>
+          <div class="scrolly-vs__bar">
+            <div class="scrolly-vs__s" data-w="${sPct}"></div>
+            <div class="scrolly-vs__c" data-w="${100-sPct}"></div>
+          </div>
+          <span class="scrolly-vs__n" style="color:var(--cpfc);text-align:right" data-count="${cGoals}">0</span>
+        </div>
+        <div class="scrolly-card__sub" style="display:flex;justify-content:space-between;margin-top:8px">
+          <span style="color:var(--sylvans);font-weight:700">${RLL_CONFIG.TEAMS.SYLVANS.shortName}</span>
+          <span style="color:var(--cpfc);font-weight:700">${RLL_CONFIG.TEAMS.CPFC.shortName}</span>
+        </div>
+      </div>
+    `;
+
+    /* Stagger-animate the cards + fire counters/bars as they enter */
+    const cards = grid.querySelectorAll(".scrolly-card");
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const card = entry.target;
+        const siblings = [...cards].filter(c => !c.classList.contains("on"));
+        const delay = Math.max(siblings.indexOf(card), 0) * 90;
+        setTimeout(() => {
+          card.classList.add("on");
+          card.querySelectorAll("[data-count]").forEach(el =>
+            Counter.animateTo(el, parseInt(el.dataset.count,10), 1300, el.dataset.suffix||""));
+          card.querySelectorAll("[data-w]").forEach(el => el.style.width = el.dataset.w + "%");
+        }, delay);
+        obs.unobserve(card);
+      });
+    }, { threshold: 0.25 });
+    cards.forEach(c => obs.observe(c));
+    PlayerPopup.attachAll(grid);
+  }
+
+  /* ── LIVE TICKER — recent results + scorers marquee ── */
+  function renderTicker(data) {
+    const wrap  = document.getElementById("rll-ticker");
+    const track = document.getElementById("ticker-track");
+    if (!wrap || !track || !data.history.length) return;
+
+    const items = [];
+    data.history.slice(0, 6).forEach(m => {
+      items.push(`<span class="ticker__item">📅 ${m.date} · <b style="color:var(--sylvans)">SBFC ${m.sylvans}</b>–<b style="color:var(--cpfc)">${m.cpfc} CPFC</b></span>`);
+      if (m.motm && m.motm !== "—") items.push(`<span class="ticker__item">⭐ MOTM · <b>${m.motm}</b></span>`);
+      const counts = {};
+      (m.scorers||[]).forEach(n => counts[n]=(counts[n]||0)+1);
+      Object.entries(counts).slice(0,3).forEach(([n,c]) =>
+        items.push(`<span class="ticker__item">⚽ <b>${n}</b>${c>1?` ×${c}`:""}</span>`));
+    });
+    if (!items.length) return;
+    // duplicate for seamless loop
+    track.innerHTML = items.join("") + items.join("");
+    wrap.style.display = "";
+  }
 
   function buildStandingsRow(pos, name, p, w, d, l, gf, ga, pts, team) {
     const gd = gf - ga;
