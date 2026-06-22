@@ -198,7 +198,7 @@ body { background: transparent; }
   display:inline-flex; align-items:center; gap:7px; vertical-align:middle;
 }
 .pa__img, .pa__fb {
-  width: 24px; height: 24px; border-radius: 50%; flex-shrink:0;
+  width: 36px; height: 36px; border-radius: 12px; flex-shrink:0;
   object-fit: cover; object-position: center top;
   border: 1.5px solid var(--pa-col, rgba(255,255,255,0.25));
   box-shadow: 0 0 10px var(--pa-glow, transparent), 0 2px 6px rgba(0,0,0,0.5);
@@ -212,7 +212,7 @@ body { background: transparent; }
 }
 .player-link:hover .pa__img, .player-link:hover .pa__fb { transform: scale(1.18); box-shadow: 0 0 16px var(--pa-glow, rgba(255,255,255,0.2)); }
 .pa--lg .pa__img, .pa--lg .pa__fb,
-.pa__img.pa--lg, .pa__fb.pa--lg { width: 34px; height: 34px; font-size:1rem; }
+.pa--lg .pa__img, .pa--lg .pa__fb { width: 52px; height: 52px; font-size:1rem; } /* was 34px */
 
 /* =========================================================
    PLAYER POPUP v2
