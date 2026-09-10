@@ -10,29 +10,29 @@ const RLL_CONFIG = {
   /* ── LEAGUE TABLE CELLS ────────────────────────── */
   CELLS: {
    SYLVANS_POINTS:        "E6",
-    CPFC_POINTS:           "G6",
+    Sylvans_POINTS:           "G6",
     SYLVANS_WINS:          "F12",
-    CPFC_WINS:             "G12",
+    Sylvans_WINS:             "G12",
     SYLVANS_DRAWS:         "H12",
-    CPFC_DRAWS:            "H12",
+    Sylvans_DRAWS:            "H12",
     SYLVANS_LOSSES:        "G12",
-    CPFC_LOSSES:           "F12",
+    Sylvans_LOSSES:           "F12",
     SYLVANS_GOALS_FOR:     "B12",
-    CPFC_GOALS_FOR:        "C12",
+    Sylvans_GOALS_FOR:        "C12",
     SYLVANS_GOALS_AGAINST: "C12",
-    CPFC_GOALS_AGAINST:    "B12",
+    Sylvans_GOALS_AGAINST:    "B12",
     SYLVANS_PLAYED:        "I12",
-    CPFC_PLAYED:           "I12",
+    Sylvans_PLAYED:           "I12",
     ANNOUNCEMENT:          "K11",
   },
 
   /* ── MATCH HISTORY ─────────────────────────────────
-     Columns: Date | SBFC | CPFC | MOTM | Scorers | Assists
+     Columns: Date | Rangers | Sylvans | MOTM | Scorers | Assists
      Newest match at the BOTTOM. Older rows can have empty Assists — fine.
   ─────────────────────────────────────────────────── */
   HISTORY_RANGE: "B26:G110",
   HISTORY_COLS: {
-    DATE: 0, SYLVANS_SCORE: 1, CPFC_SCORE: 2, MOTM: 3, SCORERS: 4, ASSISTS: 5,
+    DATE: 0, SYLVANS_SCORE: 1, Sylvans_SCORE: 2, MOTM: 3, SCORERS: 4, ASSISTS: 5,
   },
 
   /* ── PLAYERS TABLE ─────────────────────────────────
@@ -80,8 +80,8 @@ const RLL_CONFIG = {
 
   /* ── TEAMS ─────────────────────────────────────── */
   TEAMS: {
-    SYLVANS: { name:"Samuel Bader FC", shortName:"SBFC", abbr:"SBFC", color:"#e63030", key:"SBFC" },
-    CPFC:    { name:"Charlie Prevost FC", shortName:"CPFC", abbr:"CPFC", color:"#1a6dd4", key:"CPFC"    },
+    SYLVANS: { name:"Rangers", shortName:"Rangers", abbr:"RFC", color:"#e63030", key:"Rangers" },
+    Sylvans:    { name:"Sylvans", shortName:"Sylvans", abbr:"SFC", color:"#1a6dd4", key:"Sylvans"    },
   },
 
   /* ── DEMO DATA ─────────────────────────────────── */
@@ -102,16 +102,16 @@ const RLL_CONFIG = {
       { date:"8 May 2025",  sylvans:6, cpfc:5, motm:"J. Rockmount", scorers:[], assists:[] },
     ],
     players: [
-      { name:"J. Rockmount", team:"SBFC", number:"1",  bio:"Commanding keeper.",        image:"", position:"GK",  price:8 },
-      { name:"T. Walsh",     team:"SBFC", number:"7",  bio:"Pacey winger.",             image:"", position:"MID", price:10 },
-      { name:"M. Smith",     team:"SBFC", number:"10", bio:"Creative playmaker.",       image:"", position:"MID", price:12 },
-      { name:"K. Briggs",    team:"SBFC", number:"4",  bio:"Solid defensive mid.",      image:"", position:"DEF", price:7 },
-      { name:"R. Hunt",      team:"SBFC", number:"8",  bio:"Box-to-box midfielder.",    image:"", position:"FWD", price:8 },
-      { name:"C. Prevost",   team:"CPFC",    number:"10", bio:"Club founder, top player.", image:"", position:"FWD", price:12 },
-      { name:"D. Clarke",    team:"CPFC",    number:"9",  bio:"Clinical finisher.",        image:"", position:"FWD", price:10 },
-      { name:"M. Jones",     team:"CPFC",    number:"7",  bio:"Tricky winger.",            image:"", position:"MID", price:9 },
-      { name:"A. Peters",    team:"CPFC",    number:"5",  bio:"Rock-solid at the back.",   image:"", position:"DEF", price:7 },
-      { name:"L. Ford",      team:"CPFC",    number:"11", bio:"Dynamic forward.",          image:"", position:"GK",  price:8 },
+      { name:"J. Rockmount", team:"Rangers", number:"1",  bio:"Commanding keeper.",        image:"", position:"GK",  price:8 },
+      { name:"T. Walsh",     team:"Rangers", number:"7",  bio:"Pacey winger.",             image:"", position:"MID", price:10 },
+      { name:"M. Smith",     team:"Rangers", number:"10", bio:"Creative playmaker.",       image:"", position:"MID", price:12 },
+      { name:"K. Briggs",    team:"Rangers", number:"4",  bio:"Solid defensive mid.",      image:"", position:"DEF", price:7 },
+      { name:"R. Hunt",      team:"Rangers", number:"8",  bio:"Box-to-box midfielder.",    image:"", position:"FWD", price:8 },
+      { name:"C. Prevost",   team:"Sylvans",    number:"10", bio:"Club founder, top player.", image:"", position:"FWD", price:12 },
+      { name:"D. Clarke",    team:"Sylvans",    number:"9",  bio:"Clinical finisher.",        image:"", position:"FWD", price:10 },
+      { name:"M. Jones",     team:"Sylvans",    number:"7",  bio:"Tricky winger.",            image:"", position:"MID", price:9 },
+      { name:"A. Peters",    team:"Sylvans",    number:"5",  bio:"Rock-solid at the back.",   image:"", position:"DEF", price:7 },
+      { name:"L. Ford",      team:"Sylvans",    number:"11", bio:"Dynamic forward.",          image:"", position:"GK",  price:8 },
     ],
     announcements: [
       { date:"12 Jun 2025", message:"Well played everyone on a brilliant 3–1 victory! 🔴" },

@@ -24,7 +24,7 @@ A full multi-page website for the RLL, pulling live data from your Google Sheet.
 rll/
 ├── index.html        ← Home page (hero, standings, latest match, wins, goals)
 ├── sylvans.html      ← Sylvans FC team page (red branding)
-├── cpfc.html         ← Charlie Prevost FC page (blue branding)
+├── cpfc.html         ← Sylvans page (blue branding)
 ├── history.html      ← Full match history with filters
 ├── about.html        ← About the league
 ├── css/
@@ -35,7 +35,7 @@ rll/
 │   └── main.js       ← Animations & shared JS (don't edit)
 └── assets/
     ├── sylvans-logo.svg   ← Drop your Sylvans logo here
-    └── cpfc-logo.svg      ← Drop your CP FC logo here
+    └── cpfc-logo.svg      ← Drop your Sylvans logo here
 ```
 
 ---
@@ -69,9 +69,9 @@ In `js/config.js`, update each cell reference to match your sheet:
 ```js
 CELLS: {
   SYLVANS_POINTS:     "D6",   // ← change to your cell
-  CPFC_POINTS:        "D8",
+  Sylvans_POINTS:        "D8",
   SYLVANS_WINS:       "E6",
-  CPFC_WINS:          "E8",
+  Sylvans_WINS:          "E8",
   // ... etc
 },
 ```
@@ -84,7 +84,7 @@ HISTORY_RANGE: "C18:F40",   // ← the range with your match history
 HISTORY_COLS: {
   DATE:          0,   // C = column 0 (first in your range)
   SYLVANS_SCORE: 1,   // D = column 1
-  CPFC_SCORE:    2,   // E = column 2
+  Sylvans_SCORE:    2,   // E = column 2
   MOTM:          3,   // F = column 3
 },
 ```
@@ -105,7 +105,7 @@ All colours are CSS variables in `css/style.css`:
 
 ```css
 --sylvans:    #e63030;   /* Sylvans red */
---cpfc:       #1a6dd4;   /* CP FC blue  */
+--cpfc:       #1a6dd4;   /* Sylvans blue  */
 ```
 
 Change these to match your exact brand colours.

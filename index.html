@@ -8,7 +8,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rockmount Lunchtime League</title>
-  <meta name="description" content="The official home of the Rockmount Lunchtime League — Samuel Bader FC vs Charlie Prevost FC." />
+  <meta name="description" content="The official home of the Rockmount Lunchtime League — Rangers vs Sylvans." />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/v2.css"/>
   <style>
@@ -93,8 +93,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Rangers</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Sylvans</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -138,15 +138,15 @@
 
     <!-- ── MAIN TEAM POINTS DISPLAY ── -->
     <div class="hero__teams" id="hero-teams">
-      <!-- SBFC -->
+      <!-- Rangers -->
       <a class="hero__team hero__team--sylvans" href="sylvans.html" data-transition>
         <img
           class="team-logo team-logo--sylvans"
-          src="assets/SBFC.png"
+          src="assets/Rangers.png"
           onerror="this.replaceWith(buildFallbackLogo('S','var(--sylvans)'))"
-          alt="Samuel Bader FC"
+          alt="Rangers"
         />
-        <span class="hero__team-name">Samuel Bader FC</span>
+        <span class="hero__team-name">Rangers</span>
         <div class="hero__team-pts" id="hero-syl-pts">
           <span class="loading" style="padding:0;gap:6px;border:none;font-family:var(--font-d);font-size:inherit;color:inherit">...</span>
         </div>
@@ -160,15 +160,15 @@
         <div class="hero__vs-line"></div>
       </div>
 
-      <!-- Charlie Prevost FC -->
+      <!-- Sylvans -->
       <a class="hero__team hero__team--cpfc" href="cpfc.html" data-transition>
         <img
           class="team-logo team-logo--cpfc"
           src="assets/cpfc-logo.png"
           onerror="this.replaceWith(buildFallbackLogo('C','var(--cpfc)'))"
-          alt="CP FC"
+          alt="Sylvans"
         />
-        <span class="hero__team-name">Charlie Prevost FC</span>
+        <span class="hero__team-name">Sylvans</span>
         <div class="hero__team-pts" id="hero-cpfc-pts">
           <span class="loading" style="padding:0;gap:6px;border:none;font-family:var(--font-d);font-size:inherit;color:inherit">...</span>
         </div>
@@ -262,8 +262,8 @@
 <footer class="footer">
   <p>© 2025 Rockmount Lunchtime League. All rights reserved.</p>
   <nav class="footer__links">
-    <a href="sylvans.html" data-transition>Samuel Bader FC</a>
-    <a href="cpfc.html"    data-transition>Charlie Prevost FC</a>
+    <a href="sylvans.html" data-transition>Rangers</a>
+    <a href="cpfc.html"    data-transition>Sylvans</a>
     <a href="history.html" data-transition>History</a>
     <a href="announcements.html"   data-transition>About</a>
   </nav>
@@ -334,15 +334,15 @@
     /* Wins comparison bar */
     document.getElementById("wins-wrap").innerHTML =
       buildComparisonBar(data,
-        "SBFC", data.sylvansWins,
-        "CP FC",   data.cpfcWins
+        "Rangers", data.sylvansWins,
+        "Sylvans",   data.cpfcWins
       );
 
     /* Goals comparison bar */
     document.getElementById("goals-wrap").innerHTML =
       buildComparisonBar(data,
-        "SBFC", data.sylvansGoalsFor,
-        "CP FC",   data.cpfcGoalsFor
+        "Rangers", data.sylvansGoalsFor,
+        "Sylvans",   data.cpfcGoalsFor
       );
 
     /* Full standings table */
@@ -356,13 +356,13 @@
         </div>
         ${buildStandingsRow(
           sylLead ? 1 : 2,
-          "Samuel Bader FC", data.sylvansPlayed, data.sylvansWins, data.sylvansDraws,
+          "Rangers", data.sylvansPlayed, data.sylvansWins, data.sylvansDraws,
           data.sylvansLosses, data.sylvansGoalsFor, data.sylvansGoalsAgainst, data.sylvansPoints,
           "sylvans"
         )}
         ${buildStandingsRow(
           sylLead ? 2 : 1,
-          "Charlie Prevost FC", data.cpfcPlayed, data.cpfcWins, data.cpfcDraws,
+          "Sylvans", data.cpfcPlayed, data.cpfcWins, data.cpfcDraws,
           data.cpfcLosses, data.cpfcGoalsFor, data.cpfcGoalsAgainst, data.cpfcPoints,
           "cpfc"
         )}
@@ -414,7 +414,7 @@
       </div>
 
       ${topScorer ? `
-      <div class="scrolly-card scrolly-card--${topScorer.team===RLL_CONFIG.TEAMS.SYLVANS.key?"syl":topScorer.team===RLL_CONFIG.TEAMS.CPFC.key?"cpfc":"gold"}">
+      <div class="scrolly-card scrolly-card--${topScorer.team===RLL_CONFIG.TEAMS.SYLVANS.key?"syl":topScorer.team===RLL_CONFIG.TEAMS.Sylvans.key?"cpfc":"gold"}">
         <div class="scrolly-card__icon">👑</div>
         <div class="scrolly-card__val" data-count="${topScorer.goals}">0</div>
         <div class="scrolly-card__lbl">Golden Boot</div>
@@ -458,7 +458,7 @@
         </div>
         <div class="scrolly-card__sub" style="display:flex;justify-content:space-between;margin-top:8px">
           <span style="color:var(--sylvans);font-weight:700">${RLL_CONFIG.TEAMS.SYLVANS.shortName}</span>
-          <span style="color:var(--cpfc);font-weight:700">${RLL_CONFIG.TEAMS.CPFC.shortName}</span>
+          <span style="color:var(--cpfc);font-weight:700">${RLL_CONFIG.TEAMS.Sylvans.shortName}</span>
         </div>
       </div>
     `;
@@ -492,7 +492,7 @@
 
     const items = [];
     data.history.slice(0, 6).forEach(m => {
-      items.push(`<span class="ticker__item">📅 ${m.date} · <b style="color:var(--sylvans)">SBFC ${m.sylvans}</b>–<b style="color:var(--cpfc)">${m.cpfc} CPFC</b></span>`);
+      items.push(`<span class="ticker__item">📅 ${m.date} · <b style="color:var(--sylvans)">Rangers ${m.sylvans}</b>–<b style="color:var(--cpfc)">${m.cpfc} Sylvans</b></span>`);
       if (m.motm && m.motm !== "—") items.push(`<span class="ticker__item">⭐ MOTM · <b>${m.motm}</b></span>`);
       const counts = {};
       (m.scorers||[]).forEach(n => counts[n]=(counts[n]||0)+1);

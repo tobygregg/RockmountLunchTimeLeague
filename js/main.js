@@ -265,22 +265,22 @@ const PlayerPopup = (() => {
 
   function teamColor(team) {
     if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "#e63030";
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "#1a6dd4";
+    if (team === RLL_CONFIG.TEAMS.Sylvans.key)    return "#1a6dd4";
     return "rgba(255,255,255,0.4)";
   }
   function teamGlow(team) {
     if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "rgba(230,48,48,0.4)";
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "rgba(26,109,212,0.4)";
+    if (team === RLL_CONFIG.TEAMS.Sylvans.key)    return "rgba(26,109,212,0.4)";
     return "transparent";
   }
   function teamName(team) {
     if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return RLL_CONFIG.TEAMS.SYLVANS.name;
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return RLL_CONFIG.TEAMS.CPFC.name;
+    if (team === RLL_CONFIG.TEAMS.Sylvans.key)    return RLL_CONFIG.TEAMS.Sylvans.name;
     return team;
   }
   function teamBg(team) {
     if (team === RLL_CONFIG.TEAMS.SYLVANS.key) return "rgba(230,48,48,0.12)";
-    if (team === RLL_CONFIG.TEAMS.CPFC.key)    return "rgba(26,109,212,0.12)";
+    if (team === RLL_CONFIG.TEAMS.Sylvans.key)    return "rgba(26,109,212,0.12)";
     return "rgba(255,255,255,0.08)";
   }
 
@@ -533,7 +533,7 @@ const MatchModal = (() => {
 
   function show(match, matchNumber) {
     hide(true);
-    const S = RLL_CONFIG.TEAMS.SYLVANS, C = RLL_CONFIG.TEAMS.CPFC;
+    const S = RLL_CONFIG.TEAMS.SYLVANS, C = RLL_CONFIG.TEAMS.Sylvans;
     const perf = RLLData.matchPerformance(match);
     const sWin = match.sylvans > match.cpfc, cWin = match.cpfc > match.sylvans;
     const total = perf.totalGoals || 0;
@@ -686,7 +686,7 @@ function buildMatchCard(match) {
           <span class="match-card__score-sep">—</span>
           <span class="match-card__score" style="${cpfcStyle}">${match.cpfc}</span>
         </div>
-        <div class="match-card__team"><span class="match-card__team-name" style="${cpfcStyle}">${RLL_CONFIG.TEAMS.CPFC.shortName}</span></div>
+        <div class="match-card__team"><span class="match-card__team-name" style="${cpfcStyle}">${RLL_CONFIG.TEAMS.Sylvans.shortName}</span></div>
       </div>
       ${match.motm && match.motm !== "—" ? `
       <div class="match-card__motm">
@@ -708,9 +708,9 @@ function buildHistoryRows(history) {
     const cpStyle  = result === "cpfc"    ? `color:var(--cpfc)` : "";
     const isLatest = i === 0;
     const resultLabel = result === "sylvans"
-      ? `<span class="history-match__result text-sylvans">SBFC Win</span>`
+      ? `<span class="history-match__result text-sylvans">Rangers Win</span>`
       : result === "cpfc"
-      ? `<span class="history-match__result text-cpfc">CP FC Win</span>`
+      ? `<span class="history-match__result text-cpfc">Sylvans Win</span>`
       : `<span class="history-match__result text-muted">Draw</span>`;
 
     let scorerHtml = "";
@@ -735,7 +735,7 @@ function buildHistoryRows(history) {
           <span class="history-match__score-sep">—</span>
           <span class="history-match__score-num" style="${cpStyle}">${match.cpfc}</span>
         </div>
-        <div class="history-match__team history-match__team--away" style="${cpStyle}">${RLL_CONFIG.TEAMS.CPFC.shortName}</div>
+        <div class="history-match__team history-match__team--away" style="${cpStyle}">${RLL_CONFIG.TEAMS.Sylvans.shortName}</div>
         <div class="history-match__meta">
           <span class="history-match__date">📅 ${match.date}</span>
           ${match.motm && match.motm!=="—" ? `<span class="history-match__motm">⭐ ${linkPlayerName(match.motm)}</span>` : ""}

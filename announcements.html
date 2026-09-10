@@ -129,8 +129,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Rangers</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Sylvans</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -251,7 +251,7 @@ function playerColor(name){
   const p=_players.find(p=>p.name.toLowerCase().trim()===name.toLowerCase().trim());
   if(!p)return null;
   if(p.team===RLL_CONFIG.TEAMS.SYLVANS.key)return"var(--sylvans)";
-  if(p.team===RLL_CONFIG.TEAMS.CPFC.key)return"var(--cpfc)";
+  if(p.team===RLL_CONFIG.TEAMS.Sylvans.key)return"var(--cpfc)";
   return null;
 }
 function teamBg(name){
@@ -316,7 +316,7 @@ function buildMatchPin(match){
     <span class="match-pin__num match-pin__syl" style="${sw?"":"opacity:.55"}">${match.sylvans}</span>
     <span class="match-pin__sep">—</span>
     <span class="match-pin__num match-pin__cpfc" style="${cw?"":"opacity:.55"}">${match.cpfc}</span>
-    <span class="match-pin__team">${RLL_CONFIG.TEAMS.CPFC.shortName}</span>
+    <span class="match-pin__team">${RLL_CONFIG.TEAMS.Sylvans.shortName}</span>
   </div>
   <div class="match-pin__meta">
     ${match.date?`<span class="match-pin__chip">📅 ${match.date}</span>`:""}

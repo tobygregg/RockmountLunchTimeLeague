@@ -29,11 +29,11 @@ const RLLData = (() => {
     const rows = await fetchRange(RLL_CONFIG.HISTORY_RANGE);
     const C    = RLL_CONFIG.HISTORY_COLS;
     return rows
-      .filter(r => r[C.DATE] && r[C.SYLVANS_SCORE] !== "" && r[C.CPFC_SCORE] !== "")
+      .filter(r => r[C.DATE] && r[C.SYLVANS_SCORE] !== "" && r[C.Sylvans_SCORE] !== "")
       .map(r => ({
         date:    r[C.DATE] || "",
         sylvans: parseInt(r[C.SYLVANS_SCORE], 10) || 0,
-        cpfc:    parseInt(r[C.CPFC_SCORE],    10) || 0,
+        cpfc:    parseInt(r[C.Sylvans_SCORE],    10) || 0,
         motm:    r[C.MOTM] || "—",
         scorers: C.SCORERS != null ? parseScorers(r[C.SCORERS] || "") : [],
         assists: C.ASSISTS != null ? parseScorers(r[C.ASSISTS] || "") : [],
@@ -131,24 +131,24 @@ const RLLData = (() => {
   /* ── BUILD ─────────────────────────────────────── */
   function buildFromSheet(cells, history, rawPlayers, announcements) {
     const n   = v => parseInt(v,10) || 0;
-    const gf  = n(cells.SYLVANS_GOALS_FOR), cf = n(cells.CPFC_GOALS_FOR);
+    const gf  = n(cells.SYLVANS_GOALS_FOR), cf = n(cells.Sylvans_GOALS_FOR);
     const players = computePlayerStats(rawPlayers, history);
     return {
-      sylvansPoints: n(cells.SYLVANS_POINTS), cpfcPoints: n(cells.CPFC_POINTS),
-      sylvansWins:   n(cells.SYLVANS_WINS),   cpfcWins:   n(cells.CPFC_WINS),
-      sylvansDraws:  n(cells.SYLVANS_DRAWS),  cpfcDraws:  n(cells.CPFC_DRAWS),
-      sylvansLosses: n(cells.SYLVANS_LOSSES), cpfcLosses: n(cells.CPFC_LOSSES),
+      sylvansPoints: n(cells.SYLVANS_POINTS), cpfcPoints: n(cells.Sylvans_POINTS),
+      sylvansWins:   n(cells.SYLVANS_WINS),   cpfcWins:   n(cells.Sylvans_WINS),
+      sylvansDraws:  n(cells.SYLVANS_DRAWS),  cpfcDraws:  n(cells.Sylvans_DRAWS),
+      sylvansLosses: n(cells.SYLVANS_LOSSES), cpfcLosses: n(cells.Sylvans_LOSSES),
       sylvansGoalsFor: gf, cpfcGoalsFor: cf,
       sylvansGoalsAgainst: n(cells.SYLVANS_GOALS_AGAINST),
-      cpfcGoalsAgainst:    n(cells.CPFC_GOALS_AGAINST),
-      sylvansPlayed: n(cells.SYLVANS_PLAYED), cpfcPlayed: n(cells.CPFC_PLAYED),
+      cpfcGoalsAgainst:    n(cells.Sylvans_GOALS_AGAINST),
+      sylvansPlayed: n(cells.SYLVANS_PLAYED), cpfcPlayed: n(cells.Sylvans_PLAYED),
       totalGoals: gf + cf,
       announcement:  (cells.ANNOUNCEMENT || "").trim(),
       announcements, history,
       latestMatch:   history[0] || null,
       players,
       sylvansPlayers: players.filter(p => p.team === RLL_CONFIG.TEAMS.SYLVANS.key),
-      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.CPFC.key),
+      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.Sylvans.key),
       fromDemo: false,
     };
   }
@@ -163,7 +163,7 @@ const RLLData = (() => {
       announcement: "", latestMatch: history[0] || null,
       players,
       sylvansPlayers: players.filter(p => p.team === RLL_CONFIG.TEAMS.SYLVANS.key),
-      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.CPFC.key),
+      cpfcPlayers:    players.filter(p => p.team === RLL_CONFIG.TEAMS.Sylvans.key),
       fromDemo: true,
     };
   }

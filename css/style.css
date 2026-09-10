@@ -72,7 +72,7 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 @media(hover:hover){.hero__team:hover{transform:translateY(-5px);}}
 .team-logo{width:clamp(72px,16vw,134px);height:auto;flex-shrink:0;}
 .team-logo--sylvans{filter:drop-shadow(0 8px 24px rgba(230,48,48,.3));animation:floatLogo 4s ease-in-out infinite,glowSylvans 3.5s ease-in-out infinite;}
-.team-logo--cpfc{filter:drop-shadow(0 8px 24px rgba(26,109,212,.3));animation:floatLogo 4s ease-in-out infinite .7s,glowCPFC 3.5s ease-in-out infinite .7s;}
+.team-logo--cpfc{filter:drop-shadow(0 8px 24px rgba(26,109,212,.3));animation:floatLogo 4s ease-in-out infinite .7s,glowSylvans 3.5s ease-in-out infinite .7s;}
 .hero__team-name{font-family:var(--font-d);font-size:clamp(.8rem,2.5vw,1.3rem);letter-spacing:.08em;color:var(--text-muted);text-align:center;line-height:1.2;}
 .hero__team-pts{font-family:var(--font-d);font-size:clamp(3rem,9vw,5.5rem);line-height:1;letter-spacing:.02em;}
 .hero__team--sylvans .hero__team-pts{color:var(--sylvans);text-shadow:0 0 40px var(--sylvans-glow);}
@@ -539,7 +539,7 @@ button{cursor:pointer;border:none;background:none;font:inherit;}
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 @keyframes glowSylvans{0%,100%{filter:drop-shadow(0 8px 24px rgba(230,48,48,.28))}50%{filter:drop-shadow(0 8px 48px rgba(230,48,48,.65))}}
-@keyframes glowCPFC{0%,100%{filter:drop-shadow(0 8px 24px rgba(26,109,212,.28))}50%{filter:drop-shadow(0 8px 48px rgba(26,109,212,.65))}}
+@keyframes glowSylvans{0%,100%{filter:drop-shadow(0 8px 24px rgba(26,109,212,.28))}50%{filter:drop-shadow(0 8px 48px rgba(26,109,212,.65))}}
 @keyframes scrollBounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 

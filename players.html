@@ -98,8 +98,8 @@
     <li class="nav__item" id="dd-teams">
       <button class="nav__item-btn" data-dropdown="teams">Teams<svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <ul class="nav__dropdown">
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Samuel Bader FC</a></li>
-        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Charlie Prevost FC</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="sylvans.html" data-transition><span class="nav__dropdown-link__icon">🔴</span> Rangers</a></li>
+        <li class="nav__dropdown-item"><a class="nav__dropdown-link" href="cpfc.html" data-transition><span class="nav__dropdown-link__icon">🔵</span> Sylvans</a></li>
       </ul>
     </li>
     <li class="nav__item" id="dd-stats">
@@ -188,8 +188,8 @@
     <div class="table-controls">
       <div class="team-filter-tabs">
         <button class="team-tab active--all" data-team="all">All Players</button>
-        <button class="team-tab" data-team="SBFC">Samuel Bader FC</button>
-        <button class="team-tab" data-team="CPFC">Charlie Prevost FC</button>
+        <button class="team-tab" data-team="Rangers">Rangers</button>
+        <button class="team-tab" data-team="Sylvans">Sylvans</button>
       </div>
       <span class="table-count" id="table-count"></span>
     </div>
@@ -215,8 +215,8 @@
   <p>© 2025 Rockmount Lunchtime League</p>
   <nav class="footer__links">
     <a href="index.html"   data-transition>Home</a>
-    <a href="sylvans.html" data-transition>Samuel Bader FC</a>
-    <a href="cpfc.html"    data-transition>Charlie Prevost FC</a>
+    <a href="sylvans.html" data-transition>Rangers</a>
+    <a href="cpfc.html"    data-transition>Sylvans</a>
     <a href="history.html" data-transition>History</a>
   </nav>
 </footer>
@@ -240,7 +240,7 @@
     return scorers.map((p, i) => {
       const pct  = Math.round((p.goals / max) * 100);
       const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
-                 : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc"
+                 : p.team === RLL_CONFIG.TEAMS.Sylvans.key    ? "cpfc"
                  : "unknown";
       const color = team === "sylvans" ? "var(--sylvans)"
                   : team === "cpfc"    ? "var(--cpfc)"
@@ -354,7 +354,7 @@
         <tbody>
           ${rows.map((p, i) => {
             const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
-                       : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc"
+                       : p.team === RLL_CONFIG.TEAMS.Sylvans.key    ? "cpfc"
                        : "unknown";
             const badgeCls = team === "sylvans" ? "stats-table__team-badge--sylvans"
                            : team === "cpfc"    ? "stats-table__team-badge--cpfc"
@@ -407,7 +407,7 @@
     const max = sorted[0].fantasyPts || 1;
     document.getElementById("fantasy-lb-wrap").innerHTML = sorted.map((p, i) => {
       const team = p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "sylvans"
-                 : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "cpfc" : "unknown";
+                 : p.team === RLL_CONFIG.TEAMS.Sylvans.key    ? "cpfc" : "unknown";
       const col  = team === "sylvans" ? "var(--sylvans)" : team === "cpfc" ? "var(--cpfc)" : "var(--text-muted)";
       const pct  = Math.round(((p.fantasyPts || 0) / max) * 100);
       const medals = ["🏆","🥈","🥉"];
@@ -549,7 +549,7 @@
 
     function colOf(p) {
       return p.team === RLL_CONFIG.TEAMS.SYLVANS.key ? "var(--sylvans)"
-           : p.team === RLL_CONFIG.TEAMS.CPFC.key    ? "var(--cpfc)"
+           : p.team === RLL_CONFIG.TEAMS.Sylvans.key    ? "var(--cpfc)"
            : "rgba(255,255,255,0.5)";
     }
 
@@ -641,16 +641,16 @@
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
-          <span class="team-lb-header__name text-sylvans">Samuel Bader FC</span>
+          <span class="team-lb-header__name text-sylvans">Rangers</span>
         </div>
         ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
       </div>
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
-          <span class="team-lb-header__name text-cpfc">Charlie Prevost FC</span>
+          <span class="team-lb-header__name text-cpfc">Sylvans</span>
         </div>
-        ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
+        ${buildTeamScorerList(allPlayers, RLL_CONFIG.TEAMS.Sylvans.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
     `;
 
@@ -659,16 +659,16 @@
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--sylvans);box-shadow:0 0 8px var(--sylvans-glow)"></div>
-          <span class="team-lb-header__name text-sylvans">Samuel Bader FC</span>
+          <span class="team-lb-header__name text-sylvans">Rangers</span>
         </div>
         ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.SYLVANS.key, "var(--sylvans)", "scorer-lb-team--sylvans")}
       </div>
       <div class="team-lb-block">
         <div class="team-lb-header">
           <div class="team-lb-header__dot" style="background:var(--cpfc);box-shadow:0 0 8px var(--cpfc-glow)"></div>
-          <span class="team-lb-header__name text-cpfc">Charlie Prevost FC</span>
+          <span class="team-lb-header__name text-cpfc">Sylvans</span>
         </div>
-        ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.CPFC.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
+        ${buildTeamMOTMList(allPlayers, RLL_CONFIG.TEAMS.Sylvans.key, "var(--cpfc)", "scorer-lb-team--cpfc")}
       </div>
     `;
 
@@ -680,7 +680,7 @@
         document.querySelectorAll(".team-tab").forEach(b => {
           b.className = "team-tab";
         });
-        btn.classList.add(t === "all" ? "active--all" : t === "SBFC" ? "active--sylvans" : "active--cpfc");
+        btn.classList.add(t === "all" ? "active--all" : t === "Rangers" ? "active--sylvans" : "active--cpfc");
         renderTable();
       });
     });
